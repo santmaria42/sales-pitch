@@ -108,9 +108,27 @@ img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 .f-display{font-family:'Reggae One','Noto Sans JP',sans-serif;font-weight:400}
 
+/* ===== demo bar(営業デモ用・サイト本体とは別物の見た目に) ===== */
+.demo-bar{
+  position:fixed;top:0;left:0;right:0;z-index:110;
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px;
+  background:#223240;color:#cfe3f5;
+  font-size:11px;font-weight:700;
+  border-bottom:2px dashed #4a6a85;
+}
+.demo-bar .dlabel{letter-spacing:.04em;white-space:nowrap}
+.demo-bar .dchips{display:flex;gap:6px;margin-left:auto}
+.demo-bar button{
+  font-family:'Noto Sans JP',sans-serif;font-weight:900;font-size:12px;
+  padding:4px 13px;border-radius:99px;cursor:pointer;
+  border:1px solid #5a7b97;background:transparent;color:#cfe3f5;
+}
+.demo-bar button.on{background:#ffcf5c;border-color:#ffcf5c;color:#223240}
+
 /* ===== header ===== */
 .hdr{
-  position:fixed;top:0;left:0;right:0;z-index:100;
+  position:fixed;top:33px;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
   padding:10px 14px;
   background:linear-gradient(180deg,rgba(16,14,12,.92),rgba(16,14,12,.75));
@@ -135,6 +153,14 @@ a{color:inherit;text-decoration:none}
     url('https://horumon-chitose.com/wp-content/uploads/2023/06/a42b5df72d51b77ea16ca375c45f69dd-1536x1102.jpg') center 30%/cover no-repeat;
 }
 .fv-inner{position:relative;z-index:3;padding:0 22px 42px}
+.season-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--aka);color:#fff;
+  font-size:12px;font-weight:900;letter-spacing:.03em;
+  padding:6px 14px;border-radius:99px;margin-bottom:14px;
+  box-shadow:0 2px 12px rgba(0,0,0,.55);
+  animation:fadein .3s ease;
+}
 .fv-catch{
   font-size:clamp(34px,9.6vw,64px);
   line-height:1.25;letter-spacing:.04em;
@@ -197,11 +223,12 @@ a{color:inherit;text-decoration:none}
 @media (prefers-reduced-motion:reduce){
   .embers i,.fv::after{animation:none}
   .embers{display:none}
+  .season-chip,.news-item{animation:none !important}
   html{scroll-behavior:auto}
 }
 
 /* ===== sections ===== */
-section{padding:42px 18px;scroll-margin-top:54px}
+section{padding:42px 18px;scroll-margin-top:88px}
 .sec-head{text-align:center;margin-bottom:20px}
 .sec-head .en{
   display:block;color:var(--ember);font-weight:900;
@@ -357,6 +384,46 @@ section{padding:42px 18px;scroll-margin-top:54px}
 .news-item p{font-size:13.5px;font-weight:700;line-height:1.5}
 .news-sample-note{margin-top:12px;font-size:10.5px;color:#8d8273;text-align:center}
 
+/* ===== pitch(提案セクション) ===== */
+.pitch{background:var(--paper);color:#2a241c}
+.pitch .sec-head .en{color:var(--aka)}
+.pitch .sec-head h2{color:#1d1812}
+.pitch-lead{font-size:14px;font-weight:700;text-align:center;margin-bottom:22px}
+.pitch-lead b{color:var(--aka)}
+.loss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.loss{
+  background:#fff;border:1px solid #e0d5c2;border-radius:10px;
+  padding:14px 8px;text-align:center;
+  box-shadow:0 2px 8px rgba(42,36,28,.07);
+}
+.loss b{font-family:'Reggae One';font-weight:400;font-size:17px;color:var(--aka);display:block;line-height:1.3;margin-bottom:5px}
+.loss span{font-size:10.5px;color:#6e6557;line-height:1.55;display:block}
+.loss-cap{font-size:11px;color:#8d8273;text-align:center;margin-top:8px}
+.ops{margin-top:26px;background:#fff;border:1px solid #e0d5c2;border-radius:10px;padding:18px 16px}
+.ops h3{font-size:15px;margin-bottom:10px;color:#1d1812}
+.ops h3 b{color:var(--aka)}
+.ops ul{list-style:none}
+.ops li{
+  font-size:13.5px;font-weight:700;padding:8px 0 8px 28px;position:relative;
+  border-bottom:1px dashed #e0d5c2;
+}
+.ops li:last-child{border-bottom:none}
+.ops li::before{
+  content:"✓";position:absolute;left:4px;top:8px;
+  color:#fff;background:var(--aka);border-radius:50%;
+  width:18px;height:18px;font-size:11px;line-height:18px;text-align:center;font-weight:900;
+}
+.ops li small{display:block;font-size:11px;color:#8d8273;font-weight:400}
+.price-box{
+  margin-top:14px;border:2px solid var(--aka);border-radius:10px;
+  background:#fff;padding:16px;text-align:center;
+}
+.price-box .plabel{font-size:12px;font-weight:900;color:var(--aka);letter-spacing:.1em}
+.price-box .pval{font-family:'Reggae One';font-size:28px;color:#1d1812;line-height:1.4;white-space:nowrap}
+.price-box .pval small{font-size:13px}
+.price-box .psub{font-size:11px;color:#6e6557}
+.pitch-close{margin-top:18px;text-align:center;font-size:14px;font-weight:900}
+
 /* ===== footer ===== */
 footer{background:#0a0908;padding:38px 18px 90px;text-align:center}
 footer .flogo{height:36px;width:auto;margin:0 auto 18px;opacity:.9}
@@ -393,6 +460,15 @@ footer .mock-note{font-size:10.5px;color:#6e6557;line-height:1.8}
 </head>
 <body>
 
+<div class="demo-bar">
+  <span class="dlabel">📅 運用イメージ:月で切替 →</span>
+  <span class="dchips">
+    <button id="m-jun" class="on" onclick="setMonth('jun')">6月</button>
+    <button id="m-jul" onclick="setMonth('jul')">7月</button>
+    <button id="m-dec" onclick="setMonth('dec')">12月</button>
+  </span>
+</div>
+
 <header class="hdr">
   <img src="https://horumon-chitose.com/wp-content/uploads/2023/06/horumon-logo-800x213.png" alt="ホルモン焼 千歳">
   <a class="hdr-cta" href="#stores">ご予約</a>
@@ -402,6 +478,7 @@ footer .mock-note{font-size:10.5px;color:#6e6557;line-height:1.8}
 <div class="fv">
   <div class="embers" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <div class="fv-inner">
+    <span class="season-chip" id="season-chip">🍋 6月の限定ホルモン、入荷中(※サンプル)</span>
     <h1 class="fv-catch f-display">芝浦直送、<br><span class="accent">毎朝目利き。</span></h1>
     <p class="fv-sub">炭火七輪で焼く新鮮ホルモンと名物・厚切りタン<br><b>ホルモン焼 千歳</b>|東京・飯田橋&amp;大森</p>
     <div class="fv-btns">
@@ -452,7 +529,7 @@ footer .mock-note{font-size:10.5px;color:#6e6557;line-height:1.8}
   <div class="nomihodai-band">
     <div class="small">全コース</div>
     <div class="big">2時間飲み放題付き</div>
-    <div class="small">歓送迎会・打ち上げ・会社宴会に</div>
+    <div class="small" id="band-occasion">歓送迎会・打ち上げ・会社宴会に</div>
   </div>
   <div class="course-rail">
     <div class="ccard">
@@ -543,7 +620,7 @@ footer .mock-note{font-size:10.5px;color:#6e6557;line-height:1.8}
     <span class="en">NEWS</span>
     <h2 class="f-display">お知らせ</h2>
   </div>
-  <div class="news-list">
+  <div class="news-list" id="news-list">
     <div class="news-item">
       <time datetime="2026-06-10">2026.06.10</time>
       <span class="cat">入荷</span>
@@ -563,7 +640,42 @@ footer .mock-note{font-size:10.5px;color:#6e6557;line-height:1.8}
   <p class="news-sample-note">※お知らせの内容はサンプルです(更新運用のイメージ)。</p>
 </section>
 
-<!-- 6. footer -->
+<!-- 6. 提案(運用サブスク) -->
+<section class="pitch" id="plan">
+  <div class="sec-head">
+    <span class="en">PROPOSAL</span>
+    <h2 class="f-display">作って終わり、<br>にしない。</h2>
+  </div>
+  <p class="pitch-lead">上の<b>「月で切替」</b>で見ていただいた動きが、そのまま毎月の運用です。<br>サイトは作品ではなく、<b>毎月働く集客ツール</b>に変わります。</p>
+
+  <div class="loss-grid">
+    <div class="loss"><b>3年放置</b><span>現サイトの最終更新は2023年5月。「リニューアルしました」が最新のお知らせのまま</span></div>
+    <div class="loss"><b>約7MB</b><span>現トップページの画像容量。スマホで開くと待たされ、見る前に離脱される重さ</span></div>
+    <div class="loss"><b>画像ゼロ</b><span>LINEやXでお店のURLを送っても、サムネイル画像が表示されない(OGP未設定)</span></div>
+  </div>
+  <p class="loss-cap">※2026年6月時点の現公式サイトの実測値です。</p>
+
+  <div class="ops">
+    <h3>月額プランで<b>毎月やること</b></h3>
+    <ul>
+      <li>お知らせ・季節メニューの更新<small>原稿づくりから。お電話・LINEで5分のヒアリングだけ</small></li>
+      <li>宴会シーズンの打ち出し<small>忘年会・歓送迎会・暑気払いを先回りで掲載</small></li>
+      <li>Googleビジネスプロフィールの同期<small>「検索とマップで今やってる店」として選ばれる状態を維持</small></li>
+      <li>写真の追加・軽量化<small>スマホで一瞬で開く速さを保ちます</small></li>
+      <li>営業時間・予約リンクの保守<small>変更があった月はすぐ反映</small></li>
+    </ul>
+  </div>
+
+  <div class="price-box">
+    <div class="plabel">月額プラン</div>
+    <div class="pval">◯◯,◯◯◯円<small>(税込)/月</small></div>
+    <div class="psub">初期費用 ◯円 / 契約期間の縛りなし / 現サイトを活かした改修にも対応</div>
+  </div>
+
+  <p class="pitch-close">まずは1ヶ月、お試しから。</p>
+</section>
+
+<!-- 7. footer -->
 <footer>
   <img class="flogo" src="https://horumon-chitose.com/wp-content/uploads/2023/06/horumon-logo-800x213.png" alt="ホルモン焼 千歳">
   <div class="flinks">
@@ -581,6 +693,54 @@ footer .mock-note{font-size:10.5px;color:#6e6557;line-height:1.8}
 </div>
 
 <script>
+// 月切替デモ(運用サブスクの実演)
+var MONTHS = {
+  jun: {
+    chip: '🍋 6月の限定ホルモン、入荷中(※サンプル)',
+    occasion: '歓送迎会・打ち上げ・会社宴会に',
+    news: [
+      ['2026-06-10','2026.06.10','入荷','6月の限定ホルモン、入荷しています。数量限定・なくなり次第終了です。'],
+      ['2026-06-01','2026.06.01','宴会','夏の宴会ご予約受付中。2時間飲み放題付きコースは4,400円から。'],
+      ['2026-05-22','2026.05.22','営業','大森駅前店は毎週金曜、深夜25時まで営業しています。']
+    ]
+  },
+  jul: {
+    chip: '🍺 暑気払いは炭火×キンキンの生で(※サンプル)',
+    occasion: '暑気払い・納涼会のご予約受付中',
+    news: [
+      ['2026-07-10','2026.07.10','限定','夏の限定ホルモン始めました。レモンサワーとの相性が抜群です。'],
+      ['2026-07-01','2026.07.01','宴会','暑気払いコースのご予約受付中。2時間飲み放題付き4,400円から。'],
+      ['2026-06-25','2026.06.25','営業','7月も毎週金曜、大森駅前店は深夜25時まで営業します。']
+    ]
+  },
+  dec: {
+    chip: '🎍 忘年会コースのご予約、受付中(※サンプル)',
+    occasion: '忘年会・新年会のご予約はお早めに',
+    news: [
+      ['2026-12-08','2026.12.08','宴会','忘年会シーズン、金曜・土曜は満席の日が出ています。ご予約はお早めに。'],
+      ['2026-12-01','2026.12.01','営業','年末年始の営業日のお知らせを掲載しました。'],
+      ['2026-11-20','2026.11.20','限定','冬の限定ホルモン、始まりました。']
+    ]
+  }
+};
+function setMonth(key){
+  var m = MONTHS[key];
+  ['jun','jul','dec'].forEach(function(k){
+    document.getElementById('m-' + k).classList.toggle('on', k === key);
+  });
+  var chip = document.getElementById('season-chip');
+  chip.textContent = m.chip;
+  chip.style.animation = 'none';
+  void chip.offsetWidth;
+  chip.style.animation = '';
+  document.getElementById('band-occasion').textContent = m.occasion;
+  document.getElementById('news-list').innerHTML = m.news.map(function(n){
+    return '<div class="news-item" style="animation:fadein .3s ease">' +
+      '<time datetime="' + n[0] + '">' + n[1] + '</time>' +
+      '<span class="cat">' + n[2] + '</span><p>' + n[3] + '</p></div>';
+  }).join('');
+}
+
 // 人気No.1カードを初期表示でセンターに
 (function(){
   var rail = document.querySelector('.course-rail');
