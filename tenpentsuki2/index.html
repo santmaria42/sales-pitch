@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中華そば 天辺月｜大森・中華そば【提案用モック】</title>
+<meta name="description" content="JR大森駅近くの中華そば・つけ麺の店「中華そば 天辺月(てっぺんつき)」。食べログ口コミ201件、大森エリアで愛される一杯。※本ページは提案用のモックです。">
+<meta name="robots" content="noindex">
+
+<!-- OGP -->
+<meta property="og:title" content="中華そば 天辺月｜大森・中華そば">
+<meta property="og:description" content="JR大森駅近く。中華そば・つけ麺。食べログ口コミ201件の人気店。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://santmaria420.github.io/sales-pitch/tenpentsuki2/">
+<meta property="og:image" content="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=1200&q=70">
+<meta property="og:locale" content="ja_JP">
+
+<!-- JSON-LD (未確認項目は省略) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "中華そば 天辺月",
+  "servesCuisine": ["ラーメン", "つけ麺"],
+  "priceRange": "¥1,000～¥1,999",
+  "address": {
+    "@type": "PostalAddress",
+    "addressRegion": "東京都",
+    "addressLocality": "大田区"
+  },
+  "sameAs": "https://tabelog.com/tokyo/A1315/A131502/13277982/"
+}
+</script>
+
+<style>
+:root{
+  --bg: #0d0b09;
+  --bg2: #15110d;
+  --ink: #f2ece1;
+  --ink-dim: #b8ae9d;
+  --gold: #c9a227;
+  --gold-dim: #8a7426;
+  --serif: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+}
+img{ display:block; width:100%; height:100%; object-fit:cover; }
+a{ color: var(--gold); }
+
+/* ===== ファーストビュー ===== */
+.hero{
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 80%, #3a2c1a 0%, var(--bg) 65%);
+}
+.hero-photo{
+  position: absolute; inset: 0;
+}
+.hero-photo img{
+  filter: brightness(.62) saturate(1.05);
+}
+.hero-shade{
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(13,11,9,.55) 0%, rgba(13,11,9,.05) 35%, rgba(13,11,9,.15) 60%, var(--bg) 100%);
+}
+
+/* 湯気 (CSSのみ) */
+.steam{
+  position: absolute;
+  left: 50%; bottom: 18%;
+  width: 0; height: 0;
+  pointer-events: none;
+}
+.steam span{
+  position: absolute;
+  bottom: 0;
+  width: 56px; height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 70%, rgba(255,250,240,.30) 0%, rgba(255,250,240,0) 70%);
+  filter: blur(9px);
+  opacity: 0;
+  animation: rise 6s ease-in-out infinite;
+}
+.steam span:nth-child(1){ left:-70px; animation-delay: 0s; }
+.steam span:nth-child(2){ left:-24px; width:70px; height:190px; animation-delay: 2s; animation-duration: 7s; }
+.steam span:nth-child(3){ left: 28px; animation-delay: 4s; animation-duration: 6.5s; }
+@keyframes rise{
+  0%   { transform: translateY(0) translateX(0) scaleY(.6); opacity: 0; }
+  20%  { opacity: .85; }
+  55%  { transform: translateY(-130px) translateX(14px) scaleY(1); }
+  100% { transform: translateY(-260px) translateX(-10px) scaleY(1.4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .steam span{ animation: none; opacity: .35; transform: translateY(-90px); }
+  html{ scroll-behavior:auto; }
+}
+
+.hero-inner{
+  position: absolute; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+/* 縦書きの店名ロゴ */
+.hero-title{
+  writing-mode: vertical-rl;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(40px, 11vw, 64px);
+  letter-spacing: .28em;
+  color: var(--ink);
+  text-shadow: 0 2px 24px rgba(0,0,0,.8);
+  height: 7.2em;
+}
+.hero-yomi{
+  margin-top: 14px;
+  font-family: var(--serif);
+  font-size: 12px;
+  letter-spacing: .5em;
+  color: var(--ink-dim);
+  text-shadow: 0 1px 8px rgba(0,0,0,.9);
+}
+.hero-tag{
+  margin-top: 22px;
+  display: inline-block;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  font-family: var(--serif);
+  font-size: 13px;
+  letter-spacing: .35em;
+  padding: 7px 18px 7px 22px;
+  background: rgba(13,11,9,.5);
+}
+.hero-scroll{
+  position: absolute;
+  bottom: 22px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: .3em;
+  color: var(--ink-dim);
+}
+.hero-scroll::after{
+  content:"";
+  display:block;
+  width:1px; height:34px;
+  margin: 8px auto 0;
+  background: linear-gradient(var(--gold), transparent);
+}
+
+/* ===== 共通セクション ===== */
+section{ padding: 48px 22px; }
+.sec-head{
+  font-family: var(--serif);
+  font-size: 26px;
+  letter-spacing: .2em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.sec-head::before{
+  content:"";
+  display:inline-block;
+  width: 26px; height: 1px;
+  background: var(--gold);
+  vertical-align: middle;
+  margin-right: 12px;
+}
+.sec-sub{
+  font-size: 11px;
+  letter-spacing: .25em;
+  color: var(--gold);
+  margin-bottom: 26px;
+}
+.note{
+  font-size: 11px;
+  color: var(--ink-dim);
+}
+
+/* ===== こだわり ===== */
+.kodawari{ background: var(--bg2); }
+.kodawari-item{
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(201,162,39,.18);
+}
+.kodawari-item:last-of-type{ border-bottom: none; }
+.kodawari-item h3{
+  font-family: var(--serif);
+  font-size: 18px;
+  letter-spacing: .15em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.kodawari-item p{ color: var(--ink); }
+
+/* ===== メニュー ===== */
+.menu-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.menu-card{
+  background: var(--bg2);
+  border: 1px solid rgba(201,162,39,.22);
+  overflow: hidden;
+}
+.menu-card.wide{ grid-column: 1 / -1; }
+.menu-photo{
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, #2c2317 0%, #171208 100%);
+}
+.menu-card.wide .menu-photo{ aspect-ratio: 16 / 9; }
+.menu-body{ padding: 12px 14px 14px; }
+.menu-body h3{
+  font-family: var(--serif);
+  font-size: 16px;
+  letter-spacing: .08em;
+  line-height: 1.5;
+}
+.menu-price{
+  margin-top: 4px;
+  color: var(--gold);
+  font-size: 14px;
+}
+.menu-price small{
+  color: var(--ink-dim);
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+/* ===== 営業案内 ===== */
+.info{ background: var(--bg2); }
+.info-table{
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+}
+.info-table th, .info-table td{
+  text-align: left;
+  vertical-align: top;
+  padding: 13px 4px;
+  border-bottom: 1px solid rgba(201,162,39,.18);
+  font-weight: normal;
+}
+.info-table th{
+  white-space: nowrap;
+  width: 6.5em;
+  color: var(--gold);
+  font-family: var(--serif);
+  letter-spacing: .1em;
+}
+.map-wrap{
+  position: relative;
+  border: 1px solid rgba(201,162,39,.22);
+  background: var(--bg);
+}
+.map-wrap::before{
+  content: "地図を読み込んでいます…";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.map-wrap iframe{
+  position: relative;
+  display:block;
+  width: 100%;
+  height: 280px;
+  border: 0;
+  filter: grayscale(.25) contrast(1.02);
+}
+.map-link{
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  letter-spacing: .05em;
+}
+
+/* ===== お知らせ ===== */
+.news-box{
+  border: 1px solid var(--gold-dim);
+  background: var(--bg2);
+  padding: 26px 20px;
+}
+.news-box ul{ list-style: none; }
+.news-box li{
+  padding: 12px 0;
+  border-bottom: 1px dashed rgba(201,162,39,.25);
+  font-size: 14px;
+}
+.news-box li:last-child{ border-bottom: none; }
+.news-date{
+  display:block;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: .1em;
+}
+.news-pitch{
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+/* ===== フッター ===== */
+footer{
+  padding: 56px 22px 36px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--bg) 0%, #080604 100%);
+}
+.tabelog-btn{
+  display: block;
+  max-width: 340px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  text-decoration: none;
+  font-family: var(--serif);
+  letter-spacing: .12em;
+  font-size: 15px;
+}
+.tabelog-btn small{
+  display: block;
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: .05em;
+  margin-top: 4px;
+}
+.footer-name{
+  margin-top: 40px;
+  font-family: var(--serif);
+  font-size: 18px;
+  letter-spacing: .3em;
+}
+.footer-note{
+  margin-top: 24px;
+  font-size: 10px;
+  color: #6e6657;
+  line-height: 1.8;
+}
+
+/* ===== PC: 崩れない程度 ===== */
+@media (min-width: 768px){
+  section{ max-width: 860px; margin: 0 auto; }
+  .kodawari, .info{ max-width: none; }
+  .kodawari > *, .info > *{ max-width: 860px; margin-left:auto; margin-right:auto; }
+  .menu-grid{ grid-template-columns: repeat(2, 1fr); }
+  .map-wrap iframe{ height: 360px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 1. ファーストビュー ===== -->
+<header class="hero">
+  <div class="hero-photo">
+    <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=1100&q=70" alt="中華そば(イメージ写真)" fetchpriority="high">
+  </div>
+  <div class="hero-shade"></div>
+  <div class="steam" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="hero-inner">
+    <h1 class="hero-title">中華そば<br>天辺月</h1>
+    <p class="hero-yomi">てっぺんつき</p>
+    <p class="hero-tag">大森・中華そば</p>
+  </div>
+  <p class="hero-scroll">SCROLL</p>
+</header>
+
+<main>
+
+<!-- ===== 2. こだわり ===== -->
+<section class="kodawari" id="kodawari">
+  <h2 class="sec-head">こだわり</h2>
+  <p class="sec-sub">OUR CRAFT</p>
+
+  <div class="kodawari-item">
+    <h3>スープ</h3>
+    <p>丁寧に引いた出汁が織りなす、最後の一滴まで飲み干せる一杯。<span class="note">※取材で差し替え</span></p>
+  </div>
+  <div class="kodawari-item">
+    <h3>麺</h3>
+    <p>スープと響き合う、のどごしのよい自慢の麺。<span class="note">※取材で差し替え</span></p>
+  </div>
+  <div class="kodawari-item">
+    <h3>チャーシュー</h3>
+    <p>じっくり火を入れた、しっとり柔らかなチャーシュー。<span class="note">※取材で差し替え</span></p>
+  </div>
+</section>
+
+<!-- ===== 3. メニュー ===== -->
+<section id="menu">
+  <h2 class="sec-head">お品書き</h2>
+  <p class="sec-sub">MENU</p>
+
+  <div class="menu-grid">
+    <div class="menu-card wide">
+      <div class="menu-photo"><img src="https://images.unsplash.com/photo-1623341214825-9f4f963727da?w=900&q=70" alt="中華そば(イメージ写真)" loading="lazy"></div>
+      <div class="menu-body">
+        <h3>中華そば</h3>
+        <p class="menu-price">¥○○○<small>※要確認</small></p>
+      </div>
+    </div>
+    <div class="menu-card">
+      <div class="menu-photo"><img src="https://images.unsplash.com/photo-1632709810780-b5a4343cebec?w=600&q=70" alt="つけ麺(イメージ写真)" loading="lazy"></div>
+      <div class="menu-body">
+        <h3>つけ麺</h3>
+        <p class="menu-price">¥○○○<small>※要確認</small></p>
+      </div>
+    </div>
+    <div class="menu-card">
+      <div class="menu-photo"><img src="https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=600&q=70" alt="チャーシュー麺(イメージ写真)" loading="lazy"></div>
+      <div class="menu-body">
+        <h3>チャーシュー麺</h3>
+        <p class="menu-price">¥○○○<small>※要確認</small></p>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:16px;">※メニュー名・価格は取材のうえ正式なものに差し替えます。</p>
+</section>
+
+<!-- ===== 4. 営業案内 ===== -->
+<section class="info" id="info">
+  <h2 class="sec-head">営業案内</h2>
+  <p class="sec-sub">INFORMATION</p>
+
+  <table class="info-table">
+    <tr><th>営業時間</th><td>○○:○○ 〜 ○○:○○ <span class="note">※要確認</span></td></tr>
+    <tr><th>定休日</th><td>日曜日</td></tr>
+    <tr><th>アクセス</th><td>JR大森駅より徒歩○分 <span class="note">※要確認</span></td></tr>
+    <tr><th>予算目安</th><td>¥1,000 〜 ¥1,999</td></tr>
+  </table>
+
+  <div class="map-wrap">
+    <iframe
+      src="https://www.google.com/maps?q=%E4%B8%AD%E8%8F%AF%E3%81%9D%E3%81%B0+%E5%A4%A9%E8%BE%BA%E6%9C%88+%E5%A4%A7%E6%A3%AE&z=16&output=embed"
+      title="中華そば 天辺月 周辺地図"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <a class="map-link" href="https://www.google.com/maps?q=%E4%B8%AD%E8%8F%AF%E3%81%9D%E3%81%B0+%E5%A4%A9%E8%BE%BA%E6%9C%88+%E5%A4%A7%E6%A3%AE" target="_blank" rel="noopener">Googleマップで開く →</a>
+</section>
+
+<!-- ===== 5. お知らせ ===== -->
+<section id="news">
+  <h2 class="sec-head">お知らせ</h2>
+  <p class="sec-sub">NEWS</p>
+
+  <div class="news-box">
+    <ul>
+      <li>
+        <span class="news-date">20XX.XX.XX</span>
+        【サンプル】季節の限定メニューを始めました。
+      </li>
+      <li>
+        <span class="news-date">20XX.XX.XX</span>
+        【サンプル】○月○日(○)は臨時休業いたします。
+      </li>
+    </ul>
+    <p class="news-pitch">限定メニューのご案内や臨時休業のお知らせは、この欄でいつでも告知できます。</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== 6. フッター ===== -->
+<footer>
+  <a class="tabelog-btn" href="https://tabelog.com/tokyo/A1315/A131502/13277982/" target="_blank" rel="noopener">
+    食べログで口コミを見る
+    <small>口コミ201件・2,660人が保存している大森の人気店</small>
+  </a>
+  <p class="footer-name">中華そば 天辺月</p>
+  <p class="footer-note">
+    ※本ページはご提案用のサンプルです。<br>
+    ※写真はイメージです。実際の料理写真に差し替えます。<br>
+    © 中華そば 天辺月
+  </p>
+</footer>
+
+</body>
+</html>
