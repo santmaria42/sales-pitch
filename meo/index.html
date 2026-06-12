@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>飲食店のMEO対策 × AI — 「地図で見つかる店」にする提案</title>
+<meta name="description" content="Googleマップで「地域名+業態」検索したときに上位表示させるMEO対策を、AIの物量で毎日回す。飲食店向けの運用代行プラン。">
+<meta property="og:title" content="飲食店のMEO対策 × AI">
+<meta property="og:description" content="Googleマップで選ばれる店にする。AIだから毎日できる、続けられる。">
+<style>
+:root{
+  --ink:#0E1116;
+  --surface:#151B23;
+  --surface2:#1C2430;
+  --line:#2A3442;
+  --gold:#C9A227;
+  --gold-hi:#E8C547;
+  --teal:#0D9488;
+  --teal-hi:#2DD4BF;
+  --text:#F2EFE6;
+  --muted:#9AA4B2;
+  --danger:#E25C5C;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:"Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+.num{font-family:"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;font-weight:800;}
+section{padding:88px 24px;max-width:1060px;margin:0 auto;}
+@media(max-width:640px){section{padding:64px 18px;}}
+
+.eyebrow{
+  display:inline-block;font-size:12px;letter-spacing:.22em;color:var(--gold-hi);
+  border:1px solid rgba(201,162,39,.45);border-radius:999px;padding:5px 14px;margin-bottom:18px;
+}
+h2{font-size:clamp(26px,4.4vw,38px);font-weight:800;line-height:1.35;margin-bottom:14px;}
+.lead{color:var(--muted);font-size:15px;max-width:680px;}
+
+/* ===== reveal ===== */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1);}
+.rv.on{opacity:1;transform:none;}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}.rv.d4{transition-delay:.32s}
+
+/* ===== hero ===== */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  position:relative;max-width:none;padding:120px 24px 80px;
+}
+.hero-inner{max-width:1060px;margin:0 auto;width:100%;position:relative;z-index:2;}
+.hero-bg{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(600px 360px at 78% 18%, rgba(13,148,136,.18), transparent 65%),
+    radial-gradient(520px 340px at 12% 85%, rgba(201,162,39,.14), transparent 65%);
+}
+.hero h1{
+  font-size:clamp(34px,6.8vw,66px);font-weight:900;line-height:1.25;letter-spacing:.01em;
+  margin:14px 0 22px;
+}
+.shine{
+  background:linear-gradient(100deg,var(--teal) 20%,var(--teal-hi) 40%,#C9FBF2 50%,var(--teal-hi) 60%,var(--teal) 80%);
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 3.4s linear infinite;
+}
+@keyframes shine{to{background-position:-220% 0;}}
+.hero p.sub{color:var(--muted);font-size:clamp(14px,2vw,17px);max-width:600px;}
+.hero-stats{display:flex;gap:14px;margin-top:42px;flex-wrap:wrap;}
+.hstat{
+  background:rgba(21,27,35,.8);border:1px solid var(--line);border-radius:14px;
+  padding:16px 22px;min-width:150px;backdrop-filter:blur(4px);
+}
+.hstat .v{font-size:30px;color:var(--teal-hi);}
+.hstat .l{font-size:12px;color:var(--muted);margin-top:2px;}
+.scrolldown{margin-top:56px;color:var(--muted);font-size:12px;letter-spacing:.2em;animation:bob 2.2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+/* ===== map demo ===== */
+.mapdemo{
+  margin-top:46px;max-width:420px;background:var(--surface);border:1px solid var(--line);
+  border-radius:18px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.45);
+}
+.mapdemo .bar{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface2);
+  border-bottom:1px solid var(--line);font-size:13px;color:var(--muted);
+}
+.mapdemo .bar .dot{width:8px;height:8px;border-radius:50%;background:var(--teal-hi);flex:none;animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.5)}50%{box-shadow:0 0 0 7px rgba(45,212,191,0)}}
+.mapdemo .q{color:var(--text);font-weight:700;}
+.mapdemo .q .caret{display:inline-block;width:2px;height:1em;background:var(--teal-hi);vertical-align:-2px;margin-left:1px;animation:blink 1s steps(1) infinite;}
+@keyframes blink{50%{opacity:0}}
+.shop{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:center;transition:background .4s;}
+.shop:last-child{border-bottom:0;}
+.shop .ic{width:42px;height:42px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;}
+.shop .nm{font-size:14px;font-weight:700;}
+.shop .meta{font-size:11.5px;color:var(--muted);}
+.shop .stars{color:var(--gold-hi);font-size:11.5px;letter-spacing:1px;}
+.shop.you{background:linear-gradient(90deg,rgba(13,148,136,.16),transparent);}
+.shop.you .nm{color:var(--teal-hi);}
+.shop .rankno{font-size:12px;color:var(--muted);width:16px;flex:none;text-align:center;}
+.shop.you .rankno{color:var(--teal-hi);font-weight:800;}
+.mapdemo .note{padding:10px 16px;font-size:11px;color:var(--muted);background:var(--surface2);}
+
+/* ===== cards ===== */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;}
+@media(max-width:760px){.grid3{grid-template-columns:1fr;}}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px 24px;
+}
+.card .big{font-size:40px;color:var(--gold-hi);line-height:1.1;}
+.card .big small{font-size:18px;}
+.card h3{font-size:16px;margin:10px 0 6px;}
+.card p{font-size:13px;color:var(--muted);}
+.card .src{font-size:10.5px;color:#5A6472;margin-top:10px;display:block;}
+
+/* ===== work grid ===== */
+.works{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:38px;}
+@media(max-width:760px){.works{grid-template-columns:1fr;}}
+.work{
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 22px;
+  transition:border-color .3s,transform .3s;position:relative;overflow:hidden;
+}
+.work:hover{border-color:rgba(45,212,191,.5);transform:translateY(-3px);}
+.work .freq{
+  position:absolute;top:16px;right:16px;font-size:10.5px;letter-spacing:.14em;font-weight:700;
+  padding:3px 10px;border-radius:999px;background:rgba(13,148,136,.16);color:var(--teal-hi);
+}
+.work .freq.once{background:rgba(201,162,39,.16);color:var(--gold-hi);}
+.work .ic{font-size:26px;display:block;margin-bottom:10px;}
+.work h4{font-size:16px;margin-bottom:8px;padding-right:80px;}
+.work p{font-size:13px;color:var(--muted);margin-bottom:10px;}
+.work .ai{
+  font-size:12.5px;border-radius:10px;padding:10px 13px;background:var(--surface2);color:#C8E8E2;
+  border-left:3px solid var(--teal);
+}
+.work .ai b{color:var(--teal-hi);font-size:11px;letter-spacing:.12em;display:block;margin-bottom:2px;}
+
+/* ===== compare ===== */
+.cmp{margin-top:38px;display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:760px){.cmp{grid-template-columns:1fr;}}
+.cmpcol{border-radius:18px;padding:26px 24px;border:1px solid var(--line);background:var(--surface);}
+.cmpcol.ai{border-color:rgba(45,212,191,.45);background:linear-gradient(180deg,rgba(13,148,136,.10),var(--surface));}
+.cmpcol h3{font-size:17px;margin-bottom:16px;}
+.cmpcol.ai h3{color:var(--teal-hi);}
+.cmpcol ul{list-style:none;font-size:13.5px;}
+.cmpcol li{padding:7px 0 7px 26px;position:relative;color:#C8CFDA;border-bottom:1px dashed var(--line);}
+.cmpcol li:last-child{border-bottom:0;}
+.cmpcol.old li::before{content:"✕";position:absolute;left:2px;color:var(--danger);font-weight:700;}
+.cmpcol.ai li::before{content:"✓";position:absolute;left:2px;color:var(--teal-hi);font-weight:700;}
+.punch{
+  margin-top:30px;background:linear-gradient(135deg,rgba(13,148,136,.12),rgba(201,162,39,.10));
+  border:1px solid rgba(45,212,191,.35);border-radius:14px;padding:20px 24px;font-size:15px;
+}
+.punch strong{color:var(--teal-hi);}
+
+/* ===== roadmap ===== */
+.weeks{margin-top:36px;display:grid;gap:14px;}
+.week{
+  display:grid;grid-template-columns:130px 1fr;gap:18px;align-items:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+}
+@media(max-width:560px){.week{grid-template-columns:1fr;gap:6px;}}
+.week .w{font-size:13px;letter-spacing:.14em;color:var(--teal-hi);font-weight:700;}
+.week h4{font-size:15px;margin-bottom:3px;}
+.week p{font-size:12.5px;color:var(--muted);}
+
+/* ===== plans ===== */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px;}
+@media(max-width:820px){.plans{grid-template-columns:1fr;}}
+.plan{
+  border-radius:20px;padding:30px 28px;position:relative;
+  border:2px solid var(--line);background:var(--surface);
+  transition:transform .35s cubic-bezier(.22,1,.36,1),border-color .35s,box-shadow .35s;
+}
+.plan:hover{transform:translateY(-4px);}
+.plan.teal{border-color:rgba(45,212,191,.55);box-shadow:0 0 0 4px rgba(45,212,191,.08),0 18px 48px rgba(13,148,136,.14);}
+.plan .tag{
+  display:inline-block;font-size:11.5px;letter-spacing:.16em;border-radius:999px;padding:4px 12px;margin-bottom:14px;font-weight:700;
+}
+.plan.teal .tag{background:rgba(13,148,136,.18);color:var(--teal-hi);}
+.plan.gold .tag{background:rgba(201,162,39,.18);color:var(--gold-hi);}
+.plan h3{font-size:22px;margin-bottom:4px;}
+.plan .sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.pricebox{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;}
+.pricebox .p .v{font-size:30px;}
+.plan.teal .pricebox .v{color:var(--teal-hi);}
+.plan.gold .pricebox .v{color:var(--gold-hi);}
+.pricebox .p .v small{font-size:14px;font-weight:700;}
+.pricebox .p .l{font-size:11.5px;color:var(--muted);}
+.plan ul{list-style:none;font-size:13.5px;color:#C8CFDA;margin-bottom:18px;}
+.plan ul li{padding:5px 0 5px 24px;position:relative;}
+.plan ul li::before{content:"✓";position:absolute;left:2px;font-weight:700;}
+.plan.teal ul li::before{color:var(--teal-hi);}
+.plan.gold ul li::before{color:var(--gold-hi);}
+.talk{
+  font-size:13px;border-radius:12px;padding:13px 16px;background:var(--surface2);color:#DDE3EA;
+}
+.talk b{font-size:11px;letter-spacing:.14em;display:block;margin-bottom:4px;}
+.plan.teal .talk b{color:var(--teal-hi);}
+.plan.gold .talk b{color:var(--gold-hi);}
+.market-note{margin-top:26px;font-size:13px;color:var(--muted);border-left:3px solid var(--teal);padding-left:14px;}
+.market-note b{color:var(--teal-hi);}
+
+/* ===== checklist ===== */
+.checks{
+  margin-top:34px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px 26px;
+}
+.checks h3{font-size:16px;margin-bottom:6px;}
+.checks h3 span{color:var(--teal-hi);}
+.checks .csub{font-size:12.5px;color:var(--muted);margin-bottom:16px;}
+.checkitem{
+  display:flex;align-items:flex-start;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;
+  transition:background .25s;font-size:13.5px;color:#C8CFDA;
+}
+.checkitem:hover{background:var(--surface2);}
+.checkitem .box{
+  width:20px;height:20px;border-radius:6px;border:2px solid var(--line);flex:none;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink);transition:all .25s;
+}
+.checkitem.on .box{background:var(--teal-hi);border-color:var(--teal-hi);}
+.checkitem.on .box::before{content:"✓";font-weight:800;}
+.checkresult{
+  margin-top:18px;padding:16px 18px;border-radius:12px;background:var(--surface2);
+  font-size:14px;border:1px solid var(--line);transition:border-color .3s;
+}
+.checkresult b{color:var(--teal-hi);font-size:18px;}
+.checkresult.hot{border-color:rgba(45,212,191,.55);}
+
+/* ===== CTA ===== */
+.cta{
+  text-align:center;max-width:none;
+  background:radial-gradient(700px 380px at 50% 0%, rgba(13,148,136,.16), transparent 70%);
+  padding-bottom:120px;
+}
+.cta h2{font-size:clamp(28px,5vw,46px);}
+.cta p{color:var(--muted);margin:14px auto 36px;max-width:540px;font-size:14.5px;}
+.btn{
+  display:inline-block;border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:17px;
+  color:var(--ink);background:linear-gradient(115deg,var(--teal),var(--teal-hi));
+  padding:18px 46px;border-radius:999px;letter-spacing:.04em;
+  box-shadow:0 14px 44px rgba(13,148,136,.4);
+  transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s;
+  text-decoration:none;
+}
+.btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 20px 56px rgba(45,212,191,.5);}
+.btn:active{transform:scale(.98);}
+.btn:focus-visible{outline:3px solid var(--gold-hi);outline-offset:3px;}
+footer{padding:30px;text-align:center;font-size:11.5px;color:#5A6472;}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+  .rv{opacity:1;transform:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <span class="eyebrow rv">飲食店向け｜MEO対策 × AI運用</span>
+    <h1 class="rv d1">「近くの居酒屋」で、<br><span class="shine">最初に出る店</span>になる。</h1>
+    <p class="sub rv d2">お客さんはもう食べログを開かない。Googleマップで検索して、上位3件から選ぶ。そこに入るための作業を、AIが毎日休まず回します。</p>
+    <div class="hero-stats">
+      <div class="hstat rv d2"><div class="v num" data-count="3" data-suffix="枠">0枠</div><div class="l">マップ検索で最初に見える店の数</div></div>
+      <div class="hstat rv d3"><div class="v num" data-count="24" data-suffix="h">0h</div><div class="l">以内に全口コミへ返信</div></div>
+      <div class="hstat rv d4"><div class="v num" data-count="0" data-suffix="円">0円</div><div class="l">広告費。やるのは「運用」だけ</div></div>
+    </div>
+
+    <div class="mapdemo rv d3" aria-label="Googleマップ検索結果のイメージ">
+      <div class="bar"><span class="dot"></span><span class="q" id="typeQ"></span></div>
+      <div id="shopList">
+        <div class="shop"><div class="rankno num">1</div><div class="ic">🏮</div><div><div class="nm">居酒屋 ほにゃらら</div><div class="meta"><span class="stars">★★★★☆</span> 4.2 (318) ・ 営業中</div></div></div>
+        <div class="shop"><div class="rankno num">2</div><div class="ic">🍶</div><div><div class="nm">大衆酒場 なんとか</div><div class="meta"><span class="stars">★★★★☆</span> 4.0 (205) ・ 営業中</div></div></div>
+        <div class="shop"><div class="rankno num">3</div><div class="ic">🍺</div><div><div class="nm">炭火焼 どこそこ</div><div class="meta"><span class="stars">★★★☆☆</span> 3.9 (177) ・ 営業中</div></div></div>
+        <div class="shop you" id="yourShop"><div class="rankno num" id="yourRank">12</div><div class="ic">🔥</div><div><div class="nm">あなたのお店</div><div class="meta"><span class="stars">★★★★☆</span> 4.3 (<span id="yourReviews">23</span>) ・ 営業中</div></div></div>
+      </div>
+      <div class="note">↑ 評価は高いのに順位が低い…はMEO未着手の典型。情報量と更新頻度で逆転できます。</div>
+    </div>
+
+    <div class="scrolldown rv d4">▼ SCROLL</div>
+  </div>
+</section>
+
+<!-- ============ WHY MEO ============ -->
+<section>
+  <span class="eyebrow rv">01 — なぜMEOか</span>
+  <h2 class="rv d1">来店の入口は、もう地図。</h2>
+  <p class="lead rv d2">「渋谷 ラーメン」「近くの焼肉」——飲食の検索はほぼ地図化しました。グルメ媒体に月数万円払うより先に、無料のGoogleビジネスプロフィールを取り切るのが順番です。</p>
+  <div class="grid3">
+    <div class="card rv d1">
+      <div class="big num">約8<small>割</small></div>
+      <h3>スマホのローカル検索が来店等の行動につながる</h3>
+      <p>「近くの◯◯」検索は来店・電話・予約に直結する。検索した人は“今行く店”を探している。</p>
+      <span class="src">※Google公表のローカル検索行動調査より</span>
+    </div>
+    <div class="card rv d2">
+      <div class="big num">TOP3</div>
+      <h3>見られるのは上位3件だけ</h3>
+      <p>マップ検索で最初に表示されるのは3店舗。4位以下は「さらに表示」の先。3位以内と圏外で集客は桁が変わる。</p>
+    </div>
+    <div class="card rv d3">
+      <div class="big num">¥0</div>
+      <h3>掲載は無料。差がつくのは運用</h3>
+      <p>Googleビジネスプロフィール自体は無料。順位を決めるのは情報の充実度・口コミ・更新頻度＝つまり手間。そこをAIが代わる。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT AI DOES ============ -->
+<section>
+  <span class="eyebrow rv">02 — AIで何をやるか</span>
+  <h2 class="rv d1">順位を決める作業を、ぜんぶAIの物量で。</h2>
+  <p class="lead rv d2">MEOに魔法はありません。Googleが見ているのは「情報の正確さ・充実度」「口コミと返信」「更新の継続」。どれも“毎日コツコツ”が必要で、店主には一番できないこと。だからAIに回させます。</p>
+  <div class="works">
+    <div class="work rv d1">
+      <span class="freq once">初月で完了</span>
+      <span class="ic">🧱</span>
+      <h4>プロフィール完全整備</h4>
+      <p>カテゴリ・属性・営業時間・メニュー・写真・サービス説明をすべて埋める。情報の穴は順位の穴。</p>
+      <div class="ai"><b>AIの仕事</b>競合上位店のプロフィールを分析し、足りない項目・効くキーワードを洗い出して説明文を生成。</div>
+    </div>
+    <div class="work rv d2">
+      <span class="freq">毎日〜週2</span>
+      <span class="ic">📸</span>
+      <h4>「最新情報」投稿の継続</h4>
+      <p>本日のおすすめ・季節メニュー・空席情報を投稿。更新が止まった店とGoogleはみなされない状態を作る。</p>
+      <div class="ai"><b>AIの仕事</b>メニュー表と写真から投稿文を量産。LINEで写真を送るだけで、その日のうちに投稿に変わる運用。</div>
+    </div>
+    <div class="work rv d1">
+      <span class="freq">24時間以内</span>
+      <span class="ic">💬</span>
+      <h4>口コミ全件返信</h4>
+      <p>返信率と速さは順位とお客さんの信頼の両方に効く。低評価ほど丁寧な返信が次の客を呼ぶ。</p>
+      <div class="ai"><b>AIの仕事</b>口コミの内容を読んで店のトーンで返信文を起案 → 店主はOKを押すだけ。低評価には謝罪+改善+再来店導線まで設計。</div>
+    </div>
+    <div class="work rv d2">
+      <span class="freq">仕組み化</span>
+      <span class="ic">⭐</span>
+      <h4>口コミを「増やす」導線</h4>
+      <p>卓上QRコード→そのまま口コミ画面へ。会計時のひと声テンプレも用意。数は正義、ペースはもっと正義。</p>
+      <div class="ai"><b>AIの仕事</b>QR付き卓上POPのデザイン生成、依頼トークの台本化、増加ペースの監視。※やらせ・報酬付き依頼は規約違反なのでやらない。</div>
+    </div>
+    <div class="work rv d3">
+      <span class="freq once">初月で完了</span>
+      <span class="ic">🔗</span>
+      <h4>NAP統一・サイテーション</h4>
+      <p>店名・住所・電話が食べログ/ホットペッパー/自社サイトでバラバラだと評価が割れる。表記を完全統一。</p>
+      <div class="ai"><b>AIの仕事</b>Web上の自店情報をクロールして表記ゆれを検出、修正リストを作成。Q&A欄への想定問答の先回り登録も。</div>
+    </div>
+    <div class="work rv d3">
+      <span class="freq">毎月</span>
+      <span class="ic">📊</span>
+      <h4>順位計測と月次レポート</h4>
+      <p>「地域名×業態」の主要キーワードで順位を定点観測。表示回数・経路検索・電話数の推移を1枚で報告。</p>
+      <div class="ai"><b>AIの仕事</b>数値を集計してA4一枚の日本語レポートに。「来月やること」まで提案して、打ち手が途切れない。</div>
+    </div>
+  </div>
+  <div class="punch rv d2">MEO業者の中身は実は「人力の代行作業」。だから月3〜5万円が相場でした。AIなら同じ作業が<strong>1店舗あたり実働数時間</strong>で回る。<strong>同じ品質を半額以下で、しかも毎日</strong>。これは構造の話で、根性の話じゃない。</div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section>
+  <span class="eyebrow rv">03 — 従来業者との違い</span>
+  <h2 class="rv d1">「契約したのに月1回の投稿だけ」を終わらせる。</h2>
+  <div class="cmp">
+    <div class="cmpcol old rv d1">
+      <h3>よくあるMEO業者</h3>
+      <ul>
+        <li>月3〜5万円＋初期費用、年間契約縛り</li>
+        <li>投稿は月1〜4回のテンプレ文</li>
+        <li>口コミ返信は対象外 or 定型文</li>
+        <li>レポートは英語ツールの画面キャプチャ</li>
+        <li>「順位保証」を謳う業者ほど中身が薄い</li>
+      </ul>
+    </div>
+    <div class="cmpcol ai rv d2">
+      <h3>AI運用（この提案）</h3>
+      <ul>
+        <li>月1.5万円〜、縛りは最低3ヶ月だけ</li>
+        <li>投稿は週2〜毎日。写真を送れば当日反映</li>
+        <li>口コミは全件・24h以内・店のトーンで返信</li>
+        <li>日本語A4一枚レポート＋翌月の打ち手つき</li>
+        <li>順位保証はしない。やった作業は全部見せる</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROADMAP ============ -->
+<section>
+  <span class="eyebrow rv">04 — 進め方</span>
+  <h2 class="rv d1">最初の90日でやること。</h2>
+  <div class="weeks">
+    <div class="week rv d1"><div class="w">DAY 1–14</div><div><h4>土台づくり</h4><p>プロフィール完全整備・写真一新・NAP統一・QRコードPOP設置。ここで「情報量」は地域上位に並ぶ。</p></div></div>
+    <div class="week rv d2"><div class="w">DAY 15–45</div><div><h4>運用を習慣に</h4><p>週2投稿＋口コミ全件返信を回し始める。店側の作業は「写真をLINEで送る」「返信にOKを出す」だけ。</p></div></div>
+    <div class="week rv d3"><div class="w">DAY 46–90</div><div><h4>計測と寄せ</h4><p>順位が動き出す時期。伸びたキーワードに投稿と説明文を寄せ、口コミ増加ペースを引き上げる。</p></div></div>
+    <div class="week rv d4"><div class="w">DAY 90+</div><div><h4>月次レポートで判断</h4><p>表示回数・経路検索・電話タップの実数で継続判断。効いてなければやめていい契約にしてあります。</p></div></div>
+  </div>
+</section>
+
+<!-- ============ PLANS ============ -->
+<section id="plans">
+  <span class="eyebrow rv">05 — 料金</span>
+  <h2 class="rv d1">グルメ媒体1ヶ月分より、安く。</h2>
+  <div class="plans">
+    <div class="plan teal rv d1">
+      <span class="tag">PLAN A — おまかせ運用</span>
+      <h3>まずはここから</h3>
+      <div class="sub">1店舗・基本運用をすべて含む</div>
+      <div class="pricebox">
+        <div class="p"><div class="v num">¥0</div><div class="l">初期費用</div></div>
+        <div class="p"><div class="v num">¥15,000<small>/月</small></div><div class="l">運用費</div></div>
+        <div class="p"><div class="v num">3<small>ヶ月〜</small></div><div class="l">最低期間</div></div>
+      </div>
+      <ul>
+        <li>プロフィール完全整備（初月）</li>
+        <li>週2回の最新情報投稿</li>
+        <li>口コミ全件返信（24h以内・承認制）</li>
+        <li>口コミQRコードPOP作成</li>
+        <li>月次レポート（A4一枚＋翌月の打ち手）</li>
+      </ul>
+      <div class="talk"><b>ひとこと</b>「ホットペッパーの最安プランより安いです。3ヶ月で数字を見て、ダメならやめてください」</div>
+    </div>
+    <div class="plan gold rv d2">
+      <span class="tag">PLAN B — 攻め運用</span>
+      <h3>上位3枠を獲りにいく</h3>
+      <div class="sub">激戦区・多店舗・本気で1位を狙う店向け</div>
+      <div class="pricebox">
+        <div class="p"><div class="v num">¥30,000</div><div class="l">初期費用</div></div>
+        <div class="p"><div class="v num">¥30,000<small>/月</small></div><div class="l">運用費</div></div>
+        <div class="p"><div class="v num">6<small>ヶ月〜</small></div><div class="l">最低期間</div></div>
+      </div>
+      <ul>
+        <li>PLAN Aの全部</li>
+        <li>投稿 毎日（写真はこちらで加工・生成補助）</li>
+        <li>NAP統一・サイテーション整備</li>
+        <li>競合3店の動向ウォッチ</li>
+        <li>週次ミニレポート＋月次提案ミーティング</li>
+      </ul>
+      <div class="talk"><b>ひとこと</b>「MEO業者の相場（月3〜5万＋初期数万）の下限で、作業量は数倍入ってます」</div>
+    </div>
+  </div>
+  <p class="market-note rv d3">正直な注意書き：<b>順位の保証はできません</b>（Googleのアルゴリズム上、誰にもできません。保証を謳う業者は避けるべきです）。代わりに、やった作業と数字の変化はすべて見せます。</p>
+</section>
+
+<!-- ============ CHECKLIST ============ -->
+<section>
+  <span class="eyebrow rv">06 — 30秒診断</span>
+  <h2 class="rv d1">いま、あなたの店は何点か。</h2>
+  <p class="lead rv d2">当てはまるものをタップしてください。Googleマップであなたの店を検索しながらやると正確です。</p>
+  <div class="checks rv d2">
+    <h3>MEO放置度チェック — <span id="checkScore">0 / 6</span></h3>
+    <div class="csub">チェックが多いほど、伸びしろが大きい状態です。</div>
+    <div id="checkList">
+      <div class="checkitem" tabindex="0" role="checkbox" aria-checked="false"><span class="box"></span>Googleの「最新情報」投稿が3ヶ月以上止まっている（または一度もない）</div>
+      <div class="checkitem" tabindex="0" role="checkbox" aria-checked="false"><span class="box"></span>返信していない口コミがある</div>
+      <div class="checkitem" tabindex="0" role="checkbox" aria-checked="false"><span class="box"></span>写真が1年以上前のまま／お客さん投稿の写真の方が多い</div>
+      <div class="checkitem" tabindex="0" role="checkbox" aria-checked="false"><span class="box"></span>メニューや営業時間が今と違う箇所がある</div>
+      <div class="checkitem" tabindex="0" role="checkbox" aria-checked="false"><span class="box"></span>口コミ件数が近隣の人気店の半分以下</div>
+      <div class="checkitem" tabindex="0" role="checkbox" aria-checked="false"><span class="box"></span>「地域名＋業態」で検索して自分の店が3位以内に出ない</div>
+    </div>
+    <div class="checkresult" id="checkResult">タップすると診断結果が出ます。</div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <span class="eyebrow rv">START</span>
+  <h2 class="rv d1">最初の2週間で、<br>プロフィールは見違えます。</h2>
+  <p class="rv d2">まずは現状の無料診断から。あなたの店をマップで検索して、競合上位3店と何が違うかをレポート1枚にしてお渡しします。売り込みはそのあとで。</p>
+  <button class="btn rv d3" id="ctaBtn">無料診断をたのむ</button>
+  <div class="done" id="ctaDone" style="margin-top:22px;font-size:14px;color:var(--teal-hi);opacity:0;transition:opacity .5s;min-height:24px;"></div>
+</section>
+
+<footer>飲食店MEO × AI運用 提案資料｜掲載の統計はGoogle公表データ等に基づく目安です。順位を保証するものではありません。</footer>
+
+<script>
+(function(){
+"use strict";
+var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- scroll reveal ---------- */
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("on"); io.unobserve(e.target);} });
+},{threshold:0.15});
+document.querySelectorAll(".rv").forEach(function(el){ io.observe(el); });
+
+/* ---------- hero count-up ---------- */
+function countUp(el){
+  var target = parseInt(el.getAttribute("data-count"),10);
+  var suffix = el.getAttribute("data-suffix")||"";
+  if(reduced){ el.textContent = target + suffix; return; }
+  var t0 = null, dur = 1400;
+  function frame(ts){
+    if(!t0) t0 = ts;
+    var p = Math.min((ts-t0)/dur,1);
+    var eased = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(target*eased) + suffix;
+    if(p<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+var ioCount = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){ countUp(e.target); ioCount.unobserve(e.target);} });
+},{threshold:0.4});
+document.querySelectorAll("[data-count]").forEach(function(el){ ioCount.observe(el); });
+
+/* ---------- map demo: typing + rank climb ---------- */
+var typeQ = document.getElementById("typeQ");
+var QUERY = "近くの 居酒屋";
+function typeQuery(cb){
+  if(reduced){ typeQ.textContent = QUERY; if(cb) cb(); return; }
+  var i = 0;
+  typeQ.innerHTML = '<span class="caret"></span>';
+  var iv = setInterval(function(){
+    i++;
+    typeQ.innerHTML = QUERY.slice(0,i) + '<span class="caret"></span>';
+    if(i>=QUERY.length){ clearInterval(iv); if(cb) setTimeout(cb,700); }
+  }, 110);
+}
+var yourShop = document.getElementById("yourShop");
+var yourRank = document.getElementById("yourRank");
+var yourReviews = document.getElementById("yourReviews");
+var shopList = document.getElementById("shopList");
+function climb(){
+  if(reduced){ return; }
+  var rank = 12, reviews = 23;
+  var steps = [9,7,5,3,2];
+  var s = 0;
+  var iv = setInterval(function(){
+    rank = steps[s];
+    reviews += 12 + Math.floor(s*9);
+    yourRank.textContent = rank;
+    yourReviews.textContent = reviews;
+    if(rank<=3 && yourShop.parentNode){
+      // move card up visually
+      var kids = Array.prototype.slice.call(shopList.children);
+      var idx = kids.indexOf(yourShop);
+      var targetIdx = rank-1;
+      if(idx>targetIdx){ shopList.insertBefore(yourShop, kids[targetIdx]); }
+      // renumber others
+      Array.prototype.forEach.call(shopList.children,function(el,i2){
+        var no = el.querySelector(".rankno");
+        if(no && el!==yourShop) no.textContent = (i2+1);
+      });
+    }
+    s++;
+    if(s>=steps.length){ clearInterval(iv); }
+  }, 1100);
+}
+var ioMap = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){ ioMap.unobserve(e.target); typeQuery(function(){ setTimeout(climb, 800); }); }
+  });
+},{threshold:0.5});
+ioMap.observe(document.querySelector(".mapdemo"));
+
+/* ---------- checklist ---------- */
+var items = document.querySelectorAll(".checkitem");
+var score = document.getElementById("checkScore");
+var result = document.getElementById("checkResult");
+function judge(){
+  var n = document.querySelectorAll(".checkitem.on").length;
+  score.textContent = n + " / 6";
+  result.classList.toggle("hot", n>=2);
+  if(n===0){ result.innerHTML = "タップすると診断結果が出ます。"; }
+  else if(n<=1){ result.innerHTML = "<b>軽症。</b>いい状態です。週2投稿と口コミ返信を足せば上位が狙えます。"; }
+  else if(n<=3){ result.innerHTML = "<b>伸びしろ大。</b>競合も同レベルで放置していることが多く、90日で順位が動きやすいゾーンです。"; }
+  else { result.innerHTML = "<b>宝の山。</b>ここまで未着手なら、初月の整備だけで見え方が変わります。正直、一番おいしい状態です。"; }
+}
+items.forEach(function(it){
+  function flip(){
+    it.classList.toggle("on");
+    it.setAttribute("aria-checked", it.classList.contains("on") ? "true":"false");
+    judge();
+  }
+  it.addEventListener("click", flip);
+  it.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); flip(); } });
+});
+
+/* ---------- CTA ---------- */
+var ctaBtn = document.getElementById("ctaBtn");
+var ctaDone = document.getElementById("ctaDone");
+ctaBtn.addEventListener("click", function(){
+  ctaDone.textContent = "お店の名前と地域をLINEかメールで送ってください。診断レポートを作ってお持ちします。";
+  ctaDone.style.opacity = "1";
+});
+})();
+</script>
+</body>
+</html>
