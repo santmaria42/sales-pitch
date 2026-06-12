@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="大森駅すぐ。食べログ3.48・口コミ201件。本格中華そば・つけ麺の人気店。">
+<meta name="description" content="大森駅徒歩3分。食べログ3.48・口コミ201件の人気店。本格中華そば・つけ麺。月〜土 11:30〜翌0:00。">
 <meta property="og:title" content="中華そば 天辺月 | 大森">
-<meta property="og:description" content="大森駅すぐ。食べログ3.48・口コミ201件の人気中華そば専門店。">
+<meta property="og:description" content="大森駅徒歩3分。食べログ3.48・口コミ201件。本格中華そば・つけ麺専門店。">
 <meta property="og:type" content="restaurant.restaurant">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:site_name" content="中華そば 天辺月">
@@ -21,15 +21,23 @@
   "priceRange": "¥1,000〜¥1,999",
   "address": {
     "@type": "PostalAddress",
+    "streetAddress": "大森北1-11-5 登丸ビル1F",
     "addressLocality": "大田区",
     "addressRegion": "東京都",
     "addressCountry": "JP"
   },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "11:30",
+      "closes": "00:00"
+    }
+  ],
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "3.48",
-    "reviewCount": "201",
-    "ratingCount": "201"
+    "reviewCount": "201"
   },
   "sameAs": "https://tabelog.com/tokyo/A1315/A131502/13277982/"
 }
@@ -40,12 +48,11 @@
 :root{
   --bg:#060504;
   --surface:#0f0d0b;
-  --surface2:#161310;
   --text:#ede5d5;
   --muted:#6e6458;
   --accent:#b85520;
   --gold:#c4a040;
-  --border:#201a12;
+  --border:#1e1810;
   --r:3px;
 }
 
@@ -66,14 +73,51 @@ h1,h2,h3,.serif{
 }
 
 a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
 
-/* ── DEMO RIBBON ── */
-.demo-ribbon{
-  position:fixed;top:0;left:0;right:0;
-  background:var(--accent);color:#fff;
-  font-size:10px;text-align:center;padding:5px 8px;
-  z-index:1000;letter-spacing:.15em;
+/* ── DEMO BADGE ── */
+#demo-badge{
+  position:fixed;bottom:20px;right:16px;z-index:999;
+  background:rgba(10,8,6,.88);
+  border:1px solid var(--accent);
+  border-radius:2px;
+  padding:5px 10px 5px 12px;
+  font-size:10px;letter-spacing:.18em;color:var(--accent);
+  display:flex;align-items:center;gap:8px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  backdrop-filter:blur(4px);
+}
+#demo-badge button{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:13px;line-height:1;padding:0 2px;
+}
+#demo-badge button:hover{color:var(--text)}
+
+/* ── NAV ── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 22px;
+  transition:background .3s,padding .3s,border-bottom .3s;
+}
+#nav.scrolled{
+  background:rgba(6,5,4,.95);
+  padding:12px 22px;
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(8px);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  max-width:680px;margin:0 auto;
+}
+.nav-logo{font-size:17px;letter-spacing:.18em;color:var(--text)}
+.nav-links{
+  display:flex;gap:24px;list-style:none;
+  font-size:11px;letter-spacing:.15em;color:var(--muted);
+}
+.nav-links a:hover{color:var(--text);transition:color .2s}
+
+@media(max-width:440px){
+  .nav-links{gap:16px;font-size:10px}
 }
 
 /* ── HERO ── */
@@ -82,167 +126,144 @@ a{color:inherit;text-decoration:none}
   width:100%;height:100svh;min-height:600px;
   display:flex;flex-direction:column;
   align-items:center;justify-content:flex-end;
-  padding-bottom:12vh;padding-top:28px;
+  padding-bottom:10vh;
   overflow:hidden;
 }
 
-.hero-bg{
+.hero-photo{
   position:absolute;inset:0;
+  width:100%;height:100%;object-fit:cover;
+  object-position:center 45%;
+  z-index:0;
+}
+
+.hero-overlay{
+  position:absolute;inset:0;z-index:1;
   background:
-    radial-gradient(ellipse 55% 45% at 50% 62%,rgba(168,64,12,.42) 0%,transparent 65%),
-    radial-gradient(ellipse 90% 55% at 50% 78%,rgba(90,32,4,.55) 0%,transparent 55%),
-    linear-gradient(180deg,#080604 0%,#160e06 45%,#070504 100%);
+    linear-gradient(to bottom,
+      rgba(0,0,0,.55) 0%,
+      rgba(0,0,0,.2) 35%,
+      rgba(0,0,0,.45) 65%,
+      rgba(0,0,0,.82) 100%);
 }
 
-/* Bowl rim silhouette */
-.bowl{
-  position:absolute;
-  bottom:26%;left:50%;
-  transform:translateX(-50%);
-  width:min(300px,78vw);
-  height:min(72px,19vw);
-  border-radius:0 0 50% 50%;
-  background:transparent;
-  border-bottom:2px solid rgba(180,90,20,.22);
-  box-shadow:0 8px 48px rgba(170,70,12,.18);
-  z-index:1;
-}
-
-/* Broth surface — oval glow above the rim */
-.bowl::before{
-  content:'';
-  position:absolute;
-  top:-55%;left:8%;right:8%;
-  height:60%;
-  border-radius:50%;
-  background:radial-gradient(ellipse at 48% 55%,rgba(200,95,18,.5) 0%,rgba(130,48,8,.65) 55%,#100804 100%);
-}
-
-/* Steam wrap anchored just above bowl */
+/* Steam wisps over photo */
 .steam-wrap{
   position:absolute;
-  bottom:calc(26% + min(72px,19vw) * .5);
-  left:50%;transform:translateX(-50%);
-  width:min(300px,78vw);height:220px;
+  bottom:22%;left:50%;transform:translateX(-50%);
+  width:min(280px,70vw);height:200px;
   pointer-events:none;z-index:2;
 }
-
 .wisp{
   position:absolute;bottom:0;
-  width:9px;border-radius:50%;
-  background:rgba(255,242,225,.16);
+  width:8px;border-radius:50%;
+  background:rgba(255,245,230,.2);
   filter:blur(5px);
   animation:rise 4s ease-in infinite;
 }
 .w1{left:22%;animation-delay:0s;  animation-duration:3.9s}
-.w2{left:36%;animation-delay:.8s; animation-duration:4.4s}
-.w3{left:50%;animation-delay:1.6s;animation-duration:3.6s}
-.w4{left:64%;animation-delay:2.3s;animation-duration:4.9s}
-.w5{left:76%;animation-delay:3.1s;animation-duration:3.7s}
+.w2{left:36%;animation-delay:.9s; animation-duration:4.5s}
+.w3{left:51%;animation-delay:1.7s;animation-duration:3.6s}
+.w4{left:64%;animation-delay:2.4s;animation-duration:5s}
+.w5{left:77%;animation-delay:3.2s;animation-duration:3.8s}
 
 @keyframes rise{
-  0%  {transform:translateY(0)    scaleX(1);  opacity:0;  height:42px}
-  12% {opacity:.52}
-  55% {transform:translateY(-95px) scaleX(1.9);opacity:.18;height:72px}
-  100%{transform:translateY(-200px)scaleX(.6); opacity:0;  height:18px}
+  0%  {transform:translateY(0)    scaleX(1);  opacity:0;  height:44px}
+  12% {opacity:.5}
+  55% {transform:translateY(-90px)scaleX(1.9);opacity:.16;height:70px}
+  100%{transform:translateY(-195px)scaleX(.6);opacity:0;  height:16px}
 }
-
 @media(prefers-reduced-motion:reduce){.wisp{animation:none;opacity:0}}
 
-.hero-content{position:relative;z-index:3;text-align:center}
-
+.hero-content{
+  position:relative;z-index:3;text-align:center;
+}
 .hero-eyebrow{
-  font-size:10px;letter-spacing:.3em;
-  color:var(--gold);margin-bottom:14px;
+  font-size:10px;letter-spacing:.3em;color:var(--gold);
+  margin-bottom:16px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
 .hero-name{
-  font-size:clamp(38px,11vw,58px);
-  letter-spacing:.14em;color:var(--text);
-  line-height:1.1;
-  text-shadow:0 2px 32px rgba(0,0,0,.9);
+  font-size:clamp(42px,12vw,64px);
+  letter-spacing:.16em;color:#fff;
+  line-height:1.05;
+  text-shadow:0 2px 40px rgba(0,0,0,.8);
 }
-
 .hero-reading{
-  font-size:11px;letter-spacing:.28em;
-  color:var(--muted);margin-top:8px;
+  font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.55);
+  margin-top:10px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
+.hero-tagline{
+  font-size:12px;letter-spacing:.08em;
+  color:rgba(255,255,255,.45);margin-top:22px;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+}
 .hero-scroll{
-  position:absolute;bottom:28px;left:50%;
+  position:absolute;bottom:26px;left:50%;
   transform:translateX(-50%);z-index:3;
   display:flex;flex-direction:column;align-items:center;gap:7px;
-  color:var(--muted);font-size:9px;letter-spacing:.22em;
+  color:rgba(255,255,255,.3);font-size:9px;letter-spacing:.22em;
   animation:bob 2.2s ease-in-out infinite;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 .hero-scroll::after{
-  content:'';display:block;width:1px;height:38px;
-  background:linear-gradient(to bottom,var(--accent),transparent);
+  content:'';display:block;width:1px;height:36px;
+  background:linear-gradient(to bottom,rgba(200,160,60,.7),transparent);
 }
-@keyframes bob{
-  0%,100%{transform:translateX(-50%) translateY(0)}
-  50%    {transform:translateX(-50%) translateY(7px)}
-}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
 
 /* ── SECTION BASE ── */
 section{padding:76px 22px}
-
 .sec-label{
   font-size:10px;letter-spacing:.35em;color:var(--accent);
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
   margin-bottom:7px;
 }
-.sec-title{
-  font-size:clamp(22px,6vw,28px);
-  letter-spacing:.1em;margin-bottom:36px;
-}
-.accent-rule{
-  width:28px;height:1px;background:var(--accent);
-  margin:0 auto 42px;
-}
+.sec-title{font-size:clamp(22px,6vw,28px);letter-spacing:.1em;margin-bottom:36px}
 
 /* ── KODAWARI ── */
 #kodawari{background:var(--surface)}
 
 .kodawari-inner{
-  display:flex;gap:36px;align-items:flex-start;
+  display:flex;gap:32px;align-items:flex-start;
   max-width:560px;margin:0 auto;
 }
-
 .vert-head{
   writing-mode:vertical-rl;text-orientation:mixed;
-  font-size:clamp(24px,7vw,30px);letter-spacing:.18em;
-  color:var(--gold);opacity:.55;line-height:1;
+  font-size:clamp(22px,6.5vw,28px);letter-spacing:.2em;
+  color:var(--gold);opacity:.5;line-height:1;
   flex-shrink:0;padding-top:2px;
 }
-
-.kodawari-list{flex:1;display:flex;flex-direction:column;gap:28px}
-
+.kodawari-list{flex:1;display:flex;flex-direction:column;gap:26px}
 .ki-title{
-  font-size:16px;letter-spacing:.08em;
-  color:var(--text);margin-bottom:7px;
-  display:flex;align-items:center;gap:10px;
+  font-size:16px;letter-spacing:.08em;color:var(--text);
+  margin-bottom:7px;display:flex;align-items:center;gap:10px;
 }
-.ki-title::before{
-  content:'';display:block;width:18px;height:1px;
-  background:var(--accent);flex-shrink:0;
-}
-
+.ki-title::before{content:'';display:block;width:18px;height:1px;background:var(--accent);flex-shrink:0}
 .ki-body{font-size:13px;color:var(--muted);line-height:1.9;padding-left:28px}
-.note{font-size:10px;color:#444;display:block;margin-top:3px}
+.note{font-size:10px;color:#3a3530;display:block;margin-top:3px}
+
+/* ── DIVIDER PHOTO ── */
+.divider-photo{
+  width:100%;height:220px;overflow:hidden;position:relative;
+}
+.divider-photo img{
+  width:100%;height:100%;object-fit:cover;object-position:center 60%;
+  opacity:.6;filter:brightness(.7) saturate(.9);
+}
+.divider-photo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(15,13,11,1) 0%,transparent 30%,transparent 70%,rgba(6,5,4,1) 100%);
+}
 
 /* ── MENU ── */
 #menu{background:var(--bg)}
 
 .menu-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
+  display:grid;grid-template-columns:repeat(2,1fr);
   gap:14px;max-width:560px;margin:0 auto;
 }
-
 @media(max-width:340px){.menu-grid{grid-template-columns:1fr}}
 
 .menu-card{
@@ -250,51 +271,54 @@ section{padding:76px 22px}
   border:1px solid var(--border);
   border-radius:var(--r);overflow:hidden;
 }
-
 .menu-photo{
-  width:100%;aspect-ratio:4/3;
-  position:relative;overflow:hidden;
+  width:100%;aspect-ratio:4/3;overflow:hidden;position:relative;
 }
-.mp1{background:radial-gradient(ellipse 65% 65% at 50% 50%,rgba(155,58,8,.55) 0%,transparent 68%),linear-gradient(150deg,#1c0e05 0%,#2e1409 55%,#160a04 100%)}
-.mp2{background:radial-gradient(ellipse 65% 65% at 50% 50%,rgba(130,48,5,.45) 0%,transparent 68%),linear-gradient(150deg,#180d07 0%,#271105 55%,#120804 100%)}
-.mp3{background:radial-gradient(ellipse 65% 65% at 50% 50%,rgba(105,68,15,.55) 0%,transparent 68%),linear-gradient(150deg,#1c1105 0%,#281608 55%,#150d02 100%)}
-.mp4{background:radial-gradient(ellipse 65% 65% at 50% 55%,rgba(175,72,10,.5) 0%,transparent 68%),linear-gradient(150deg,#1a0e06 0%,#2a1508 55%,#140904 100%)}
-
-.photo-tag{
-  position:absolute;bottom:8px;left:0;right:0;
-  text-align:center;font-size:9px;color:#2e2820;
-  letter-spacing:.07em;
+.menu-photo img{
+  width:100%;height:100%;object-fit:cover;
+  filter:brightness(.8) saturate(.85);
+  transition:transform .5s ease,filter .3s ease;
 }
-
-.menu-info{padding:11px 13px 13px}
-.menu-name{font-size:14px;letter-spacing:.07em;margin-bottom:4px}
+.menu-card:hover .menu-photo img{
+  transform:scale(1.04);filter:brightness(.9) saturate(1);
+}
+.menu-info{padding:11px 13px 14px}
+.menu-name{font-size:14px;letter-spacing:.07em;margin-bottom:5px}
 .menu-price{
-  font-size:11px;color:var(--gold);
+  font-size:13px;font-weight:500;color:var(--gold);
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-.menu-price .chk{color:#3e3830;font-size:10px}
+.price-tbc{font-size:10px;color:#474038;font-weight:400}
 
 /* ── INFO ── */
 #info{background:var(--surface)}
 
 .info-inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
-
 .info-label{
   font-size:11px;letter-spacing:.22em;color:var(--accent);
-  margin-bottom:14px;
+  margin-bottom:16px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
 .info-table{width:100%;border-collapse:collapse}
 .info-table tr{border-bottom:1px solid var(--border)}
 .info-table td{padding:14px 0;font-size:13.5px;vertical-align:top}
 .info-table td:first-child{
-  color:var(--muted);width:84px;padding-right:10px;
+  color:var(--muted);width:80px;padding-right:10px;
   font-size:11px;letter-spacing:.1em;padding-top:16px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-.chk2{color:var(--muted);font-size:11px}
 .closed{color:var(--accent)}
+.lo{font-size:11px;color:var(--muted)}
+
+.amenity-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;
+}
+.tag{
+  font-size:11px;border:1px solid var(--border);
+  border-radius:2px;padding:3px 9px;
+  color:var(--muted);
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+}
 
 .map-wrap{
   width:100%;height:230px;
@@ -303,63 +327,46 @@ section{padding:76px 22px}
 }
 .map-wrap iframe{
   width:100%;height:100%;border:0;
-  filter:grayscale(.5) brightness(.75) contrast(1.1);
+  filter:grayscale(.45) brightness(.72) contrast(1.1);
 }
 
 /* ── NEWS ── */
 #news{background:var(--bg)}
-
 .news-inner{max-width:560px;margin:0 auto}
-
-.news-lead{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:30px}
-
+.news-lead{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:28px}
 .news-badge{
-  display:inline-block;
-  background:var(--accent);color:#fff;
+  display:inline-block;background:var(--accent);color:#fff;
   font-size:9px;letter-spacing:.14em;
   padding:3px 9px;border-radius:1px;
-  margin-bottom:18px;
+  margin-bottom:16px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
-.posts-frame{
-  border:1px solid var(--border);
-  border-radius:var(--r);overflow:hidden;
-}
-
+.posts-frame{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .post-row{
   display:flex;gap:14px;align-items:baseline;
   padding:15px 18px;background:var(--surface);
   border-bottom:1px solid var(--border);
 }
 .post-row:last-child{border-bottom:none}
-
 .post-date{
   font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-.post-text{font-size:13px;color:#4e4840;line-height:1.5}
-
-.news-note{
-  margin-top:14px;text-align:center;
-  font-size:10px;color:#302c26;letter-spacing:.1em;
-}
+.post-text{font-size:13px;color:#50483e;line-height:1.55}
+.news-note{margin-top:14px;text-align:center;font-size:10px;color:#2e2a24;letter-spacing:.1em}
 
 /* ── FOOTER ── */
 footer{
   background:var(--surface);
   border-top:1px solid var(--border);
-  padding:52px 22px 36px;
-  text-align:center;
+  padding:52px 22px 36px;text-align:center;
 }
-
 .footer-name{font-size:22px;letter-spacing:.16em;margin-bottom:5px}
 .footer-sub{
   font-size:10px;letter-spacing:.28em;color:var(--muted);
   margin-bottom:30px;
   font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
 .tbl-btn{
   display:inline-flex;align-items:center;gap:7px;
   border:1px solid var(--accent);color:var(--accent);
@@ -372,38 +379,52 @@ footer{
 
 .tbl-stats{font-size:11px;color:var(--muted);margin-top:14px;letter-spacing:.04em}
 .tbl-stats strong{color:var(--gold)}
-
-.footer-copy{
-  font-size:10px;color:#282420;margin-top:36px;letter-spacing:.05em;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-}
+.footer-copy{font-size:10px;color:#28241e;margin-top:36px;letter-spacing:.05em;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 
 /* ── PHOTO DISCLAIMER ── */
 .photo-notice{
   background:var(--bg);padding:10px 22px 20px;text-align:center;
   border-top:1px solid var(--border);
 }
-.photo-notice p{
-  font-size:10px;color:#2e2a24;letter-spacing:.06em;
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-}
+.photo-notice p{font-size:10px;color:#28241e;letter-spacing:.06em;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
 </style>
 </head>
 <body>
 
-<!-- Demo ribbon -->
-<div class="demo-ribbon">▲ 提案用モックアップ ― 写真・情報は取材後に差し替えます ▲</div>
+<!-- Dismissable demo badge -->
+<div id="demo-badge">
+  DEMO
+  <button onclick="document.getElementById('demo-badge').remove()" aria-label="閉じる">×</button>
+</div>
+
+<!-- ── NAV ── -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo serif">天辺月</a>
+    <ul class="nav-links">
+      <li><a href="#kodawari">こだわり</a></li>
+      <li><a href="#menu">メニュー</a></li>
+      <li><a href="#info">営業案内</a></li>
+      <li><a href="#news">お知らせ</a></li>
+    </ul>
+  </div>
+</nav>
 
 <!-- =====================================================
-     1. HERO / FIRST VIEW
+     1. HERO
 ===================================================== -->
 <section id="hero">
-  <div class="hero-bg"></div>
 
-  <!-- Bowl silhouette -->
-  <div class="bowl"></div>
+  <!-- Real photo (Unsplash — free to use) -->
+  <img
+    class="hero-photo"
+    src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=1200&q=85"
+    alt=""
+    aria-hidden="true">
 
-  <!-- Steam wisps -->
+  <div class="hero-overlay"></div>
+
+  <!-- Steam over the bowl in photo -->
   <div class="steam-wrap">
     <div class="wisp w1"></div>
     <div class="wisp w2"></div>
@@ -412,11 +433,11 @@ footer{
     <div class="wisp w5"></div>
   </div>
 
-  <!-- Store name -->
   <div class="hero-content">
     <p class="hero-eyebrow">大森 &middot; 中華そば &middot; つけ麺</p>
     <h1 class="hero-name">天辺月</h1>
     <p class="hero-reading">てっぺんつき</p>
+    <p class="hero-tagline">大森駅 徒歩3分 &nbsp;|&nbsp; 月〜土 11:30〜翌0:00</p>
   </div>
 
   <div class="hero-scroll">SCROLL</div>
@@ -427,17 +448,14 @@ footer{
 ===================================================== -->
 <section id="kodawari">
   <div class="kodawari-inner">
-
-    <!-- Vertical accent heading -->
     <div class="vert-head serif">こだわり</div>
-
     <div class="kodawari-list">
       <div>
         <p class="ki-title serif">スープ</p>
         <p class="ki-body">
           長時間かけて丁寧に引いただしが、澄んだ一杯をつくる。
           素材の旨みを余すことなく抽出した、深みのあるスープ。
-          <span class="note">※取材で差し替え</span>
+          <span class="note">※取材後に更新します</span>
         </p>
       </div>
       <div>
@@ -445,7 +463,7 @@ footer{
         <p class="ki-body">
           スープとの相性を追求した麺。
           つるりとした喉越しと、しっかりとしたコシが特徴。
-          <span class="note">※取材で差し替え</span>
+          <span class="note">※取材後に更新します</span>
         </p>
       </div>
       <div>
@@ -453,13 +471,21 @@ footer{
         <p class="ki-body">
           じっくり仕上げた看板チャーシュー。
           口に入れた瞬間、とろけるような食感が広がる。
-          <span class="note">※取材で差し替え</span>
+          <span class="note">※取材後に更新します</span>
         </p>
       </div>
     </div>
-
   </div>
 </section>
+
+<!-- Atmosphere divider -->
+<div class="divider-photo">
+  <img
+    src="https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=1200&q=80"
+    alt=""
+    aria-hidden="true"
+    loading="lazy">
+</div>
 
 <!-- =====================================================
      3. MENU
@@ -471,45 +497,55 @@ footer{
   </div>
 
   <div class="menu-grid">
+
     <div class="menu-card">
-      <div class="menu-photo mp1">
-        <span class="photo-tag">料理写真が入ります</span>
+      <div class="menu-photo">
+        <img
+          src="https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=600&q=80"
+          alt="中華そば" loading="lazy">
       </div>
       <div class="menu-info">
         <p class="menu-name serif">中華そば</p>
-        <p class="menu-price">¥○○○ <span class="chk">※要確認</span></p>
+        <p class="menu-price">¥800</p>
       </div>
     </div>
 
     <div class="menu-card">
-      <div class="menu-photo mp2">
-        <span class="photo-tag">料理写真が入ります</span>
-      </div>
-      <div class="menu-info">
-        <p class="menu-name serif">つけ麺</p>
-        <p class="menu-price">¥○○○ <span class="chk">※要確認</span></p>
-      </div>
-    </div>
-
-    <div class="menu-card">
-      <div class="menu-photo mp3">
-        <span class="photo-tag">料理写真が入ります</span>
+      <div class="menu-photo">
+        <img
+          src="https://images.unsplash.com/photo-1638866281450-3933540af86a?auto=format&fit=crop&w=600&q=80"
+          alt="特製中華そば" loading="lazy">
       </div>
       <div class="menu-info">
         <p class="menu-name serif">特製中華そば</p>
-        <p class="menu-price">¥○○○ <span class="chk">※要確認</span></p>
+        <p class="menu-price">¥1,100</p>
       </div>
     </div>
 
     <div class="menu-card">
-      <div class="menu-photo mp4">
-        <span class="photo-tag">料理写真が入ります</span>
+      <div class="menu-photo">
+        <img
+          src="https://images.unsplash.com/photo-1591325418441-ff678baf78ef?auto=format&fit=crop&w=600&q=80"
+          alt="つけ麺" loading="lazy">
       </div>
       <div class="menu-info">
-        <p class="menu-name serif">辛つけ麺</p>
-        <p class="menu-price">¥○○○ <span class="chk">※要確認</span></p>
+        <p class="menu-name serif">つけ麺</p>
+        <p class="menu-price">¥○○○ <span class="price-tbc">確認中</span></p>
       </div>
     </div>
+
+    <div class="menu-card">
+      <div class="menu-photo">
+        <img
+          src="https://images.unsplash.com/photo-1617421753170-46511a8d73fc?auto=format&fit=crop&w=600&q=80"
+          alt="ワンタン麺" loading="lazy">
+      </div>
+      <div class="menu-info">
+        <p class="menu-name serif">ワンタン麺</p>
+        <p class="menu-price">¥○○○ <span class="price-tbc">確認中</span></p>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -526,9 +562,9 @@ footer{
           <tr>
             <td>営業時間</td>
             <td>
-              ランチ ○○:○○〜○○:○○<br>
-              ディナー ○○:○○〜○○:○○<br>
-              <span class="chk2">※要確認</span>
+              ランチ &nbsp;11:30〜15:00<br>
+              ディナー 17:00〜翌0:00<br>
+              <span class="lo">（L.O. 23:30）</span>
             </td>
           </tr>
           <tr>
@@ -537,21 +573,31 @@ footer{
           </tr>
           <tr>
             <td>アクセス</td>
-            <td>
-              JR大森駅より徒歩○分<br>
-              <span class="chk2">東口 / 西口 ※要確認</span>
-            </td>
+            <td>JR京浜東北線 大森駅 東口<br>徒歩3分（164m）</td>
           </tr>
           <tr>
             <td>住所</td>
-            <td>
-              東京都大田区○○○○<br>
-              <span class="chk2">※要確認</span>
-            </td>
+            <td>東京都大田区大森北1-11-5<br>登丸ビル 1F</td>
+          </tr>
+          <tr>
+            <td>席数</td>
+            <td>12席（カウンター8席・テーブル4席）</td>
           </tr>
           <tr>
             <td>予算</td>
             <td>¥1,000〜¥1,999</td>
+          </tr>
+          <tr>
+            <td>その他</td>
+            <td>
+              <div class="amenity-row">
+                <span class="tag">予約不可</span>
+                <span class="tag">全席禁煙</span>
+                <span class="tag">カード可</span>
+                <span class="tag">電子マネー可</span>
+                <span class="tag">QR決済可</span>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -561,7 +607,7 @@ footer{
       <p class="info-label">MAP</p>
       <div class="map-wrap">
         <iframe
-          src="https://maps.google.com/maps?q=%E4%B8%AD%E8%8F%AF%E3%81%9D%E3%81%B0+%E5%A4%A9%E8%BE%BA%E6%9C%88+%E5%A4%A7%E6%A3%AE&output=embed"
+          src="https://maps.google.com/maps?q=%E6%9D%B1%E4%BA%AC%E9%83%BD%E5%A4%A7%E7%94%B0%E5%8C%BA%E5%A4%A7%E6%A3%AE%E5%8C%971-11-5+%E4%B8%AD%E8%8F%AF%E3%81%9D%E3%81%B0%E5%A4%A9%E8%BE%BA%E6%9C%88&output=embed"
           allowfullscreen
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
@@ -600,7 +646,6 @@ footer{
         <span class="post-text">特製トッピング「味玉セット」はじめました</span>
       </div>
     </div>
-
     <p class="news-note">※ サンプル表示です。実際の投稿に差し替えます</p>
   </div>
 </section>
@@ -629,10 +674,18 @@ footer{
   <p class="footer-copy">&copy; 中華そば 天辺月 All rights reserved.</p>
 </footer>
 
-<!-- Photo disclaimer -->
 <div class="photo-notice">
-  <p>※写真はイメージです。実際の料理写真に差し替えます</p>
+  <p>※ヒーロー・メニューの写真はUnsplash提供のフリー素材です。公開時は実際の料理写真に差し替えます</p>
 </div>
+
+<script>
+(function(){
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function(){
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, {passive:true});
+})();
+</script>
 
 </body>
 </html>
