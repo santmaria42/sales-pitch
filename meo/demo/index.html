@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>口コミAIアシスタント 体験デモ｜中華そば 天辺月</title>
+<meta name="description" content="卓上QR→AIが2〜3問→本人の言葉で口コミ下書き→コピーしてGoogleへ。飲食店の口コミを増やす新しい導線の体験デモ。">
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --ink:#0E1116;
+  --surface:#151B23;
+  --surface2:#1C2430;
+  --line:#2A3442;
+  --gold:#C9A227;
+  --gold-hi:#E8C547;
+  --teal:#0D9488;
+  --teal-hi:#2DD4BF;
+  --text:#F2EFE6;
+  --muted:#9AA4B2;
+  --danger:#E25C5C;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:"Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+  line-height:1.7;
+  min-height:100vh;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:36px 20px 80px;}
+header.page{ text-align:center; margin-bottom:30px;}
+.eyebrow{
+  display:inline-block;font-size:11px;letter-spacing:.22em;color:var(--gold-hi);
+  border:1px solid rgba(201,162,39,.45);border-radius:999px;padding:4px 14px;margin-bottom:14px;
+}
+h1{font-size:clamp(22px,4vw,32px);font-weight:800;line-height:1.4;}
+h1 small{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-top:6px;}
+
+.stage{display:flex;gap:34px;justify-content:center;align-items:flex-start;}
+@media(max-width:860px){.stage{flex-direction:column;align-items:center;}}
+
+/* ===== phone ===== */
+.phone{
+  width:min(390px,100%);flex:none;
+  background:#05070a;border:1px solid #2a3442;border-radius:38px;
+  padding:12px;box-shadow:0 24px 70px rgba(0,0,0,.6);
+  position:relative;
+}
+.phone .notch{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:120px;height:24px;background:#05070a;border-radius:0 0 16px 16px;z-index:5;
+}
+.screen{
+  background:#FAF7F0;color:#26221C;
+  border-radius:28px;overflow:hidden;
+  height:680px;max-height:78vh;min-height:560px;
+  display:flex;flex-direction:column;position:relative;
+}
+@media(max-width:480px){ .screen{height:74vh;} }
+
+/* ===== screens ===== */
+.scr{position:absolute;inset:0;display:none;flex-direction:column;}
+.scr.on{display:flex;}
+
+/* --- POP screen --- */
+.pop{
+  background:linear-gradient(165deg,#1b1410 0%,#0E1116 70%);
+  color:var(--text);align-items:center;justify-content:center;text-align:center;
+  padding:34px 26px;gap:0;
+}
+.pop .shop{font-size:12px;letter-spacing:.3em;color:var(--gold-hi);margin-bottom:8px;}
+.pop h2{font-size:24px;font-weight:800;line-height:1.45;margin-bottom:6px;}
+.pop .sub{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+.qr{
+  width:150px;height:150px;background:#fff;border-radius:14px;padding:12px;margin:0 auto 10px;
+  box-shadow:0 8px 30px rgba(0,0,0,.45);
+}
+.qr svg{width:100%;height:100%;display:block;}
+.pop .scanme{font-size:11px;color:var(--muted);margin-bottom:24px;}
+.tap-hint{font-size:11px;color:var(--teal-hi);margin-top:12px;animation:bob 1.6s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* --- chat screen --- */
+.chathead{
+  flex:none;background:#fff;border-bottom:1px solid #E8E2D6;
+  padding:34px 16px 10px;display:flex;align-items:center;gap:10px;
+}
+.chathead .ava{
+  width:34px;height:34px;border-radius:50%;flex:none;
+  background:linear-gradient(135deg,var(--teal),var(--teal-hi));
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.chathead .nm{font-size:13.5px;font-weight:700;}
+.chathead .st{font-size:10.5px;color:#0D9488;display:flex;align-items:center;gap:4px;}
+.chathead .st::before{content:"";width:6px;height:6px;border-radius:50%;background:#0D9488;}
+.chat{
+  flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;
+  scroll-behavior:smooth;
+}
+.msg{max-width:82%;padding:9px 13px;border-radius:16px;font-size:13.5px;line-height:1.6;
+  animation:pop .25s cubic-bezier(.34,1.4,.64,1);}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97);}to{opacity:1;transform:none;}}
+.msg.bot{background:#fff;border:1px solid #E8E2D6;align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.user{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.typing{display:inline-flex;gap:4px;padding:4px 2px;}
+.typing i{width:6px;height:6px;border-radius:50%;background:#B9AE9C;animation:tp 1s infinite;}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+
+.inputzone{
+  flex:none;background:#fff;border-top:1px solid #E8E2D6;padding:12px 14px 16px;min-height:74px;
+}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.chip{
+  border:1.5px solid var(--teal);color:var(--teal);background:#fff;
+  border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.chip:active{transform:scale(.95);}
+.chip.sel{background:var(--teal);color:#fff;}
+.stars{display:flex;gap:6px;justify-content:center;}
+.stars button{
+  font-size:30px;background:none;border:none;cursor:pointer;color:#D8D0C0;
+  transition:transform .12s,color .12s;padding:2px;
+}
+.stars button.lit{color:#F5B301;}
+.stars button:active{transform:scale(1.2);}
+.gobtn{
+  display:block;margin:10px auto 0;background:var(--teal);color:#fff;border:none;border-radius:999px;
+  padding:9px 26px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.gobtn:disabled{opacity:.35;}
+.inputnote{text-align:center;font-size:11px;color:#A89E8C;}
+
+/* --- draft screen --- */
+.draft{background:#FAF7F0;padding:34px 18px 18px;gap:12px;}
+.draft h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.draft h3 .badge{
+  font-size:10px;background:var(--teal);color:#fff;border-radius:999px;padding:2px 9px;letter-spacing:.08em;
+}
+.draft .hint{font-size:11.5px;color:#8A8070;}
+.draftbox{
+  flex:1;width:100%;resize:none;border:1.5px solid #DDD5C4;border-radius:14px;
+  padding:14px;font-size:13.5px;line-height:1.75;font-family:inherit;background:#fff;color:#26221C;
+  min-height:180px;
+}
+.draftbox:focus{outline:2px solid var(--teal);border-color:transparent;}
+.starline{display:flex;align-items:center;gap:6px;font-size:13px;color:#6B6354;}
+.starline .s{color:#F5B301;font-size:16px;letter-spacing:2px;}
+.dbtns{display:flex;flex-direction:column;gap:9px;}
+.btn-re{
+  background:#fff;border:1.5px solid #C9BFA8;color:#6B6354;border-radius:12px;
+  padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+}
+.btn-go{
+  background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;border:none;border-radius:12px;
+  padding:14px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;
+  box-shadow:0 6px 18px rgba(13,148,136,.35);
+}
+.btn-go:active{transform:scale(.98);}
+
+/* --- google mock screen --- */
+.gmock{background:#F1F3F4;padding:34px 0 0;}
+.gnote{
+  background:#FFF3CD;color:#7A5D00;font-size:10.5px;text-align:center;padding:6px 12px;flex:none;
+}
+.gcard{
+  background:#fff;flex:1;margin-top:8px;border-radius:16px 16px 0 0;
+  box-shadow:0 -2px 12px rgba(0,0,0,.08);padding:18px 18px 14px;
+  display:flex;flex-direction:column;gap:12px;
+  font-family:Roboto,"Hiragino Sans",sans-serif;
+}
+.gcard .gtitle{font-size:15px;font-weight:500;color:#202124;}
+.gcard .grow{display:flex;align-items:center;gap:10px;}
+.gcard .gava{
+  width:34px;height:34px;border-radius:50%;background:#7B1FA2;color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;
+}
+.gcard .guser{font-size:13px;color:#202124;}
+.gcard .gpub{font-size:11px;color:#5F6368;}
+.gstars{font-size:30px;color:#FBBC04;letter-spacing:6px;text-align:center;}
+.gstars .off{color:#DADCE0;}
+.gtext{
+  border:1px solid #DADCE0;border-radius:8px;padding:12px;font-size:13px;line-height:1.7;color:#202124;
+  flex:1;overflow-y:auto;background:#fff;white-space:pre-wrap;position:relative;
+}
+.pastetag{
+  position:absolute;top:8px;right:8px;font-size:10px;background:#E8F0FE;color:#1967D2;
+  border-radius:4px;padding:2px 8px;animation:pop .3s;
+}
+.gbtns{display:flex;justify-content:flex-end;gap:8px;padding-bottom:6px;}
+.gbtn-c{background:none;border:none;color:#1A73E8;font-size:13.5px;font-weight:500;padding:9px 14px;cursor:pointer;font-family:inherit;}
+.gbtn-p{background:#1A73E8;color:#fff;border:none;border-radius:6px;font-size:13.5px;font-weight:500;padding:9px 22px;cursor:pointer;font-family:inherit;}
+
+/* --- done screen --- */
+.done{
+  background:linear-gradient(165deg,#0E1116,#10231f);color:var(--text);
+  align-items:center;justify-content:center;text-align:center;padding:30px 26px;
+}
+.done .ok{
+  width:74px;height:74px;border-radius:50%;background:var(--teal);margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;font-size:38px;color:#fff;
+  animation:pop .4s cubic-bezier(.34,1.5,.64,1);
+}
+.done h2{font-size:20px;font-weight:800;margin-bottom:8px;}
+.done p{font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+.done .stat{
+  margin:18px auto 0;background:rgba(13,148,136,.12);border:1px solid rgba(45,212,191,.3);
+  border-radius:14px;padding:14px 18px;font-size:12.5px;color:var(--text);max-width:280px;
+}
+.done .stat b{color:var(--teal-hi);}
+.btn-retry{
+  margin-top:22px;background:none;border:1.5px solid var(--line);color:var(--muted);
+  border-radius:999px;padding:9px 24px;font-size:12.5px;cursor:pointer;font-family:inherit;
+}
+
+/* toast */
+.toast{
+  position:absolute;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:#26221C;color:#fff;font-size:12.5px;border-radius:999px;padding:9px 18px;
+  opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:10;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== annotation panel ===== */
+.anno{flex:1;max-width:420px;min-width:280px;}
+.anno .ttl{
+  font-size:12px;letter-spacing:.2em;color:var(--gold-hi);margin-bottom:14px;font-weight:700;
+}
+.acard{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;margin-bottom:10px;transition:all .35s;opacity:.45;
+}
+.acard.hot{
+  opacity:1;border-color:rgba(45,212,191,.55);background:var(--surface2);
+  box-shadow:0 6px 24px rgba(13,148,136,.15);transform:translateX(4px);
+}
+.acard h4{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.acard h4 .n{
+  width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;
+}
+.acard p{font-size:12px;color:var(--muted);line-height:1.65;}
+.acard p b{color:var(--teal-hi);font-weight:700;}
+.legal{
+  margin-top:16px;border-left:3px solid var(--gold);background:rgba(201,162,39,.07);
+  border-radius:0 12px 12px 0;padding:12px 14px;font-size:11.5px;color:var(--muted);line-height:1.7;
+}
+.legal b{color:var(--gold-hi);}
+@media(max-width:860px){
+  .anno{max-width:min(390px,100%);}
+  .acard{opacity:1;transform:none!important;}
+  .acard.hot{box-shadow:none;}
+}
+footer{
+  text-align:center;margin-top:46px;font-size:11px;color:#5b6573;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <span class="eyebrow">SALES DEMO</span>
+    <h1>口コミAIアシスタント<small>お客様のスマホ体験をそのまま再現 — 題材:中華そば 天辺月(大森)</small></h1>
+  </header>
+
+  <div class="stage">
+
+    <!-- ============ PHONE ============ -->
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+
+        <!-- 0: POP -->
+        <div class="scr pop on" id="scr-pop">
+          <div class="shop">中華そば 天辺月</div>
+          <h2>ごちそうさまの<br>30秒で、お店を応援</h2>
+          <div class="sub">AIがお手伝いするので、書くのは一文字もなしでOK</div>
+          <div class="qr" id="qrtap" role="button" tabindex="0" aria-label="デモを始める">
+            <svg viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg" fill="#1a1a1a">
+              <rect x="0" y="0" width="7" height="7"/><rect x="1.5" y="1.5" width="4" height="4" fill="#fff"/><rect x="2.5" y="2.5" width="2" height="2"/>
+              <rect x="18" y="0" width="7" height="7"/><rect x="19.5" y="1.5" width="4" height="4" fill="#fff"/><rect x="20.5" y="2.5" width="2" height="2"/>
+              <rect x="0" y="18" width="7" height="7"/><rect x="1.5" y="19.5" width="4" height="4" fill="#fff"/><rect x="2.5" y="20.5" width="2" height="2"/>
+              <rect x="9" y="0" width="2" height="2"/><rect x="13" y="1" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="14" y="5" width="2" height="2"/>
+              <rect x="9" y="9" width="2" height="2"/><rect x="12" y="10" width="3" height="2"/><rect x="16" y="9" width="2" height="2"/><rect x="20" y="10" width="2" height="2"/>
+              <rect x="0" y="10" width="2" height="2"/><rect x="3" y="12" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="1" y="14" width="2" height="2"/>
+              <rect x="10" y="13" width="2" height="2"/><rect x="14" y="14" width="2" height="2"/><rect x="18" y="13" width="2" height="2"/><rect x="22" y="14" width="2" height="2"/>
+              <rect x="9" y="17" width="2" height="2"/><rect x="13" y="18" width="2" height="2"/><rect x="17" y="17" width="3" height="2"/><rect x="21" y="19" width="2" height="2"/>
+              <rect x="10" y="21" width="2" height="2"/><rect x="14" y="22" width="2" height="2"/><rect x="18" y="21" width="2" height="2"/><rect x="22" y="22" width="2" height="2"/>
+            </svg>
+          </div>
+          <div class="scanme">▲ 卓上POPのQRコード(イメージ)</div>
+          <div class="tap-hint">QRをタップしてデモ開始 ▼</div>
+        </div>
+
+        <!-- 1: CHAT -->
+        <div class="scr" id="scr-chat" style="background:#FAF7F0;">
+          <div class="chathead">
+            <div class="ava">🍜</div>
+            <div>
+              <div class="nm">天辺月 AIアシスタント</div>
+              <div class="st">オンライン</div>
+            </div>
+          </div>
+          <div class="chat" id="chat"></div>
+          <div class="inputzone" id="inputzone"></div>
+        </div>
+
+        <!-- 2: DRAFT -->
+        <div class="scr draft" id="scr-draft">
+          <h3><span class="badge">AI生成</span>口コミの下書きができました</h3>
+          <div class="starline">あなたの評価 <span class="s" id="draft-stars"></span></div>
+          <textarea class="draftbox" id="draftbox" aria-label="口コミ下書き"></textarea>
+          <div class="hint">✏️ 自由に書き直せます。あなたの言葉が一番です。</div>
+          <div class="dbtns">
+            <button class="btn-re" id="btn-re">🔁 別の言い回しにする</button>
+            <button class="btn-go" id="btn-go">📋 コピーしてGoogleで投稿する</button>
+          </div>
+        </div>
+
+        <!-- 3: GOOGLE MOCK -->
+        <div class="scr gmock" id="scr-google">
+          <div class="gnote">⚠️ デモ画面です — 実運用では本物のGoogle投稿画面が開きます</div>
+          <div class="gcard">
+            <div class="gtitle">中華そば 天辺月</div>
+            <div class="grow">
+              <div class="gava">あ</div>
+              <div>
+                <div class="guser">あなた</div>
+                <div class="gpub">投稿は公開されます</div>
+              </div>
+            </div>
+            <div class="gstars" id="gstars"></div>
+            <div class="gtext" id="gtext"><span class="pastetag" id="pastetag" style="display:none;">ペーストしました</span><span id="gtext-body" style="color:#9AA0A6;">ここを長押しして「ペースト」<br><span style="font-size:11px;">(デモでは下のボタンでペースト)</span></span></div>
+            <div class="gbtns">
+              <button class="gbtn-c" id="gbtn-paste">ペースト(デモ)</button>
+              <button class="gbtn-p" id="gbtn-post" disabled style="opacity:.4;">投稿</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4: DONE -->
+        <div class="scr done" id="scr-done">
+          <div class="ok">✓</div>
+          <h2>投稿ありがとうございました!</h2>
+          <p>ここまで、文字入力は一度もしていません。</p>
+          <div class="stat">
+            お客様の作業は <b>タップ数回+ペースト1回</b>。<br>
+            「何を書けばいいか分からない」をAIが消すと、<br>口コミは<b>頼まなくても集まり</b>ます。
+          </div>
+          <button class="btn-retry" id="btn-retry">もう一度デモを見る</button>
+        </div>
+
+        <div class="toast" id="toast">📋 下書きをコピーしました</div>
+      </div>
+    </div>
+
+    <!-- ============ ANNOTATIONS ============ -->
+    <aside class="anno">
+      <div class="ttl">― この仕組みのポイント(営業用メモ)</div>
+      <div class="acard" id="an-0">
+        <h4><span class="n">1</span>卓上QRから、アプリ不要で開始</h4>
+        <p>インストールも会員登録もなし。<b>お会計前の手持ち無沙汰な30秒</b>を狙います。</p>
+      </div>
+      <div class="acard" id="an-1">
+        <h4><span class="n">2</span>AIが聞くのはたった3問</h4>
+        <p>口コミが集まらない最大の理由は謝礼の有無ではなく<b>「何を書けばいいか分からない」</b>。タップで答えるだけの質問に変換します。</p>
+      </div>
+      <div class="acard" id="an-2">
+        <h4><span class="n">3</span>本人の回答から下書きを生成</h4>
+        <p>定型文の配布ではなく、<b>本人の体験を本人の言葉に整える</b>だけ。文面は毎回変わるためスパム判定もされにくい。編集も自由です。</p>
+      </div>
+      <div class="acard" id="an-3">
+        <h4><span class="n">4</span>コピー&ジャンプで実質2〜3タップ</h4>
+        <p>Googleの仕様上、外部からの自動投稿は不可能。<b>「コピー済みの状態で公式投稿画面を開く」</b>のが理論上の最短ルートです。</p>
+      </div>
+      <div class="legal">
+        <b>⚖️ なぜこの方式か:</b> ドリンクサービス等の「謝礼と引き換えの口コミ」はGoogleポリシー違反(口コミ削除・プロフィール停止リスク)+景表法ステマ規制の対象。低評価のお客様だけ投稿させない「ゲーティング」も同様に違反です。この方式は<b>謝礼なし・選別なし・本人の言葉</b>なので、どちらもクリアします。
+      </div>
+    </aside>
+  </div>
+
+  <footer>提案用デモ — 画面・店舗名はサンプルです / Google投稿画面は説明用の再現イメージです</footer>
+</div>
+
+<script>
+(function(){
+  var state = { stars:0, dish:"", scene:"", points:[] };
+  var chat = document.getElementById("chat");
+  var inputzone = document.getElementById("inputzone");
+
+  function show(id){
+    document.querySelectorAll(".scr").forEach(function(s){ s.classList.remove("on"); });
+    document.getElementById(id).classList.add("on");
+  }
+  function setAnno(n){
+    document.querySelectorAll(".acard").forEach(function(c,i){ c.classList.toggle("hot", i===n); });
+  }
+  function botMsg(text, cb){
+    var t = document.createElement("div");
+    t.className = "msg bot";
+    t.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    chat.appendChild(t);
+    chat.scrollTop = chat.scrollHeight;
+    setTimeout(function(){
+      t.innerHTML = text;
+      chat.scrollTop = chat.scrollHeight;
+      if(cb) cb();
+    }, 750);
+  }
+  function userMsg(text){
+    var t = document.createElement("div");
+    t.className = "msg user";
+    t.textContent = text;
+    chat.appendChild(t);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function clearInput(){ inputzone.innerHTML = ""; }
+
+  /* ---- step 0: POP tap ---- */
+  document.getElementById("qrtap").addEventListener("click", startChat);
+  document.getElementById("qrtap").addEventListener("keydown", function(e){ if(e.key==="Enter") startChat(); });
+
+  function startChat(){
+    show("scr-chat");
+    setAnno(1);
+    chat.innerHTML = ""; clearInput();
+    state = { stars:0, dish:"", scene:"", points:[] };
+    botMsg("ご来店ありがとうございます!🍜<br>30秒だけ、今日の感想を聞かせてください。", function(){
+      botMsg("まず、今日の満足度は星いくつですか?", askStars);
+    });
+  }
+
+  /* ---- Q1: stars ---- */
+  function askStars(){
+    var z = document.createElement("div");
+    z.className = "stars";
+    for(var i=1;i<=5;i++){
+      (function(n){
+        var b = document.createElement("button");
+        b.textContent = "★"; b.setAttribute("aria-label", n+"つ星");
+        b.addEventListener("mouseenter", function(){ light(n); });
+        b.addEventListener("click", function(){
+          light(n); state.stars = n;
+          setTimeout(function(){
+            userMsg("★".repeat(n));
+            clearInput();
+            botMsg("ありがとうございます!今日は何を召し上がりましたか?", askDish);
+          }, 250);
+        });
+        z.appendChild(b);
+      })(i);
+    }
+    function light(n){
+      z.querySelectorAll("button").forEach(function(b,i){ b.classList.toggle("lit", i<n); });
+    }
+    clearInput(); inputzone.appendChild(z);
+  }
+
+  /* ---- Q2: dish ---- */
+  function askDish(){
+    chipInput(["中華そば","ワンタン麺","つけ麺","チャーシュー増し"], false, function(v){
+      state.dish = v;
+      botMsg("いいですね!どなたとのご来店でしたか?", askScene);
+    });
+  }
+
+  /* ---- Q3: scene ---- */
+  function askScene(){
+    chipInput(["ひとりで","家族と","友人と","仕事の合間に"], false, function(v){
+      state.scene = v;
+      botMsg("最後に、良かったところを教えてください(いくつでも)", askPoints);
+    });
+  }
+
+  /* ---- Q4: points (multi) ---- */
+  function askPoints(){
+    chipInput(["スープが好み","麺の食感","接客が丁寧","提供が早い","店内がきれい","コスパが良い"], true, function(vals){
+      state.points = vals;
+      botMsg("ありがとうございます!あなたの言葉から下書きを作っています…✍️", function(){
+        setTimeout(showDraft, 1100);
+      });
+    });
+  }
+
+  function chipInput(options, multi, done){
+    clearInput();
+    var wrap = document.createElement("div");
+    wrap.className = "chips";
+    var sel = [];
+    options.forEach(function(op){
+      var c = document.createElement("button");
+      c.className = "chip"; c.textContent = op;
+      c.addEventListener("click", function(){
+        if(multi){
+          c.classList.toggle("sel");
+          var i = sel.indexOf(op);
+          if(i>=0) sel.splice(i,1); else sel.push(op);
+          go.disabled = sel.length===0;
+        }else{
+          userMsg(op); clearInput(); done(op);
+        }
+      });
+      wrap.appendChild(c);
+    });
+    inputzone.appendChild(wrap);
+    if(multi){
+      var go = document.createElement("button");
+      go.className = "gobtn"; go.textContent = "これで決定"; go.disabled = true;
+      go.addEventListener("click", function(){
+        userMsg(sel.join("、")); clearInput(); done(sel.slice());
+      });
+      inputzone.appendChild(go);
+    }
+  }
+
+  /* ---- draft generation (template "AI") ---- */
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  var openers = {
+    "ひとりで":["仕事帰りにひとりでふらっと寄りました。","ひとりでゆっくり食べたくて訪問。","一人ランチで利用しました。"],
+    "家族と":["週末に家族と伺いました。","家族で大森に来たついでに訪問。","家族と一緒にお昼に利用しました。"],
+    "友人と":["友人と二人で行ってきました。","友達に誘われて初訪問。","友人とのランチで利用しました。"],
+    "仕事の合間に":["仕事の合間にサッと利用しました。","お昼休みに駆け込みで訪問。","外回りの途中で立ち寄りました。"]
+  };
+  var dishLines = ["{d}をいただきました。","注文は{d}。","{d}を注文しました。"];
+  var praise = {
+    5:["これが想像以上で、スープまで完食でした。","期待を大きく超える一杯でした。","文句なしの美味しさでした。"],
+    4:["安定の美味しさで大満足です。","とても美味しかったです。","しっかり満足できる一杯でした。"],
+    3:["美味しくいただきました。","普通に良かったです。"],
+    2:["味は悪くないと思いますが、好みは分かれるかも。"],
+    1:["正直、今日は期待とは違いました。"]
+  };
+  var pointLines = {
+    "スープが好み":["鶏ガラと鰹節のあっさりスープが本当に好みでした。","スープがあっさりなのに深みがあって美味しい。"],
+    "麺の食感":["麺の食感も良くてスルスル入ります。","麺がもちもちで好きなタイプでした。"],
+    "接客が丁寧":["店員さんの接客も丁寧で気持ちよく過ごせました。","接客が感じ良くてまた来たくなります。"],
+    "提供が早い":["提供が早いので時間がない時にも助かります。","注文してから出てくるまでが早い!"],
+    "店内がきれい":["店内が清潔で居心地が良いです。","お店がきれいで気持ちよく食事できました。"],
+    "コスパが良い":["この内容でこの値段はコスパ高いと思います。","値段以上の満足感です。"]
+  };
+  var closers = {
+    5:["大森でラーメンならここ、おすすめです。また行きます!","間違いなくリピートします。ごちそうさまでした!","大森に来たら絶対また寄ります。"],
+    4:["また行きたいお店です。","大森に来たらまた寄りたいと思います。","リピートありです。"],
+    3:["また機会があれば利用したいです。"],
+    2:["次回に期待します。"],
+    1:["改善に期待したいです。"]
+  };
+
+  function genDraft(){
+    var s = Math.max(1, Math.min(5, state.stars));
+    var parts = [];
+    parts.push(pick(openers[state.scene] || openers["ひとりで"]));
+    parts.push(pick(dishLines).replace("{d}", state.dish));
+    parts.push(pick(praise[s]));
+    state.points.slice(0,3).forEach(function(p){
+      if(pointLines[p]) parts.push(pick(pointLines[p]));
+    });
+    parts.push(pick(closers[s]));
+    return parts.join("");
+  }
+
+  function showDraft(){
+    show("scr-draft");
+    setAnno(2);
+    document.getElementById("draft-stars").textContent = "★".repeat(state.stars) + "☆".repeat(5-state.stars);
+    typeDraft(genDraft());
+  }
+  var typeTimer = null;
+  function typeDraft(text){
+    var box = document.getElementById("draftbox");
+    box.value = "";
+    if(typeTimer) clearInterval(typeTimer);
+    var i = 0;
+    typeTimer = setInterval(function(){
+      i += 3;
+      box.value = text.slice(0, i);
+      if(i >= text.length){ clearInterval(typeTimer); typeTimer = null; box.value = text; }
+    }, 28);
+  }
+  document.getElementById("btn-re").addEventListener("click", function(){ typeDraft(genDraft()); });
+
+  /* ---- copy & jump ---- */
+  document.getElementById("btn-go").addEventListener("click", function(){
+    var text = document.getElementById("draftbox").value;
+    function copied(){
+      var toast = document.getElementById("toast");
+      toast.classList.add("show");
+      setTimeout(function(){ toast.classList.remove("show"); }, 1700);
+      setTimeout(function(){ showGoogle(text); }, 900);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(copied, copied);
+    }else{ copied(); }
+  });
+
+  function showGoogle(text){
+    show("scr-google");
+    setAnno(3);
+    document.getElementById("gstars").innerHTML =
+      "★".repeat(state.stars) + '<span class="off">' + "★".repeat(5-state.stars) + "</span>";
+    var body = document.getElementById("gtext-body");
+    body.style.color = "#9AA0A6";
+    body.innerHTML = 'ここを長押しして「ペースト」<br><span style="font-size:11px;">(デモでは下のボタンでペースト)</span>';
+    var post = document.getElementById("gbtn-post");
+    post.disabled = true; post.style.opacity = ".4";
+    document.getElementById("pastetag").style.display = "none";
+
+    document.getElementById("gbtn-paste").onclick = function(){
+      body.style.color = "#202124";
+      body.textContent = text;
+      document.getElementById("pastetag").style.display = "block";
+      post.disabled = false; post.style.opacity = "1";
+    };
+    post.onclick = function(){
+      if(post.disabled) return;
+      show("scr-done");
+      setAnno(-1);
+    };
+  }
+
+  document.getElementById("btn-retry").addEventListener("click", function(){
+    show("scr-pop");
+    setAnno(0);
+  });
+
+  setAnno(0);
+})();
+</script>
+</body>
+</html>
