@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>撮るだけAI査定 — デモ</title>
+<meta name="description" content="写真を選ぶだけ。AIがブランド・モデル・型番を自動特定し、買取目安をその場で提示するデモ。">
+<style>
+:root{
+  --ink:#0E1116;
+  --surface:#151B23;
+  --surface2:#1C2430;
+  --line:#2A3442;
+  --gold:#C9A227;
+  --gold-hi:#E8C547;
+  --teal:#0D9488;
+  --teal-hi:#2DD4BF;
+  --text:#F2EFE6;
+  --muted:#9AA4B2;
+  --danger:#E25C5C;
+  --green:#4ADE80;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--ink);color:var(--text);
+  font-family:"Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+  line-height:1.65;min-height:100vh;
+}
+.num{font-family:"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px 80px;}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(14,17,22,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.hd{max-width:520px;margin:0 auto;padding:13px 16px;display:flex;align-items:center;gap:10px;}
+.hd .logo{font-weight:800;font-size:15px;letter-spacing:.04em;}
+.hd .logo .g{color:var(--gold-hi);}
+.hd .badge{
+  font-size:10px;color:var(--teal-hi);border:1px solid rgba(45,212,191,.4);
+  border-radius:999px;padding:2px 8px;letter-spacing:.1em;
+}
+.hd .gear{
+  margin-left:auto;background:none;border:1px solid var(--line);color:var(--muted);
+  border-radius:10px;padding:6px 10px;cursor:pointer;font-size:14px;
+}
+.hd .back{color:var(--muted);text-decoration:none;font-size:13px;}
+
+/* settings */
+#settings{
+  display:none;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:18px;margin:14px 0 0;
+}
+#settings.open{display:block;}
+#settings h4{font-size:13px;margin-bottom:8px;color:var(--gold-hi);}
+#settings p{font-size:11.5px;color:var(--muted);margin-bottom:10px;}
+#settings input{
+  width:100%;background:var(--ink);border:1px solid var(--line);border-radius:10px;
+  color:var(--text);padding:10px 12px;font-size:13px;margin-bottom:10px;
+}
+#settings .row{display:flex;gap:8px;}
+.mini-btn{
+  background:var(--surface2);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:8px 14px;font-size:12.5px;cursor:pointer;font-weight:700;
+}
+.mini-btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold-hi));color:#1A1405;border:none;}
+#aiStatus{font-size:11px;margin-top:4px;}
+#aiStatus.on{color:var(--green);}
+#aiStatus.off{color:var(--muted);}
+
+/* intro */
+.intro{text-align:center;padding:34px 0 8px;}
+.intro h1{font-size:24px;font-weight:800;line-height:1.4;}
+.intro h1 .g{color:var(--gold-hi);}
+.intro p{color:var(--muted);font-size:13px;margin-top:8px;}
+
+/* steps indicator */
+.steps{display:flex;justify-content:center;gap:6px;margin:22px 0 6px;}
+.steps .s{
+  font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;
+  padding:4px 11px;border-radius:999px;border:1px solid var(--line);
+}
+.steps .s.active{color:#1A1405;background:var(--gold-hi);border-color:var(--gold-hi);font-weight:800;}
+
+/* item grid */
+.sec-label{font-size:12px;letter-spacing:.18em;color:var(--gold-hi);margin:26px 0 12px;font-weight:700;}
+.items{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.item{
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:0;cursor:pointer;overflow:hidden;transition:transform .18s,border-color .18s;
+  text-align:left;color:var(--text);font-family:inherit;
+}
+.item:hover{transform:translateY(-3px);border-color:rgba(201,162,39,.55);}
+.item .ph{
+  height:96px;display:flex;align-items:center;justify-content:center;font-size:44px;
+}
+.item .meta{padding:10px 13px 13px;}
+.item .meta b{font-size:13px;display:block;line-height:1.4;}
+.item .meta span{font-size:11px;color:var(--muted);}
+.item.upload{
+  border-style:dashed;border-color:rgba(45,212,191,.5);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:150px;gap:6px;background:rgba(13,148,136,.05);
+}
+.item.upload .up-ico{font-size:30px;}
+.item.upload b{font-size:13px;color:var(--teal-hi);}
+.item.upload span{font-size:10.5px;color:var(--muted);text-align:center;padding:0 10px;}
+
+/* analyzing */
+#analyzing{display:none;margin-top:26px;}
+.scan-box{
+  background:var(--surface);border:1px solid rgba(201,162,39,.4);border-radius:18px;
+  padding:24px;text-align:center;position:relative;overflow:hidden;
+}
+.scan-box .target{font-size:64px;margin:8px 0 14px;position:relative;display:inline-block;}
+.scan-box img.target-img{max-width:180px;max-height:140px;border-radius:12px;display:block;margin:8px auto 14px;}
+.scanline{
+  position:absolute;left:8%;right:8%;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--teal-hi),transparent);
+  animation:scan 1.6s ease-in-out infinite;top:30px;box-shadow:0 0 14px var(--teal-hi);
+}
+@keyframes scan{0%,100%{top:24px}50%{top:160px}}
+.alist{margin-top:10px;text-align:left;max-width:300px;margin-left:auto;margin-right:auto;}
+.aitem{
+  font-size:13px;color:var(--muted);padding:7px 0;display:flex;align-items:center;gap:9px;
+  opacity:.35;transition:opacity .3s,color .3s;
+}
+.aitem .tick{width:17px;text-align:center;}
+.aitem.doing{opacity:1;color:var(--text);}
+.aitem.done{opacity:1;color:var(--green);}
+
+/* result */
+#result{display:none;margin-top:26px;}
+.rcard{
+  background:linear-gradient(180deg,rgba(201,162,39,.08),var(--surface));
+  border:1px solid rgba(201,162,39,.5);border-radius:20px;padding:24px;
+}
+.rcard .rhead{display:flex;gap:14px;align-items:center;margin-bottom:14px;}
+.rcard .rhead .emoji{font-size:42px;}
+.rcard .rhead img{width:64px;height:64px;object-fit:cover;border-radius:12px;}
+.rcard .rhead .t b{font-size:17px;display:block;line-height:1.4;}
+.rcard .rhead .t span{font-size:12px;color:var(--muted);}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin:14px 0;}
+.kv .k{color:var(--muted);white-space:nowrap;}
+.kv .v{font-weight:600;}
+.price-box{
+  background:var(--ink);border:1px solid var(--line);border-radius:16px;
+  padding:18px;text-align:center;margin:16px 0 6px;
+}
+.price-box .pl{font-size:11.5px;color:var(--muted);letter-spacing:.12em;margin-bottom:4px;}
+.price-box .pv{font-size:27px;font-weight:800;color:var(--gold-hi);}
+.price-box .pv small{font-size:14px;color:var(--text);font-weight:600;}
+.price-box .pn{font-size:10.5px;color:var(--muted);margin-top:6px;}
+.conf{margin:14px 2px 4px;}
+.conf .cl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.conf .bar{height:7px;background:var(--ink);border-radius:99px;overflow:hidden;}
+.conf .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),var(--teal-hi));width:0;transition:width 1s ease;}
+.comment{
+  font-size:12.5px;color:var(--muted);background:var(--ink);border-radius:12px;
+  padding:12px 14px;margin-top:12px;border-left:3px solid var(--gold);
+}
+
+/* reviews */
+.reviews{margin-top:22px;}
+.rev{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;margin-bottom:10px;
+}
+.rev .stars{color:var(--gold-hi);font-size:12px;letter-spacing:2px;}
+.rev p{font-size:12.5px;margin-top:5px;}
+.rev .who{font-size:11px;color:var(--muted);margin-top:5px;}
+
+/* cta */
+.cta-stack{margin-top:24px;display:flex;flex-direction:column;gap:10px;}
+.big-btn{
+  display:block;text-align:center;border-radius:14px;padding:16px;
+  font-size:15px;font-weight:800;text-decoration:none;cursor:pointer;border:none;font-family:inherit;
+  transition:transform .15s;
+}
+.big-btn:hover{transform:translateY(-2px);}
+.line-btn{background:#06C755;color:#fff;box-shadow:0 6px 20px rgba(6,199,85,.3);}
+.visit-btn{background:transparent;border:1px solid rgba(201,162,39,.55);color:var(--gold-hi);}
+.retry{
+  background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;
+  text-decoration:underline;margin:18px auto 0;display:block;font-family:inherit;
+}
+#err{
+  display:none;background:rgba(226,92,92,.1);border:1px solid rgba(226,92,92,.5);
+  color:var(--danger);border-radius:12px;padding:12px 14px;font-size:12.5px;margin-top:16px;
+}
+.foot-note{text-align:center;font-size:10.5px;color:var(--muted);margin-top:34px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <span class="logo">📸 撮るだけ<span class="g">AI査定</span></span>
+    <span class="badge">DEMO</span>
+    <button class="gear" id="gearBtn" title="実AIモード設定">⚙</button>
+    <a class="back" href="../">← 提案へ</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="settings">
+    <h4>🔑 実AIモード（オプション）</h4>
+    <p>Anthropic APIキーを入れると、アップロードした写真を<b>本物のAI（Claude）</b>が査定します。キーはこの端末のブラウザにのみ保存されます。未設定でもサンプル品のデモは動きます。</p>
+    <input type="password" id="apiKey" placeholder="sk-ant-...">
+    <div class="row">
+      <button class="mini-btn gold" id="saveKey">保存</button>
+      <button class="mini-btn" id="clearKey">削除</button>
+    </div>
+    <div id="aiStatus" class="off">実AIモード: OFF（サンプルのみ）</div>
+  </div>
+
+  <div class="intro">
+    <h1>写真を選ぶだけ。<br><span class="g">10秒</span>で買取目安がわかる。</h1>
+    <p>ブランド名も型番も、入力はいりません。AIが写真から特定します。</p>
+  </div>
+
+  <div class="steps">
+    <span class="s active" id="st1">📷 写真</span>
+    <span class="s" id="st2">🤖 AI解析</span>
+    <span class="s" id="st3">💰 目安提示</span>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="picker">
+    <div class="sec-label">SAMPLE — タップして査定体験</div>
+    <div class="items">
+      <button class="item" data-k="rolex">
+        <div class="ph" style="background:linear-gradient(135deg,#1a2c38,#0f1a22)">⌚</div>
+        <div class="meta"><b>腕時計（黒ベゼル）</b><span>引き出しに眠っていた時計</span></div>
+      </button>
+      <button class="item" data-k="birkin">
+        <div class="ph" style="background:linear-gradient(135deg,#3a2c1a,#221a0f)">👜</div>
+        <div class="meta"><b>レザーバッグ</b><span>母から譲り受けたバッグ</span></div>
+      </button>
+      <button class="item" data-k="wallet">
+        <div class="ph" style="background:linear-gradient(135deg,#2c2338,#170f22)">👛</div>
+        <div class="meta"><b>ブランド財布</b><span>数年使った長財布</span></div>
+      </button>
+      <button class="item" data-k="gold">
+        <div class="ph" style="background:linear-gradient(135deg,#383218,#221d0c)">📿</div>
+        <div class="meta"><b>金のネックレス</b><span>刻印はあるけど詳細不明</span></div>
+      </button>
+      <button class="item" data-k="omega">
+        <div class="ph" style="background:linear-gradient(135deg,#1f2937,#0f1520)">🕰️</div>
+        <div class="meta"><b>クロノグラフ時計</b><span>形見の手巻き時計</span></div>
+      </button>
+      <button class="item upload" id="uploadBtn">
+        <span class="up-ico">📤</span>
+        <b>自分の写真で試す</b>
+        <span id="uploadHint">⚙からAPIキーを設定すると<br>本物のAIが査定します</span>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="analyzing">
+    <div class="scan-box">
+      <div class="scanline"></div>
+      <div class="target" id="scanEmoji">⌚</div>
+      <img class="target-img" id="scanImg" style="display:none" alt="査定対象">
+      <div class="alist">
+        <div class="aitem" id="a1"><span class="tick">○</span>画像を解析しています…</div>
+        <div class="aitem" id="a2"><span class="tick">○</span>ブランド・モデルを特定…</div>
+        <div class="aitem" id="a3"><span class="tick">○</span>外装の状態を評価…</div>
+        <div class="aitem" id="a4"><span class="tick">○</span>最新の買取相場を照会…</div>
+      </div>
+    </div>
+    <div id="err"></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="result">
+    <div class="rcard">
+      <div class="rhead">
+        <span class="emoji" id="rEmoji">⌚</span>
+        <img id="rImg" style="display:none" alt="査定対象">
+        <div class="t">
+          <b id="rName">—</b>
+          <span id="rBrand">—</span>
+        </div>
+      </div>
+      <div class="kv">
+        <span class="k">カテゴリ</span><span class="v" id="rCat">—</span>
+        <span class="k">型番・Ref</span><span class="v" id="rRef">—</span>
+        <span class="k">状態所見</span><span class="v" id="rCond">—</span>
+      </div>
+      <div class="price-box">
+        <div class="pl">AI買取目安</div>
+        <div class="pv num" id="rPrice">—</div>
+        <div class="pn">※写真からの概算です。正式査定で確定します（付属品・内部状態で変動）</div>
+      </div>
+      <div class="conf">
+        <div class="cl"><span>AI特定の自信度</span><span class="num" id="rConfN">—%</span></div>
+        <div class="bar"><div class="fill" id="rConfBar"></div></div>
+      </div>
+      <div class="comment" id="rComment">—</div>
+    </div>
+
+    <div class="reviews" id="rReviews">
+      <div class="sec-label">⭐ 同じ商品を売った人の声</div>
+    </div>
+
+    <div class="cta-stack">
+      <a class="big-btn line-btn" href="#" onclick="alert('デモのため遷移しません。\\n本番ではLINEの正式査定トークに繋がります。');return false;">LINEで正式査定にすすむ（無料）</a>
+      <a class="big-btn visit-btn" href="#" onclick="alert('デモのため遷移しません。\\n本番では来店予約フォームに繋がります。');return false;">📅 このまま来店予約する</a>
+    </div>
+    <button class="retry" id="retryBtn">← 別の商品で試す</button>
+  </div>
+
+  <p class="foot-note">本デモの査定額・口コミはすべて演出用のダミーです。<br>実AIモードの査定額はAIによる参考値であり、実際の買取価格を保証するものではありません。</p>
+</div>
+
+<script>
+// ===== canned demo data =====
+const SAMPLES = {
+  rolex: {
+    emoji:"⌚", cat:"腕時計", brand:"ROLEX（ロレックス）",
+    name:"サブマリーナー デイト", ref:"126610LN",
+    cond:"風防に傷なし・ブレスに微細な擦れ", min:1650000, max:1920000, conf:96,
+    comment:"人気の現行黒サブです。ギャランティカードと箱があれば上限寄りの査定が見込めます。",
+    reviews:[
+      {s:5, t:"型番なんて知らなかったけど、写真だけで「サブマリーナですね」と即答されてびっくり。提示より高く買い取ってもらえました。", w:"40代男性・来店買取"},
+      {s:5, t:"他店より対応が早くて、目安が先にわかるので安心して来店できました。", w:"30代男性・LINE→来店"}
+    ]
+  },
+  birkin: {
+    emoji:"👜", cat:"バッグ", brand:"HERMÈS（エルメス）",
+    name:"バーキン30 トゴ", ref:"刻印: B刻（2023年製）",
+    cond:"角スレわずか・金具に小傷", min:1980000, max:2450000, conf:93,
+    comment:"トゴ素材の人気カラーです。エルメスは相場変動が大きいので、お早めの正式査定をおすすめします。",
+    reviews:[
+      {s:5, t:"母のバッグで詳細が全くわからなかったのですが、写真から製造年まで当ててくれました。", w:"50代女性・出張買取"},
+      {s:4, t:"目安レンジの上限で成約。説明が丁寧で納得感がありました。", w:"40代女性・来店買取"}
+    ]
+  },
+  wallet: {
+    emoji:"👛", cat:"財布", brand:"LOUIS VUITTON（ルイ・ヴィトン）",
+    name:"ジッピーウォレット モノグラム", ref:"M42616",
+    cond:"内側に使用感・ファスナー良好", min:38000, max:62000, conf:91,
+    comment:"使用感があっても値段がつくのがヴィトンの強みです。お気軽にお持ちください。",
+    reviews:[
+      {s:5, t:"古い財布だしダメ元だったのに、思ったよりずっと高くて驚きました。", w:"20代女性・来店買取"},
+      {s:4, t:"10秒で目安が出るので、売るか迷ってる段階でも気軽に使えます。", w:"30代女性・LINE査定のみ"}
+    ]
+  },
+  gold: {
+    emoji:"📿", cat:"貴金属", brand:"K18（18金）",
+    name:"喜平ネックレス 約20g", ref:"刻印: K18",
+    cond:"刻印確認・小傷あり（地金査定のため影響なし）", min:195000, max:215000, conf:88,
+    comment:"金相場が高騰中です。重量と刻印で確定するため、目安との乖離が最も小さいカテゴリです。",
+    reviews:[
+      {s:5, t:"祖母の形見で価値が全然わからなかったけど、その場でグラム計算を見せてくれて信頼できました。", w:"60代女性・来店買取"},
+      {s:5, t:"金が高いうちに、と思って査定。相場説明が明瞭でした。", w:"50代男性・来店買取"}
+    ]
+  },
+  omega: {
+    emoji:"🕰️", cat:"腕時計", brand:"OMEGA（オメガ）",
+    name:"スピードマスター プロフェッショナル", ref:"311.30.42.30.01.005",
+    cond:"風防に小傷・稼働良好", min:420000, max:560000, conf:94,
+    comment:"ムーンウォッチは安定した人気です。手巻きの調子が良ければ上限寄りが狙えます。",
+    reviews:[
+      {s:5, t:"父の形見。売るか迷っていましたが、先に目安がわかったので心の準備をして相談できました。", w:"40代男性・来店相談"},
+      {s:4, t:"古い時計でも丁寧に見てくれます。オーバーホール歴も評価してくれました。", w:"50代男性・来店買取"}
+    ]
+  }
+};
+
+const GENERIC_REVIEWS = [
+  {s:5, t:"写真を送るだけで商品名まで特定してくれるので、何も調べずに査定に出せました。", w:"30代女性・LINE査定"},
+  {s:5, t:"目安が先にわかるから、来店してからのガッカリがない。この仕組みはすごい。", w:"40代男性・来店買取"}
+];
+
+// ===== state =====
+const $ = id => document.getElementById(id);
+let realMode = false;
+
+function loadKey(){
+  const k = localStorage.getItem('brv_api_key') || '';
+  realMode = !!k;
+  $('apiKey').value = k;
+  const st = $('aiStatus');
+  st.textContent = realMode ? '実AIモード: ON（写真アップで本物のAIが査定）' : '実AIモード: OFF（サンプルのみ）';
+  st.className = realMode ? 'on' : 'off';
+  $('uploadHint').innerHTML = realMode ? '本物のAIが写真を査定します' : '⚙からAPIキーを設定すると<br>本物のAIが査定します';
+}
+$('gearBtn').onclick = () => $('settings').classList.toggle('open');
+$('saveKey').onclick = () => { localStorage.setItem('brv_api_key', $('apiKey').value.trim()); loadKey(); $('settings').classList.remove('open'); };
+$('clearKey').onclick = () => { localStorage.removeItem('brv_api_key'); loadKey(); };
+loadKey();
+
+// ===== flow control =====
+function setStep(n){
+  $('st1').className = 's' + (n===1?' active':'');
+  $('st2').className = 's' + (n===2?' active':'');
+  $('st3').className = 's' + (n===3?' active':'');
+}
+function show(stage){ // 'picker' | 'analyzing' | 'result'
+  $('picker').style.display = stage==='picker' ? 'block' : 'none';
+  $('analyzing').style.display = stage==='analyzing' ? 'block' : 'none';
+  $('result').style.display = stage==='result' ? 'block' : 'none';
+  setStep(stage==='picker'?1:stage==='analyzing'?2:3);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function resetAnalyzeList(){
+  ['a1','a2','a3','a4'].forEach(id=>{
+    const el = $(id); el.className = 'aitem'; el.querySelector('.tick').textContent = '○';
+  });
+  $('err').style.display = 'none';
+}
+function markDoing(id){ const el=$(id); el.className='aitem doing'; el.querySelector('.tick').textContent='◌'; }
+function markDone(id){ const el=$(id); el.className='aitem done'; el.querySelector('.tick').textContent='✓'; }
+
+async function playAnalysis(stepsMs){
+  const ids = ['a1','a2','a3','a4'];
+  for(let i=0;i<ids.length;i++){
+    markDoing(ids[i]);
+    await new Promise(r=>setTimeout(r, stepsMs[i]));
+    markDone(ids[i]);
+  }
+}
+
+function yen(n){ return '¥' + n.toLocaleString('ja-JP'); }
+
+function renderResult(d, imgSrc){
+  if(imgSrc){
+    $('rImg').src = imgSrc; $('rImg').style.display='block'; $('rEmoji').style.display='none';
+  } else {
+    $('rEmoji').textContent = d.emoji || '🛍️'; $('rEmoji').style.display='block'; $('rImg').style.display='none';
+  }
+  $('rName').textContent = d.name || '特定できませんでした';
+  $('rBrand').textContent = d.brand || '';
+  $('rCat').textContent = d.cat || '—';
+  $('rRef').textContent = d.ref || '—';
+  $('rCond').textContent = d.cond || '—';
+  $('rPrice').innerHTML = d.min && d.max
+    ? `${yen(d.min)} <small>〜</small> ${yen(d.max)}`
+    : '正式査定にてご案内';
+  $('rConfN').textContent = (d.conf ?? 0) + '%';
+  $('rComment').textContent = '🧑‍💼 ' + (d.comment || 'スタッフが正式査定で詳細を確認いたします。');
+
+  const rv = $('rReviews');
+  rv.innerHTML = '<div class="sec-label">⭐ 同じ商品を売った人の声</div>';
+  (d.reviews || GENERIC_REVIEWS).forEach(r=>{
+    const div = document.createElement('div');
+    div.className = 'rev';
+    div.innerHTML = `<div class="stars">${'★'.repeat(r.s)}${'☆'.repeat(5-r.s)}</div><p>${r.t}</p><div class="who">${r.w}</div>`;
+    rv.appendChild(div);
+  });
+
+  show('result');
+  requestAnimationFrame(()=>{ setTimeout(()=>{ $('rConfBar').style.width = (d.conf ?? 0) + '%'; }, 150); });
+}
+
+// ===== sample flow =====
+document.querySelectorAll('.item[data-k]').forEach(btn=>{
+  btn.onclick = async ()=>{
+    const d = SAMPLES[btn.dataset.k];
+    resetAnalyzeList();
+    $('scanEmoji').textContent = d.emoji; $('scanEmoji').style.display='block';
+    $('scanImg').style.display='none';
+    show('analyzing');
+    await playAnalysis([900, 1300, 1000, 1100]);
+    await new Promise(r=>setTimeout(r, 400));
+    renderResult(d, null);
+  };
+});
+
+$('retryBtn').onclick = ()=> show('picker');
+
+// ===== real AI flow =====
+$('uploadBtn').onclick = ()=>{
+  if(!realMode){
+    $('settings').classList.add('open');
+    $('apiKey').focus();
+    return;
+  }
+  $('fileInput').click();
+};
+
+$('fileInput').onchange = async (e)=>{
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  const {dataUrl, b64, mediaType} = await resizeImage(file, 1200);
+
+  resetAnalyzeList();
+  $('scanEmoji').style.display='none';
+  $('scanImg').src = dataUrl; $('scanImg').style.display='block';
+  show('analyzing');
+
+  const anim = playAnalysis([1200, 2500, 2500, 2500]);
+  try{
+    const d = await callClaude(b64, mediaType);
+    await anim;
+    renderResult({
+      cat: d.category, brand: d.brand, name: d.model_name, ref: d.reference || '—',
+      cond: d.condition, min: d.est_min, max: d.est_max, conf: d.confidence,
+      comment: d.comment, reviews: GENERIC_REVIEWS
+    }, dataUrl);
+  }catch(err){
+    $('err').textContent = 'AI査定に失敗しました: ' + err.message;
+    $('err').style.display = 'block';
+    setTimeout(()=> show('picker'), 3500);
+  }
+};
+
+function resizeImage(file, maxPx){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL('image/jpeg', 0.85);
+      resolve({dataUrl, b64: dataUrl.split(',')[1], mediaType: 'image/jpeg'});
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function callClaude(b64, mediaType){
+  const key = localStorage.getItem('brv_api_key');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-8',
+      max_tokens: 1500,
+      output_config: {
+        format: {
+          type: 'json_schema',
+          schema: {
+            type: 'object',
+            properties: {
+              category:   {type:'string', description:'時計/バッグ/財布/ジュエリー/貴金属/アパレル/その他'},
+              brand:      {type:'string', description:'ブランド名。不明なら「不明」'},
+              model_name: {type:'string', description:'モデル名・商品名の推定'},
+              reference:  {type:'string', description:'型番・リファレンス。読み取れなければ空文字'},
+              condition:  {type:'string', description:'写真から見える状態の所見(日本語・簡潔に)'},
+              est_min:    {type:'integer', description:'日本の中古市場での買取目安の下限(円)。やや控えめに'},
+              est_max:    {type:'integer', description:'買取目安の上限(円)'},
+              confidence: {type:'integer', description:'商品特定の自信度 0-100'},
+              comment:    {type:'string', description:'買取店の査定士風の丁寧な一言(日本語・60字以内)'}
+            },
+            required: ['category','brand','model_name','reference','condition','est_min','est_max','confidence','comment'],
+            additionalProperties: false
+          }
+        }
+      },
+      messages: [{
+        role: 'user',
+        content: [
+          {type: 'image', source: {type: 'base64', media_type: mediaType, data: b64}},
+          {type: 'text', text: 'あなたはブランド品・貴金属買取店の一次査定AIです。写真の商品を特定し、日本の中古買取市場での買取目安額(円)を推定してください。ブランド品でない場合もカテゴリと状態は答え、目安が出せない場合はest_min/est_maxを0にしてください。'}
+        ]
+      }]
+    })
+  });
+  if(!res.ok){
+    const body = await res.json().catch(()=>({}));
+    throw new Error(body.error?.message || ('HTTP ' + res.status));
+  }
+  const data = await res.json();
+  const text = data.content.find(b => b.type === 'text')?.text || '{}';
+  return JSON.parse(text);
+}
+</script>
+</body>
+</html>
