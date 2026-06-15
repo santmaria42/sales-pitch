@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プレイアブル広告 制作サービス｜営業資料</title>
+<style>
+  :root{
+    --navy:#0f1b34; --navy2:#16264a; --ink:#1c2740; --muted:#5d6880;
+    --green:#16b257; --green2:#3ce67e; --red:#ff4d63; --amber:#f6a821;
+    --line:#e6eaf2; --bg:#f5f7fb; --card:#ffffff; --soft:#eef2f9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif;color:#1c2740;background:var(--bg);line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  h2{font-size:27px;letter-spacing:.02em;margin-bottom:6px}
+  h2 .num{color:var(--green);font-weight:800;margin-right:10px}
+  .sub{color:#69748c;font-size:15px;margin-bottom:24px}
+  section{padding:54px 0;border-bottom:1px solid var(--line)}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--green);background:#e7f8ee;padding:5px 12px;border-radius:99px;margin-bottom:14px}
+
+  /* hero */
+  .hero{background:linear-gradient(160deg,#0f1b34,#16264a 60%,#1d3a5f);color:#fff;padding:64px 0 58px;border:none}
+  .hero h1{font-size:40px;line-height:1.25;letter-spacing:.01em;margin-bottom:16px}
+  .hero h1 b{color:var(--green2)}
+  .hero p{color:#c4d2ec;font-size:17px;max-width:620px}
+  .hero .tags{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+  .hero .tags span{font-size:13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:7px 14px;border-radius:99px}
+  .cta{display:inline-flex;align-items:center;gap:9px;background:linear-gradient(180deg,#43ef86,#16b257);color:#053018;font-weight:800;font-size:16px;padding:15px 26px;border-radius:14px;text-decoration:none;margin-top:26px;box-shadow:0 10px 30px rgba(40,220,120,.35)}
+  .cta.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35);box-shadow:none;margin-left:10px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .card h3{font-size:17px;margin-bottom:8px}
+  .card p{font-size:14px;color:#5d6880}
+
+  .stat{font-size:34px;font-weight:800;color:var(--navy);letter-spacing:.01em}
+  .stat small{font-size:14px;color:#8090a8}
+
+  /* checklist */
+  .check li{list-style:none;padding:11px 0 11px 34px;position:relative;border-bottom:1px dashed var(--line);font-size:15px}
+  .check li:before{position:absolute;left:0;top:9px;width:22px;height:22px;border-radius:6px;text-align:center;line-height:22px;font-size:13px;font-weight:800}
+  .check li.done:before{content:"✓";background:#e7f8ee;color:var(--green)}
+  .check li.todo:before{content:"";background:#fff;border:2px solid #d3dae8}
+  .check li .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:8px;vertical-align:middle}
+  .tag.eng{background:#e8eefc;color:#2d5bd0}
+  .tag.art{background:#fdeede;color:#c47a12}
+  .tag.qa{background:#f0e9fb;color:#7b46c6}
+
+  /* roadmap */
+  .road{display:flex;flex-direction:column;gap:0}
+  .step{display:grid;grid-template-columns:46px 1fr 120px;gap:16px;align-items:start;padding:18px 0;border-bottom:1px solid var(--line);position:relative}
+  .dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px}
+  .step .when{text-align:right;font-size:13px;color:#69748c;font-weight:600;padding-top:6px}
+  .step h4{font-size:16px;margin-bottom:3px}
+  .step p{font-size:13.5px;color:#5d6880}
+  .step .pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:#eef2f9;color:#5d6880;margin-left:6px}
+
+  /* cost table */
+  table{width:100%;border-collapse:collapse;font-size:14.5px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  th,td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--navy);color:#fff;font-size:13px;letter-spacing:.04em;font-weight:600}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  tr.total td{background:#eef9f1;font-weight:800;color:var(--navy);border-top:2px solid var(--green)}
+  .bar{height:13px;border-radius:99px;background:var(--soft);overflow:hidden;margin-top:6px}
+  .bar>span{display:block;height:100%;border-radius:99px}
+
+  /* genre */
+  .genre{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .gitem{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px 17px;display:flex;gap:13px;align-items:flex-start}
+  .gitem .ico{font-size:26px;line-height:1}
+  .gitem h4{font-size:15px;margin-bottom:2px}
+  .gitem p{font-size:12.5px;color:#5d6880}
+  .lvl{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+  .lvl.lo{background:#e7f8ee;color:var(--green)}
+  .lvl.mid{background:#fdf3e0;color:#c47a12}
+  .lvl.hi{background:#fde9ec;color:var(--red)}
+  .fit{color:#2d5bd0;font-weight:700}
+
+  .price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .plan{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;text-align:center}
+  .plan.feat{border:2px solid var(--green);box-shadow:0 14px 40px rgba(22,178,87,.14);position:relative}
+  .plan.feat:before{content:"おすすめ";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px}
+  .plan h3{font-size:16px;color:#69748c}
+  .plan .big{font-size:30px;font-weight:800;color:var(--navy);margin:8px 0}
+  .plan .big small{font-size:14px;color:#8090a8;font-weight:600}
+  .plan ul{list-style:none;text-align:left;margin-top:14px;font-size:13.5px}
+  .plan ul li{padding:6px 0 6px 22px;position:relative;color:#445}
+  .plan ul li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800}
+
+  .note{background:#fff8ec;border:1px solid #f6e2bd;border-radius:12px;padding:14px 18px;font-size:13.5px;color:#7a5a16;margin-top:18px}
+  .foot{background:var(--navy);color:#aebfe0;text-align:center;padding:40px 22px;font-size:13px}
+  .foot a{color:var(--green2);text-decoration:none}
+  @media(max-width:720px){
+    .grid2,.grid3,.genre,.price{grid-template-columns:1fr}
+    .hero h1{font-size:30px}.step{grid-template-columns:40px 1fr}.step .when{display:none}
+    .cta.ghost{margin-left:0;margin-top:10px;display:flex;justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow" style="background:rgba(60,230,126,.16);color:#9dffc4">PLAYABLE AD — 制作サービス提案</div>
+    <h1>“ちょっと遊べる広告”を、<b>内製で量産</b>する。</h1>
+    <p>インストール率が動画広告の数倍といわれるプレイアブル広告を、AI開発で短納期・高利益に。まずは実際に動くサンプルをスマホでご覧ください。</p>
+    <div class="tags"><span>🎮 実デモあり</span><span>📦 全主要ネットワーク対応想定</span><span>⚡ AI開発で工数1/3</span><span>💰 1本30万円〜</span></div>
+    <div>
+      <a class="cta" href="./">▶ 実デモを遊ぶ（ラストウォー風）</a>
+      <a class="cta ghost" href="#road">制作フェーズを見る</a>
+    </div>
+  </div>
+</header>
+
+<!-- 1. WHY -->
+<section><div class="wrap">
+  <span class="eyebrow">なぜ今プレイアブルか</span>
+  <h2><span class="num">01</span>単価が高く、効果も高い広告フォーマット</h2>
+  <p class="sub">「触れる」ことで購入意欲の高いユーザーを事前にふるいにかけられるため、広告主の費用対効果が高い。だから制作単価も高く取れる。</p>
+  <div class="grid3">
+    <div class="card"><div class="stat">2〜7<small>倍</small></div><p>静止画・動画広告に対するインストール率（CVR）の一般的な引き上げ目安。</p></div>
+    <div class="card"><div class="stat">¥22万〜75万<small>/本</small></div><p>専業スタジオの制作単価レンジ（$1.5k〜5k）。1本30万は中堅どころ。</p></div>
+    <div class="card"><div class="stat">50〜70<small>%</small></div><p>AI開発でエンジニア工数を圧縮した場合に狙える粗利率。</p></div>
+  </div>
+</div></section>
+
+<!-- 2. CURRENT STATE / GAP -->
+<section><div class="wrap">
+  <span class="eyebrow">現在地</span>
+  <h2><span class="num">02</span>プロトタイプは完成。本番配信まで“あと何が必要か”</h2>
+  <p class="sub">左＝今回のサンプルで実証済み／右＝ネット実配信までに必要な残作業。<b>担当を 🟦エンジニア / 🟧アート / 🟪QA で色分け。</b></p>
+  <div class="grid2">
+    <div class="card" style="background:#f3faf5;border-color:#cdeed8">
+      <h3 style="color:var(--green)">✅ 実証済み（このデモ）</h3>
+      <ul class="check">
+        <li class="done">コアメカニクス（ゲート増殖 → ホード戦 → 勝敗）</li>
+        <li class="done">MRAID クリックスルー（ストア遷移）</li>
+        <li class="done">エンドカード／CTA・アプリ訴求</li>
+        <li class="done">効果音・パーティクル・画面演出</li>
+        <li class="done">1ファイル完結・約20KBの軽量設計</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🔧 本番配信までの残作業</h3>
+      <ul class="check">
+        <li class="todo">本番アートへ差し替え（ブランド準拠）<span class="tag art">アート</span></li>
+        <li class="todo">各広告ネットワーク別パッケージング<span class="tag eng">エンジ</span></li>
+        <li class="todo">実アートで2〜5MB以内に収める画像圧縮<span class="tag eng">エンジ</span></li>
+        <li class="todo">縦／横／正方のアスペクト比対応<span class="tag eng">エンジ</span></li>
+        <li class="todo">実機マトリクスQA（iOS/Android WebView）<span class="tag qa">QA</span></li>
+        <li class="todo">各社プレビュー／審査バリデータ通過<span class="tag qa">QA</span></li>
+        <li class="todo">計測タグ・エンゲージイベント埋め込み<span class="tag eng">エンジ</span></li>
+        <li class="todo">A/B用バリアント作成<span class="tag art">アート</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">⚠️ <b>各ネットワークでAPIが微妙に違う</b>のがミソ。Google/Unity/AppLovin/ironSourceは単一HTML・容量〜5MB、Metaは <code>FbPlayableAd.onCTAClick()</code>・〜2MB、TikTokはZIP梱包＋設定ファイル…と仕様差分があるため「1回作って各社向けに梱包し直す」工程が必ず発生します。</div>
+</div></section>
+
+<!-- 3. ROADMAP -->
+<section id="road"><div class="wrap">
+  <span class="eyebrow">制作フェーズ</span>
+  <h2><span class="num">03</span>0→本番までのロードマップ</h2>
+  <p class="sub">素材支給ありの標準ケースで <b>2〜4週間／本</b>。最大のボトルネックは Phase 2（素材）。</p>
+  <div class="road">
+    <div class="step"><div class="dot" style="background:var(--green)">0</div>
+      <div><h4>プロトタイプ ✅<span class="pill">完了</span></h4><p>メカニクスの実証。今回のデモがこれ。</p></div><div class="when">済</div></div>
+    <div class="step"><div class="dot" style="background:#2d5bd0">1</div>
+      <div><h4>企画・設計</h4><p>訴求するゲーム機構・フック・勝敗フローを確定。コンテ作成。</p></div><div class="when">1〜2日</div></div>
+    <div class="step"><div class="dot" style="background:var(--amber)">2</div>
+      <div><h4>素材制作 🏗 最大の山<span class="pill">ボトルネック</span></h4><p>キャラ・背景・UIアート、アニメ、効果音。ブランド準拠で描き起こし。<b>クライアント支給なら大幅短縮。</b></p></div><div class="when">3〜7日</div></div>
+    <div class="step"><div class="dot" style="background:#2d5bd0">3</div>
+      <div><h4>エンジニアリング</h4><p>メカ磨き込み・演出・ビルドパイプライン・容量最適化（AIで圧縮）。</p></div><div class="when">2〜3日</div></div>
+    <div class="step"><div class="dot" style="background:#2d5bd0">4</div>
+      <div><h4>ネットワーク梱包</h4><p>MRAID＋各社API対応で5〜6媒体ぶんの配信パッケージを生成。</p></div><div class="when">1〜2日</div></div>
+    <div class="step"><div class="dot" style="background:#7b46c6">5</div>
+      <div><h4>QA・実機／審査テスト</h4><p>端末マトリクス・60fps・ロード時間、各社プレビューで審査通過確認。</p></div><div class="when">2〜3日</div></div>
+    <div class="step"><div class="dot" style="background:var(--navy)">6</div>
+      <div><h4>納品・改善イテレーション</h4><p>修正対応＋CVR最適化のA/B。配信後の数値で回す（運用フェーズ）。</p></div><div class="when">随時</div></div>
+  </div>
+</div></section>
+
+<!-- 4. COST -->
+<section><div class="wrap">
+  <span class="eyebrow">原価と売値</span>
+  <h2><span class="num">04</span>いくらかかって、いくら取れるか</h2>
+  <p class="sub">1本あたりの目安（社内工数を金額換算）。<b>素材をクライアント支給にできるかで原価が大きく変わる。</b></p>
+  <table>
+    <tr><th>工程</th><th style="text-align:right">素材支給あり</th><th style="text-align:right">素材も自社制作</th></tr>
+    <tr><td>企画・設計</td><td class="num">¥20,000〜40,000</td><td class="num">¥20,000〜40,000</td></tr>
+    <tr><td>エンジニアリング（AI活用）</td><td class="num">¥30,000〜60,000</td><td class="num">¥30,000〜60,000</td></tr>
+    <tr><td>素材（アート／音）</td><td class="num">¥0</td><td class="num">¥40,000〜120,000</td></tr>
+    <tr><td>ネットワーク梱包・QA</td><td class="num">¥30,000〜60,000</td><td class="num">¥30,000〜60,000</td></tr>
+    <tr><td>PM・進行管理</td><td class="num">¥15,000〜30,000</td><td class="num">¥15,000〜30,000</td></tr>
+    <tr class="total"><td>原価合計（目安）</td><td class="num">¥95,000〜190,000</td><td class="num">¥135,000〜310,000</td></tr>
+  </table>
+
+  <div class="grid2" style="margin-top:22px">
+    <div class="card">
+      <h3>売値（クライアント請求）</h3>
+      <div class="stat">¥250,000〜400,000<small>/本</small></div>
+      <p>市場相場の中堅ゾーン。1本30万円は十分現実的。</p>
+      <div class="bar"><span style="width:78%;background:linear-gradient(90deg,#43ef86,#16b257)"></span></div>
+    </div>
+    <div class="card" style="background:#f3faf5;border-color:#cdeed8">
+      <h3>粗利（素材支給の場合）</h3>
+      <div class="stat" style="color:var(--green)">約 ¥110,000〜250,000<small>/本</small></div>
+      <p>粗利率 <b>50〜70%</b>。AIでエンジニア工数を削るほど利益が伸びる。</p>
+      <div class="bar"><span style="width:62%;background:linear-gradient(90deg,#3ce67e,#16b257)"></span></div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:18px">
+    <div class="card"><h3 style="font-size:14px;color:#69748c">追加で取れる ①</h3><p><b>A/Bバリアント</b><br>+¥50,000〜100,000／案</p></div>
+    <div class="card"><h3 style="font-size:14px;color:#69748c">追加で取れる ②</h3><p><b>アスペクト比追加</b>（縦/横/正方）<br>+¥30,000〜60,000</p></div>
+    <div class="card"><h3 style="font-size:14px;color:#69748c">追加で取れる ③</h3><p><b>多言語ローカライズ</b><br>+¥20,000〜50,000／言語</p></div>
+  </div>
+  <div class="note">💡 単発より<b>「複数本パック＋運用改善（月額）」</b>で売ると単価も粗利率も安定します。配信後のCVR最適化イテレーションは継続収益化しやすい。</div>
+</div></section>
+
+<!-- 5. GENRES -->
+<section><div class="wrap">
+  <span class="eyebrow">対応ジャンル</span>
+  <h2><span class="num">05</span>どんなプレイアブルが作れるか</h2>
+  <p class="sub">難易度＝制作の重さ（主にアート量）。<span class="fit">青字</span>＝今回のCanvas／AI開発と相性が良いもの。</p>
+  <div class="genre">
+    <div class="gitem"><div class="ico">🏃</div><div><h4>ランナー／ゲート選択 <span class="fit">◎相性◎</span></h4><p>今回のサンプル。Last War / Top War系。<span class="lvl mid">難易度：中</span></p></div></div>
+    <div class="gitem"><div class="ico">🧩</div><div><h4>マージ／合成</h4><p>同じ物を合体して強化。Merge系の鉄板。<span class="lvl mid">難易度：中</span></p></div></div>
+    <div class="gitem"><div class="ico">💎</div><div><h4>Match-3／パズル <span class="fit">◎相性◎</span></h4><p>3つ揃え。Royal Match / Candy系。<span class="lvl mid">難易度：中〜高</span></p></div></div>
+    <div class="gitem"><div class="ico">🏹</div><div><h4>サバイバー／ローグライト</h4><p>Survivor.io / Archero。湧く敵を自動攻撃。<span class="lvl hi">難易度：高</span></p></div></div>
+    <div class="gitem"><div class="ico">🏰</div><div><h4>タワーディフェンス <span class="fit">◎相性◎</span></h4><p>侵攻を防ぐ。配置×ウェーブ。<span class="lvl mid">難易度：中〜高</span></p></div></div>
+    <div class="gitem"><div class="ico">📌</div><div><h4>ピン抜き／お助け</h4><p>Hero Wars系の「ピンを抜いて救出」。<span class="lvl mid">難易度：中</span></p></div></div>
+    <div class="gitem"><div class="ico">🎨</div><div><h4>デコ／メイクオーバー</h4><p>部屋・キャラを着せ替え。アート重め。<span class="lvl hi">難易度：高</span></p></div></div>
+    <div class="gitem"><div class="ico">🧱</div><div><h4>ハイパーカジュアル <span class="fit">◎相性◎</span></h4><p>スタック／スライス／ライン描き。軽量。<span class="lvl lo">難易度：低</span></p></div></div>
+    <div class="gitem"><div class="ico">🔫</div><div><h4>シューター／FPSライト</h4><p>狙って撃つ。当たり判定＋演出勝負。<span class="lvl hi">難易度：中〜高</span></p></div></div>
+    <div class="gitem"><div class="ico">⚔️</div><div><h4>RPG／ボス戦ショーケース</h4><p>スキルを撃ってボス撃破。ガチャ訴求。<span class="lvl hi">難易度：高</span></p></div></div>
+    <div class="gitem"><div class="ico">🃏</div><div><h4>カードバトラー</h4><p>カードを選んで戦う。数値演出主体。<span class="lvl mid">難易度：中</span></p></div></div>
+    <div class="gitem"><div class="ico">🎰</div><div><h4>スロット／カジノ <span class="fit">◎相性◎</span></h4><p>回して当てる。我々の得意領域。<span class="lvl lo">難易度：低〜中</span></p></div></div>
+  </div>
+</div></section>
+
+<!-- 6. PRICING / NEXT -->
+<section style="border-bottom:none"><div class="wrap">
+  <span class="eyebrow">料金プラン例</span>
+  <h2><span class="num">06</span>提案できる売り方</h2>
+  <p class="sub">クライアントの予算・本数に合わせて。</p>
+  <div class="price">
+    <div class="plan">
+      <h3>スポット</h3>
+      <div class="big">¥30万<small>〜/本</small></div>
+      <ul><li>コンセプト1案</li><li>主要1ネットワーク</li><li>縦 or 横 1比率</li><li>修正2回</li></ul>
+    </div>
+    <div class="plan feat">
+      <h3>スタンダード</h3>
+      <div class="big">¥45〜60万<small>/本</small></div>
+      <ul><li>コンセプト1案＋A/B 1本</li><li>主要4〜5ネットワーク梱包</li><li>縦・横 両対応</li><li>計測タグ込み・修正3回</li></ul>
+    </div>
+    <div class="plan">
+      <h3>パック＋運用</h3>
+      <div class="big">月額 / 応相談</div>
+      <ul><li>複数本まとめ制作</li><li>CVR最適化イテレーション</li><li>勝ちパターン横展開</li><li>継続改善レポート</li></ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:30px;background:linear-gradient(160deg,#0f1b34,#1d3a5f);color:#fff;border:none;text-align:center;padding:38px">
+    <h3 style="color:#fff;font-size:22px">まずは、この実デモを相手に触ってもらうのが最速の営業</h3>
+    <p style="color:#c4d2ec;margin:8px 0 20px">「Opus（AI）で作ったプレイアブル広告です」とURLを送るだけ。</p>
+    <a class="cta" href="./" style="background:linear-gradient(180deg,#43ef86,#16b257)">▶ 実デモを開く</a>
+  </div>
+</div></section>
+
+<div class="foot">
+  プレイアブル広告 制作サービス｜社内営業資料（v1）<br>
+  ※金額・期間は標準ケースの想定値です。実案件は要件により変動します。<br>
+  実デモ：<a href="./">santmaria420.github.io/sales-pitch/playable-lastwar/</a>
+</div>
+
+</body>
+</html>
