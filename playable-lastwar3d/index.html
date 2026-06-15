@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>WAR SURVIVAL 3D — Playable</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0b1426;font-family:-apple-system,"Hiragino Sans",sans-serif;touch-action:none}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+  #top{position:absolute;top:0;left:0;right:0;height:74px;background:linear-gradient(180deg,rgba(6,12,24,.7),rgba(6,12,24,0));display:flex;align-items:center;justify-content:space-between;padding:14px 18px}
+  #top .t{color:#fff;font-weight:800;font-size:20px;letter-spacing:.04em;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+  #top .t small{display:block;font-size:11px;font-weight:600;color:#9fbdf0;letter-spacing:.02em}
+  #install{pointer-events:auto;background:linear-gradient(180deg,#3ce67e,#16b257);color:#053018;font-weight:800;font-size:14px;padding:11px 18px;border-radius:13px;box-shadow:0 6px 18px rgba(40,220,120,.4);animation:pulse 1.1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  #count{position:absolute;left:50%;bottom:128px;transform:translateX(-50%);text-align:center;color:#fff;font-weight:800;font-size:46px;text-shadow:0 3px 10px rgba(0,0,0,.7);transition:transform .08s}
+  #count small{display:block;font-size:14px;letter-spacing:.18em;color:#9fd4ff;font-weight:700;margin-top:-6px}
+  #count.bump{transform:translateX(-50%) scale(1.28)}
+  #tut{position:absolute;left:50%;bottom:210px;transform:translateX(-50%);color:#fff;font-weight:700;font-size:22px;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.7);animation:fade 1.3s ease-in-out infinite}
+  #tut .hand{font-size:40px;display:block;margin-top:6px}
+  @keyframes fade{0%,100%{opacity:.55}50%{opacity:1}}
+  .float{position:absolute;font-weight:800;font-size:34px;text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none;animation:rise 1s ease-out forwards}
+  @keyframes rise{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-90px) scale(1.1)}}
+  #warn{position:absolute;left:50%;top:40%;transform:translateX(-50%);color:#ff5d6c;font-weight:900;font-size:40px;letter-spacing:.08em;text-shadow:0 2px 12px rgba(0,0,0,.8);opacity:0;transition:opacity .2s}
+  /* ---------- END ---------- */
+  #end{position:fixed;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,9,18,.84);text-align:center;padding:24px}
+  #end .title{font-size:74px;font-weight:900;letter-spacing:.04em;margin-bottom:6px}
+  #end .sub{color:#fff;font-size:22px;font-weight:700;margin-bottom:18px}
+  #end .emoji{font-size:88px;margin:6px 0 16px}
+  #end .lead{color:#cfe0ff;font-size:17px;margin-bottom:18px}
+  #card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:14px 18px;border-radius:18px;margin-bottom:26px}
+  #card .ic{width:62px;height:62px;border-radius:15px;background:linear-gradient(150deg,#3f7bd8,#c8323c);display:flex;align-items:center;justify-content:center;font-size:34px}
+  #card .meta{text-align:left;color:#fff}
+  #card .meta b{font-size:20px}
+  #card .meta .st{color:#ffd24d;font-size:16px}
+  #card .meta .sm{color:#9fb6df;font-size:13px}
+  #cta{background:linear-gradient(180deg,#43ef86,#16b257);color:#053018;font-weight:900;font-size:26px;padding:20px 52px;border-radius:20px;box-shadow:0 12px 36px rgba(40,220,120,.5);animation:pulse 1s ease-in-out infinite;cursor:pointer}
+  #conf{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="hud">
+  <div id="top">
+    <div class="t">WAR SURVIVAL<small>最後の軍隊を生き残らせろ</small></div>
+    <div id="install">インストール</div>
+  </div>
+  <div id="warn">⚠ 敵襲来</div>
+  <div id="tut">◀ ドラッグで部隊を動かせ ▶<span class="hand">👆</span></div>
+  <div id="count">10<small>UNITS</small></div>
+</div>
+<div id="end">
+  <div id="conf"></div>
+  <div class="title" id="endTitle">勝利！</div>
+  <div class="sub" id="endSub">あなたの軍隊が生き残った</div>
+  <div class="emoji" id="endEmoji">🏆</div>
+  <div class="lead">続きはアプリで本物の戦争を体験</div>
+  <div id="card"><div class="ic">⚔️</div><div class="meta"><b>War Survival</b><div class="st">★★★★★</div><div class="sm">4.8 ・ 無料</div></div></div>
+  <div id="cta">今すぐプレイ ▶</div>
+</div>
+
+<script src="./three.min.js"></script>
+<script>
+/* ===================================================================
+   WAR SURVIVAL 3D — Last War style playable ad (Three.js r128)
+   Self-contained package (three.min.js bundled locally) · MRAID-aware
+   =================================================================== */
+const STORE_URL="https://play.google.com/store/apps/details?id=com.example.app";
+function fireClick(){ try{ if(window.mraid&&mraid.open) mraid.open(STORE_URL); else window.open(STORE_URL,"_blank"); }catch(e){ try{window.open(STORE_URL,"_blank");}catch(_){} } }
+
+/* ---------- renderer / scene ---------- */
+const app=document.getElementById("app");
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+app.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0b1426);
+scene.fog=new THREE.Fog(0x0b1426,34,96);
+
+const camera=new THREE.PerspectiveCamera(56,innerWidth/innerHeight,0.1,300);
+const CAM=new THREE.Vector3(0,7.4,11.5);
+camera.position.copy(CAM);
+camera.lookAt(0,1.1,-12);
+
+scene.add(new THREE.HemisphereLight(0xbfd4ff,0x20304f,1.05));
+const dir=new THREE.DirectionalLight(0xffffff,0.9); dir.position.set(6,16,8); scene.add(dir);
+
+/* ---------- road ---------- */
+function roadTex(){
+  const c=document.createElement("canvas"); c.width=128; c.height=256; const x=c.getContext("2d");
+  x.fillStyle="#16223c"; x.fillRect(0,0,128,256);
+  x.fillStyle="#1b2c4d"; for(let i=0;i<256;i+=64){ x.fillRect(0,i,128,2); }
+  x.strokeStyle="rgba(150,180,255,.35)"; x.lineWidth=4; x.setLineDash([26,22]);
+  x.beginPath(); x.moveTo(64,0); x.lineTo(64,256); x.stroke();
+  x.fillStyle="rgba(120,150,220,.18)"; x.fillRect(8,0,4,256); x.fillRect(116,0,4,256);
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(2,18); return t;
+}
+const RW=9; // half-road usable ~ -4..4
+const roadMap=roadTex();
+const road=new THREE.Mesh(new THREE.PlaneGeometry(RW*2,400),new THREE.MeshStandardMaterial({map:roadMap,roughness:1}));
+road.rotation.x=-Math.PI/2; road.position.z=-150; scene.add(road);
+// dark flanks for depth
+const flankMat=new THREE.MeshStandardMaterial({color:0x0a1324,roughness:1});
+for(const s of [-1,1]){ const f=new THREE.Mesh(new THREE.PlaneGeometry(40,400),flankMat); f.rotation.x=-Math.PI/2; f.position.set(s*(RW+20),-0.05,-150); scene.add(f); }
+
+/* ---------- instanced soldiers / enemies / bullets ---------- */
+const bodyGeo=new THREE.BoxGeometry(0.52,0.95,0.5);  bodyGeo.translate(0,0.95/2,0);
+const headGeo=new THREE.BoxGeometry(0.34,0.34,0.34); headGeo.translate(0,0.95+0.18,0);
+const MAXP=60, MAXE=260, MAXB=180;
+function inst(geo,color,max,emissive){ const m=new THREE.MeshStandardMaterial({color,roughness:.7,emissive:emissive||0x000000,emissiveIntensity:emissive?0.5:0});
+  const im=new THREE.InstancedMesh(geo,m,max); im.count=0; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(im); return im; }
+const pBody=inst(bodyGeo,0x4f86e0,MAXP), pHead=inst(headGeo,0xd5e6ff,MAXP);
+const eBody=inst(bodyGeo,0xcf3a3f,MAXE), eHead=inst(headGeo,0xff9a9a,MAXE);
+const bulletGeo=new THREE.SphereGeometry(0.12,6,6);
+const bullet=inst(bulletGeo,0xffe27a,MAXB,0xffcc33);
+const dummy=new THREE.Object3D();
+function fill(bodyM,headM,list){ const n=Math.min(list.length,bodyM.instanceMatrix.count/16|0||list.length);
+  let i=0; for(;i<list.length && i<bodyM.count+9999;i++){ const p=list[i];
+    dummy.position.set(p.x,p.y,p.z); dummy.rotation.y=p.r||0; dummy.scale.set(p.s||1,p.s||1,p.s||1); dummy.updateMatrix();
+    bodyM.setMatrixAt(i,dummy.matrix); if(headM)headM.setMatrixAt(i,dummy.matrix); }
+  bodyM.count=list.length; bodyM.instanceMatrix.needsUpdate=true;
+  if(headM){ headM.count=list.length; headM.instanceMatrix.needsUpdate=true; }
+}
+
+/* ---------- gates ---------- */
+const gateGroup=[];
+function gateTex(txt,hex){ const c=document.createElement("canvas"); c.width=c.height=256; const x=c.getContext("2d");
+  x.clearRect(0,0,256,256); x.strokeStyle=hex; x.lineWidth=14; x.strokeRect(12,12,232,232);
+  x.shadowColor=hex; x.shadowBlur=24; x.fillStyle="#fff"; x.font="bold 120px sans-serif"; x.textAlign="center"; x.textBaseline="middle";
+  x.fillText(txt,128,140); return new THREE.CanvasTexture(c); }
+function makeGate(z,left,right){
+  const g=new THREE.Group(); g.position.z=z;
+  const cells=[[left,-2.25,0x39e57e,0xff4d63],[right,2.25,0x39e57e,0xff4d63]];
+  for(const [d,cx] of cells){ const ok=d.good; const col=ok?0x39e57e:0xff4d63; const hex=ok?"#39e57e":"#ff4d63";
+    const fill=new THREE.Mesh(new THREE.PlaneGeometry(4.4,3.2),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.22,side:THREE.DoubleSide}));
+    fill.position.set(cx,1.7,0); g.add(fill);
+    const tx=new THREE.Mesh(new THREE.PlaneGeometry(3.0,3.0),new THREE.MeshBasicMaterial({map:gateTex(d.op+d.v,hex),transparent:true,side:THREE.DoubleSide}));
+    tx.position.set(cx,1.7,0.05); g.add(tx);
+    const post=new THREE.Mesh(new THREE.BoxGeometry(.16,3.4,.16),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.6}));
+    post.position.set(cx+(cx<0?-2.2:2.2),1.7,0); g.add(post);
+  }
+  scene.add(g); const obj={g,z,left,right,done:false,type:"gate"}; gateGroup.push(obj); return obj;
+}
+
+/* ---------- game state ---------- */
+let state="TUTORIAL", last=0;
+let squadX=0, targetX=0, count=10;
+const events=[]; let bullets=[]; let shake=0, warnT=0; let started=false;
+const apply=(op,v,c)=>op==="+"?c+v:op==="−"?Math.max(0,c-v):op==="×"?c*v:Math.max(0,c/v);
+const good=g=>g.op==="×"||(g.op==="+"&&g.v>=8);
+function G(op,v){return{op,v,good:good({op,v})};}
+
+// build the track (z increases toward player at WORLD speed)
+function buildTrack(){
+  makeGate(-32,G("×",2),G("+",4));
+  makeGate(-60,G("+",15),G("÷",2));
+  addWave(-88,30);
+  makeGate(-118,G("×",2),G("−",12));
+  addWave(-150,75);
+  makeGate(-182,G("×",2),G("+",10));
+  addWave(-214,260,true);   // FINAL horde — the "crush"
+}
+function addWave(z,n,final){ events.push({type:"wave",z,count:n,max:n,charge:false,final:!!final,contact:false}); }
+
+const WORLD=15;       // base approach speed
+const CHARGE=10;      // extra when charging
+const FIRE=1.15;      // ranged dmg per unit per sec
+const MELEE=0.9;      // player losses on contact
+const REPEL=1.7;      // enemy losses on contact
+
+/* ---------- input ---------- */
+function px(clientX){ return (clientX/innerWidth*2-1); }
+function down(cx){ if(!started){started=true;} if(state==="END"){fireClick();return;} if(state==="TUTORIAL"){state="PLAY"; document.getElementById("tut").style.display="none";} targetX=THREE.MathUtils.clamp(px(cx)*5.2,-3.7,3.7); drag=true; }
+function move(cx){ if(drag) targetX=THREE.MathUtils.clamp(px(cx)*5.2,-3.7,3.7); }
+let drag=false;
+const cvs=renderer.domElement;
+cvs.addEventListener("touchstart",e=>{e.preventDefault();down(e.touches[0].clientX);},{passive:false});
+cvs.addEventListener("touchmove", e=>{e.preventDefault();move(e.touches[0].clientX);},{passive:false});
+cvs.addEventListener("touchend",  ()=>drag=false);
+cvs.addEventListener("mousedown", e=>down(e.clientX));
+cvs.addEventListener("mousemove", e=>move(e.clientX));
+window.addEventListener("mouseup", ()=>drag=false);
+document.getElementById("install").addEventListener("click",fireClick);
+document.getElementById("cta").addEventListener("click",fireClick);
+document.getElementById("end").addEventListener("click",fireClick);
+
+/* ---------- hud helpers ---------- */
+const elCount=document.getElementById("count"), elWarn=document.getElementById("warn");
+function setCount(v){ elCount.firstChild.textContent=Math.round(v); }
+function bump(){ elCount.classList.add("bump"); setTimeout(()=>elCount.classList.remove("bump"),90); }
+function floatTxt(txt,col){ const d=document.createElement("div"); d.className="float"; d.textContent=txt; d.style.color=col;
+  d.style.left="50%"; d.style.bottom="195px"; document.getElementById("hud").appendChild(d); setTimeout(()=>d.remove(),1000); }
+
+/* ---------- bullets ---------- */
+function spawnBullet(fromX,toZ){ if(bullets.length>=MAXB)return; bullets.push({x:fromX+(Math.random()-.5)*2.4,y:0.7,z:0.6,tz:toZ,a:true}); }
+
+/* ---------- main update ---------- */
+const plist=[], elist=[], blist=[];
+function update(dt){
+  squadX+=(targetX-squadX)*Math.min(1,dt*10);
+  roadMap.offset.y-=dt*(state==="PLAY"?0.9:0.25);
+  shake*=Math.pow(.0005,dt); warnT-=dt; elWarn.style.opacity=warnT>0?Math.min(1,warnT*2):0;
+
+  if(state==="PLAY"){
+    // gates
+    for(const o of gateGroup){ o.g.position.z+=WORLD*dt;
+      if(!o.done && o.g.position.z>=0){ o.done=true; const side=squadX<0?o.left:o.right; const before=count;
+        count=Math.max(0,Math.min(999,apply(side.op,side.v,before))); const d=Math.round(count-before);
+        floatTxt((d>=0?"+":"")+d, d>=0?"#6dffa6":"#ff6b7d"); bump(); shake=Math.min(.5,Math.abs(d)*.01+.12);
+      }
+    }
+    // waves
+    for(const e of events){ if(e.type!=="wave"||e.count<=0)continue;
+      let adv=WORLD; if(e.z>-26){ if(!e.charge){e.charge=true; warnT=1.3;} adv+=CHARGE; }
+      e.z+=adv*dt;
+      // ranged fire when in front
+      if(e.z<2 && e.z>-30 && count>0){ const dmg=count*FIRE*dt; e.count=Math.max(0,e.count-dmg);
+        if(Math.random()<count*dt*0.5) spawnBullet(squadX, e.z); }
+      // contact crush
+      if(e.z>=0.1 && e.count>0){ e.contact=true; const pc=count;
+        count=Math.max(0,count-e.count*MELEE*dt); e.count=Math.max(0,e.count-pc*REPEL*dt);
+        shake=.6; e.z=Math.min(e.z,1.4);
+        if(count<=0){ count=0; endGame(false); }
+      }
+    }
+    // cleanup gates passed
+    for(let i=gateGroup.length-1;i>=0;i--){ const o=gateGroup[i]; if(o.g.position.z>8){ scene.remove(o.g); gateGroup.splice(i,1);} }
+    // win check: final wave cleared
+    const fin=events.find(e=>e.final);
+    if(fin && fin.count<=0 && state==="PLAY"){ endGame(true); }
+  }
+
+  /* ----- build instance lists ----- */
+  plist.length=0; const pv=Math.min(Math.round(count),MAXP), cols=8;
+  for(let i=0;i<pv;i++){ const r=(i/cols)|0,c=i%cols;
+    plist.push({x:squadX+(c-(cols-1)/2)*0.62, y:Math.sin(performance.now()*0.006+i)*0.05, z:0.6+r*0.6}); }
+  fill(pBody,pHead,plist);
+
+  elist.length=0;
+  for(const e of events){ if(e.type!=="wave"||e.count<=0)continue; const n=Math.min(Math.round(e.count),MAXE), ec=12;
+    for(let i=0;i<n;i++){ const r=(i/ec)|0,c=i%ec;
+      elist.push({x:(c-(ec-1)/2)*0.6, y:Math.sin(performance.now()*0.008+i)*0.05, z:e.z-r*0.6, r:Math.PI}); } }
+  fill(eBody,eHead,elist.slice(0,MAXE));
+
+  // bullets
+  blist.length=0;
+  for(const b of bullets){ if(!b.a)continue; b.z-= (40)*dt; if(b.z<b.tz){ b.a=false; continue; } blist.push({x:b.x,y:b.y,z:b.z,s:1}); }
+  bullets=bullets.filter(b=>b.a);
+  fill(bullet,null,blist);
+
+  // camera shake
+  camera.position.set(CAM.x+(Math.random()-.5)*shake, CAM.y+(Math.random()-.5)*shake, CAM.z);
+}
+
+/* ---------- end ---------- */
+function endGame(win){ if(state==="END")return; state="END";
+  const t=document.getElementById("endTitle"), s=document.getElementById("endSub"), em=document.getElementById("endEmoji");
+  if(win){ t.textContent="勝利！"; t.style.color="#6dffa6"; t.style.textShadow="0 0 26px rgba(109,255,166,.7)"; s.textContent="あなたの軍隊が生き残った"; em.textContent="🏆"; document.getElementById("cta").textContent="今すぐプレイ ▶"; confetti(); }
+  else { t.textContent="全滅…"; t.style.color="#ff7a86"; s.textContent="部隊が押しつぶされた"; em.textContent="💀"; document.getElementById("cta").textContent="リベンジ ▶"; }
+  document.getElementById("count").style.display="none";
+  document.getElementById("end").style.display="flex";
+}
+function confetti(){ const c=document.getElementById("conf"); for(let i=0;i<60;i++){ const p=document.createElement("div");
+  const col=["#ffd24d","#ff5d8f","#5dd0ff","#6dffa6"][i%4];
+  p.style.cssText=`position:absolute;width:9px;height:14px;background:${col};left:${Math.random()*100}%;top:-20px;opacity:.9;transform:rotate(${Math.random()*360}deg);animation:drop ${1.6+Math.random()*1.6}s linear ${Math.random()*0.8}s forwards`;
+  c.appendChild(p); }
+  if(!document.getElementById("confkf")){ const st=document.createElement("style"); st.id="confkf"; st.textContent="@keyframes drop{to{top:108%;transform:rotate(720deg)}}"; document.head.appendChild(st); }
+}
+
+/* ---------- loop ---------- */
+buildTrack();
+function frame(now){ const dt=Math.min(.05,(now-last)/1000||0); last=now; update(dt); renderer.render(scene,camera); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+
+addEventListener("resize",()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+</script>
+</body>
+</html>
