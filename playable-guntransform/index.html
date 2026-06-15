@@ -141,17 +141,19 @@ function decompose(p){ let r=Math.round(p); const c={mech:0,tank:0,jeep:0,soldie
   c.soldier=Math.min(POOLMAX.soldier,Math.max((c.mech+c.tank+c.jeep)?0:1, r));
   return c; }
 let fleetMinX=-1, fleetMaxX=1, fleetFrontZ=0.4, weaponTier=0, topUnit="soldier";
+let activeUnits=[];   // every visible unit fires from its own position
 function layoutFleet(){ const c=decompose(power);
   topUnit = c.mech?"mech":c.tank?"tank":c.jeep?"jeep":"soldier";
   weaponTier = c.mech?4 : c.tank?3 : c.jeep?2 : (c.soldier>=8?1:0);
   // order: small at front (toward enemy, -z), big at back (toward camera, towering)
   const order=[]; for(let i=0;i<c.soldier;i++)order.push("soldier"); for(let i=0;i<c.jeep;i++)order.push("jeep");
   for(let i=0;i<c.tank;i++)order.push("tank"); for(let i=0;i<c.mech;i++)order.push("mech");
-  const COLS=5, sx=1.18, sz=1.25, used={mech:0,tank:0,jeep:0,soldier:0};
-  let mn=99,mx=-99; const rows=Math.ceil(order.length/COLS);
+  const COLS=7, sx=1.0, sz=1.2, used={mech:0,tank:0,jeep:0,soldier:0};
+  let mn=99,mx=-99; activeUnits.length=0;
   order.forEach((k,idx)=>{ const row=Math.floor(idx/COLS), col=idx%COLS, inRow=Math.min(COLS,order.length-row*COLS);
     const x=heroX+(col-(inRow-1)/2)*sx, z=0.2+row*sz;
     const g=POOL[k][used[k]++]; if(!g)return; g.visible=true; g.position.set(x,0,z); g.rotation.y=Math.sin(performance.now()*0.004+idx)*0.04;
+    activeUnits.push({g,kind:k,x,z});
     mn=Math.min(mn,x); mx=Math.max(mx,x); });
   for(const k in POOL){ for(let i=used[k];i<POOL[k].length;i++) POOL[k][i].visible=false; }
   fleetMinX=mn===99?heroX-0.5:mn; fleetMaxX=mx===-99?heroX+0.5:mx;
@@ -217,7 +219,11 @@ function buildTrack(){
   makeGate(-166,G("×",4),G("−",70));   // 120→480 (巨大ロボ登場+ジープ4)
 }
 /* weapon by topUnit tier 0..4 */
-const RATE=[3,8,12,6,18], SPREAD=[1,2,3,1,7], DMGT=[1,0.8,1.25,7,1.7], AOE=[0,0,0,2.4,0], BSPD=[40,46,46,34,52];
+// per-unit weapons: every unit shoots from its own slot
+const WPN={ soldier:{rate:4,dmg:1.0,tier:0,spread:1,aoe:0,bs:42},
+            jeep:   {rate:5,dmg:9,  tier:2,spread:1,aoe:0,bs:46},
+            tank:   {rate:1.8,dmg:70,tier:3,spread:1,aoe:2.4,bs:34},
+            mech:   {rate:5,dmg:58, tier:4,spread:3,aoe:0,bs:52} };
 
 /* ---------- input ---------- */
 const px=cx=>cx/innerWidth*2-1; const cvs=renderer.domElement;
@@ -262,19 +268,19 @@ function update(dt){
     if(!bossSpawned){
       spawnAcc+=dt; const interval=Math.max(0.42,0.6-gameT*0.013);
       if(spawnAcc>interval){ spawnAcc=0; spawnWave(Math.min(6,2+Math.floor(gameT/5)), -42); }
-      if(gameT>16){ bossSpawned=true; boss={hp:5500,max:5500,z:-34,enter:1}; bossMesh=makeBoss(); banner("⚠ 破壊神 襲来！！！",true); flashScreen("#ff2020"); elVig.style.opacity="1"; setTimeout(()=>elVig.style.opacity="0",900); shake=2.4; }
+      if(gameT>16){ bossSpawned=true; boss={hp:6500,max:6500,z:-34,enter:1}; bossMesh=makeBoss(); banner("⚠ 破壊神 襲来！！！",true); flashScreen("#ff2020"); elVig.style.opacity="1"; setTimeout(()=>elVig.style.opacity="0",900); shake=2.4; }
     } else if(boss && boss.hp>0){ spawnAcc+=dt; if(spawnAcc>1.1){ spawnAcc=0; spawnWave(2,-40); } }
 
     // fire from the fleet front, width = fleet span
-    const rate=RATE[weaponTier], aoe=AOE[weaponTier], bs=BSPD[weaponTier];
-    const spreadN=SPREAD[weaponTier];
-    const dmg=DMGT[weaponTier]*(1+Math.min(power,100)*0.02);
-    fireAcc+=dt;
-    while(fireAcc>1/rate){ fireAcc-=1/rate;
-      for(let s=0;s<spreadN;s++){ const x = heroX+(s-(spreadN-1)/2)*0.6;
-        bullets.push({x,y:0.95,z:0.0,dmg,aoe,bs,tier:weaponTier}); }
-      shake=Math.max(shake, weaponTier>=3?.22:.06);
+    let bigFire=false;
+    for(const u of activeUnits){ const w=WPN[u.kind]; const ud=u.g.userData; ud.ft=(ud.ft||0)+dt;
+      if(ud.ft>1/w.rate){ ud.ft=0;
+        for(let s=0;s<w.spread;s++){ const off=(s-(w.spread-1)/2)*0.5;
+          bullets.push({x:u.x+off, y:0.95, z:u.z-0.4, dmg:w.dmg, aoe:w.aoe, bs:w.bs, tier:w.tier}); }
+        if(w.aoe>0||u.kind==="mech") bigFire=true;
+      }
     }
+    if(bigFire) shake=Math.max(shake,.18);
     for(const b of bullets) b.z-=b.bs*dt;
     for(const b of bullets){ if(b.dead)continue;
       for(const e of enemies){ if(e.hp<=0)continue;
@@ -295,7 +301,7 @@ function update(dt){
 
     if(boss){ if(boss.enter>0){ boss.enter=Math.max(0,boss.enter-dt*1.6); bossMesh.scale.setScalar(1.6*(1-boss.enter)+0.01); }
       if(boss.hp>0){ boss.z+=5.0*dt; bossMesh.position.z=boss.z; bossMesh.rotation.y=Math.sin(performance.now()*0.002)*0.08;
-        if(boss.z>0){ hp-=36*dt; boss.z=0; shake=1; damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
+        if(boss.z>0){ hp-=44*dt; boss.z=0; shake=1; damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
         elBoss.style.display="block"; elBossBar.style.width=Math.max(0,boss.hp/boss.max*100)+"%";
       } else { scene.remove(bossMesh); elBoss.style.display="none"; return endGame(true); }
     }
