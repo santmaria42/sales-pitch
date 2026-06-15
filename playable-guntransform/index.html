@@ -192,8 +192,8 @@ function buildTrack(){
 // good path power: 1→3→6→14→28→48→96 (ピストル→…→ロボ), reaching MECH by ~t12
 
 /* weapon stats per tier */
-const RATE=[3,9,14,4.5,22], DMG=[1,1,1.4,9,3.2], SPREAD=[1,1,2,1,3], AOE=[0,0,0,2.3,0];
-const BSPD=[40,46,46,34,52];
+const RATE=[3,9,14,5,16], DMG=[1,1,1.4,7,1.5], SPREAD=[1,2,3,1,7], AOE=[0,0,0,2.3,0];
+const BSPD=[40,46,46,34,50];
 
 /* ---------- input ---------- */
 const px=cx=>cx/innerWidth*2-1; const cvs=renderer.domElement;
@@ -238,18 +238,18 @@ function update(dt){
 
     // continuous enemy pressure (ramps up); then boss
     if(!bossSpawned){
-      spawnAcc+=dt; const interval=Math.max(0.42,0.95-gameT*0.03);
-      if(spawnAcc>interval){ spawnAcc=0; spawnWave(1+Math.floor(gameT/4), -44); }
-      if(gameT>17){ bossSpawned=true; boss={hp:820,max:820,z:-46}; bossMesh=makeBoss(); banner("⚠ BOSS 出現"); }
-    }
+      spawnAcc+=dt; const interval=Math.max(0.5,0.72-gameT*0.012);
+      if(spawnAcc>interval){ spawnAcc=0; spawnWave(Math.min(5,2+Math.floor(gameT/6)), -42); }
+      if(gameT>16){ bossSpawned=true; boss={hp:2200,max:2200,z:-34}; bossMesh=makeBoss(); bossMesh.position.z=-34; banner("⚠ BOSS 出現"); }
+    } else if(boss && boss.hp>0){ spawnAcc+=dt; if(spawnAcc>1.1){ spawnAcc=0; spawnWave(2,-40); } }
 
     // auto fire
-    const rate=RATE[tier], dmg=DMG[tier]*(1+power*0.05), spread=SPREAD[tier], aoe=AOE[tier], bs=BSPD[tier];
+    const rate=RATE[tier], dmg=DMG[tier]*(1+power*0.02), spread=SPREAD[tier], aoe=AOE[tier], bs=BSPD[tier];
     fireAcc+=dt;
     const muzzles=[hero.localToWorld((FORMS[tier].muzzle||new THREE.Vector3()).clone())];
     if(FORMS[tier].muzzle2){ muzzles.push(hero.localToWorld(FORMS[tier].muzzle2.clone())); muzzles.push(hero.localToWorld(FORMS[tier].muzzle3.clone())); }
     while(fireAcc>1/rate){ fireAcc-=1/rate;
-      for(const mz of muzzles) for(let s=0;s<spread;s++){ const off=(s-(spread-1)/2)*0.5;
+      for(const mz of muzzles) for(let s=0;s<spread;s++){ const off=(s-(spread-1)/2)*0.6;
         bullets.push({x:mz.x+off,y:mz.y,z:mz.z,dmg,aoe,bs,tier}); }
       shake=Math.max(shake, tier>=3?.25:.08);
     }
@@ -270,15 +270,15 @@ function update(dt){
     bullets=bullets.filter(b=>!b.dead && b.z>-52);
 
     // move enemies toward player
-    const espd=7+gameT*0.12;
+    const espd=9+gameT*0.12;
     for(const e of enemies){ if(e.hp<=0)continue; e.z+=espd*dt;
-      if(e.z>0.5){ hp-=4; e.hp=0; shake=Math.max(shake,.5); damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
+      if(e.z>0.5){ hp-=5; e.hp=0; shake=Math.max(shake,.5); damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
     }
     enemies=enemies.filter(e=>e.hp>0);
 
     // boss
-    if(boss){ if(boss.hp>0){ boss.z+=4.5*dt; bossMesh.position.z=boss.z;
-        if(boss.z>1){ hp-=40; boss.z=1; shake=1; damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
+    if(boss){ if(boss.hp>0){ boss.z+=5.0*dt; bossMesh.position.z=boss.z;
+        if(boss.z>0){ hp-=35*dt; boss.z=0; shake=1; damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
         elBoss.style.display="block"; elBossBar.style.width=Math.max(0,boss.hp/boss.max*100)+"%";
       } else { scene.remove(bossMesh); elBoss.style.display="none"; return endGame(true); }
     }
