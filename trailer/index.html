@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Trailer — 送る前に、二人の予告編。</title>
+<style>
+  :root{
+    --bg:#0d0b1a; --card:#171430; --card2:#1f1b3d;
+    --ink:#f3f1ff; --sub:#a39ec9; --line:#2c2752;
+    --me:#7c5cff; --you:#ff5c8a;
+    --accent:#7c5cff; --accent2:#ff5c8a;
+    --ok:#36d399;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:-apple-system,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+    background:radial-gradient(1200px 800px at 50% -10%,#241a4d 0%,#0d0b1a 55%);
+    color:var(--ink); display:flex; align-items:center; justify-content:center;
+    min-height:100dvh; padding:18px;
+  }
+  /* phone frame */
+  .phone{
+    width:390px; max-width:100%; height:auto; aspect-ratio:390/844; max-height:92vh;
+    background:var(--bg); border-radius:44px; position:relative; overflow:hidden;
+    box-shadow:0 40px 120px rgba(80,40,160,.45),0 0 0 10px #060512,0 0 0 11px #2a2350;
+    display:flex; flex-direction:column;
+  }
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#060512;border-radius:0 0 18px 18px;z-index:60;}
+  .screen{flex:1; overflow-y:auto; overflow-x:hidden; position:relative; scrollbar-width:none;}
+  .screen::-webkit-scrollbar{display:none;}
+  .pad{padding:60px 18px 110px;}
+
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.5px;}
+  .brand .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:15px;}
+  .h1{font-size:22px;font-weight:800;margin:14px 0 2px;line-height:1.25;}
+  .lead{color:var(--sub);font-size:13px;line-height:1.6;margin:0;}
+  .muted{color:var(--sub);font-size:12px;}
+
+  /* buttons */
+  .btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-weight:700;border-radius:16px;padding:15px 16px;font-size:15px;width:100%;
+       background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;transition:transform .12s ease,filter .12s;}
+  .btn:active{transform:scale(.97);}
+  .btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line);}
+  .btn.sm{width:auto;padding:11px 16px;font-size:13px;border-radius:13px;}
+
+  /* onboarding chips */
+  .qblock{margin:22px 0;}
+  .qlabel{font-size:13px;color:var(--sub);margin-bottom:9px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;cursor:pointer;transition:.15s;}
+  .chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;font-weight:700;}
+
+  /* candidate cards */
+  .deck{display:flex;flex-direction:column;gap:14px;margin-top:16px;}
+  .person{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;}
+  .pho{height:150px;display:flex;align-items:flex-end;padding:12px;position:relative;}
+  .pho .nm{font-weight:800;font-size:18px;text-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .pinfo{padding:13px 14px 15px;}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px;}
+  .tag{font-size:11px;padding:5px 10px;border-radius:999px;background:var(--card2);color:var(--sub);border:1px solid var(--line);}
+  .bio{font-size:13px;color:var(--sub);line-height:1.55;margin:0 0 4px;}
+
+  /* trailer */
+  .tr-head{padding:54px 18px 14px;background:var(--bg);}
+  .avs{display:flex;align-items:center;justify-content:center;gap:14px;margin:6px 0 2px;}
+  .av{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:20px;font-weight:800;}
+  .vs{color:var(--sub);font-size:12px;font-weight:700;}
+  .chat{padding:6px 18px 20px;display:flex;flex-direction:column;gap:12px;}
+  .row{display:flex;gap:8px;align-items:flex-end;max-width:84%;opacity:0;transform:translateY(8px);}
+  .row.show{opacity:1;transform:none;transition:.35s cubic-bezier(.2,.8,.2,1);}
+  .row.me{align-self:flex-end;flex-direction:row-reverse;}
+  .mini{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;font-size:13px;flex:0 0 auto;}
+  .bub{padding:11px 14px;border-radius:18px;font-size:14px;line-height:1.5;}
+  .me .bub{background:linear-gradient(135deg,#6f4dff,#9b6bff);border-bottom-right-radius:6px;}
+  .you .bub{background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:6px;}
+  .who{font-size:10px;color:var(--sub);margin-bottom:3px;}
+  .typing{display:inline-flex;gap:4px;padding:13px 16px;}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--sub);animation:blink 1.2s infinite;}
+  .typing i:nth-child(2){animation-delay:.2s;}
+  .typing i:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}
+
+  /* spark result */
+  .result{padding:0 18px;opacity:0;transform:translateY(10px);}
+  .result.show{opacity:1;transform:none;transition:.5s;}
+  .meter{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-top:6px;}
+  .score{font-size:34px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;}
+  .bar{height:9px;border-radius:99px;background:var(--card2);overflow:hidden;margin-top:10px;}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s ease .2s;border-radius:99px;}
+  .high{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .hl{display:flex;gap:9px;align-items:center;font-size:13px;color:var(--ink);background:var(--card2);border:1px solid var(--line);padding:9px 12px;border-radius:13px;}
+  .hl b{color:var(--accent2);}
+
+  .openers{margin:20px 18px 0;}
+  .op{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);color:var(--ink);
+      padding:13px 14px;border-radius:15px;margin-bottom:9px;font-size:14px;cursor:pointer;transition:.15s;font-family:inherit;line-height:1.5;}
+  .op:active{transform:scale(.98);}
+  .op:hover{border-color:var(--accent);}
+  .op .lbl{display:block;font-size:10px;color:var(--accent);font-weight:700;margin-bottom:4px;letter-spacing:.4px;}
+
+  /* live chat after send */
+  .live{padding:60px 16px 24px;display:flex;flex-direction:column;gap:10px;}
+  .lbub{max-width:80%;padding:11px 14px;border-radius:18px;font-size:14px;line-height:1.5;opacity:0;transform:translateY(8px);animation:rise .4s forwards;}
+  .lbub.me{align-self:flex-end;background:linear-gradient(135deg,#6f4dff,#9b6bff);border-bottom-right-radius:6px;}
+  .lbub.you{align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:6px;}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  /* bottom dock */
+  .dock{position:absolute;left:0;right:0;bottom:0;padding:14px 18px 26px;background:linear-gradient(0deg,var(--bg) 72%,transparent);z-index:40;}
+  .back{position:absolute;top:52px;left:14px;z-index:50;width:38px;height:38px;border-radius:12px;background:rgba(20,16,45,.7);backdrop-filter:blur(8px);border:1px solid var(--line);color:var(--ink);display:grid;place-items:center;cursor:pointer;font-size:17px;}
+  .center{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--sub);background:var(--card);border:1px solid var(--line);padding:6px 12px;border-radius:999px;}
+  .fade-in{animation:fadeIn .4s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ok);color:#04231a;font-weight:800;font-size:13px;padding:11px 18px;border-radius:14px;opacity:0;transition:.3s;z-index:70;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen" id="screen"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ---------- あなたのAI分身（オンボーディングで決まる） ---------- */
+const me = { tone:"ゆるめ", value:"一緒に笑える人", weekend:"街をぶらぶら" };
+
+/* ---------- 候補データ（各自の予告編つき） ---------- */
+const people = [
+  {
+    id:"miki", name:"みき", age:27, job:"UIデザイナー",
+    grad:"linear-gradient(135deg,#ff8a5c,#ff5c8a)", emo:"🎨",
+    bio:"週末はサウナか映画館にいます。汗かいて整って、レイトショー観るのが至福。",
+    tags:["サウナ","映画","コーヒー"],
+    score:86,
+    highlights:[
+      ["♨️","二人とも<b>サウナで“整う”派</b>"],
+      ["🎬","好きな映画館が<b>同じミニシアター系</b>"],
+      ["😌","会話のテンポが近い（ボケ→拾い が成立）"]
+    ],
+    trailer:[
+      {s:"me", t:"プロフのサウナ、ガチ勢でしょ。水風呂何秒派？"},
+      {s:"you", t:"バレた笑 1分しっかり派です。整い椅子の取り合いだけは負けない"},
+      {s:"me", t:"わかる、あの椅子は戦争。整ったあとレイトショー直行するの最高じゃない？"},
+      {s:"you", t:"それ私の週末そのものなんですけど…！シネクイントとか行きます？"},
+      {s:"me", t:"行く行く。サウナ→映画の黄金ルート、布教したい相手見つけた"},
+      {s:"you", t:"布教される準備できてます🤝"}
+    ],
+    openers:[
+      ["予告編から","水風呂1分派って書いてたけど、整ったあとレイトショー直行する派でもある…？"],
+      ["共通点で","サウナ→映画の黄金ルート、布教したいので付き合ってほしい"],
+      ["軽め","整い椅子の取り合い、僕も負けたことないです"]
+    ]
+  },
+  {
+    id:"haruto", name:"はると", age:29, job:"エンジニア",
+    grad:"linear-gradient(135deg,#36d399,#3aa0ff)", emo:"🏕️",
+    bio:"月一でソロキャンプ。焚き火しながらラーメンの新店リスト更新するのが趣味です。",
+    tags:["キャンプ","ラーメン","ゲーム"],
+    score:79,
+    highlights:[
+      ["🔥","<b>焚き火×無言の時間</b>を二人とも好む"],
+      ["🍜","週末の<b>ラーメン開拓ルート</b>が近い"],
+      ["🎮","在宅の夜の過ごし方が一致"]
+    ],
+    trailer:[
+      {s:"me", t:"ソロキャンの“何もしない時間”って、なんであんなに贅沢なんだろうね"},
+      {s:"you", t:"わかってくれる人だ…焚き火眺めてるだけで2時間溶けます"},
+      {s:"me", t:"溶ける溶ける。で、締めはやっぱりラーメン？それともキャンプ飯派？"},
+      {s:"you", t:"締めはカップ麺すら旨い説。でも下山後の新店開拓も外せない"},
+      {s:"me", t:"その“どっちも正解”な感じ、めっちゃ気が合いそう"}
+    ],
+    openers:[
+      ["予告編から","焚き火で2時間溶けるタイプって書いてあって、完全に同類だと思った"],
+      ["共通点で","下山後のラーメン新店、おすすめ1軒だけ教えてほしい"],
+      ["軽め","“何もしない時間が贅沢”、これに同意できる人やっと見つけた"]
+    ]
+  },
+  {
+    id:"yui", name:"ゆい", age:25, job:"看護師",
+    grad:"linear-gradient(135deg,#a06bff,#ff6bd0)", emo:"🐶",
+    bio:"休みの日はカフェ巡りと犬の散歩。年2で一人旅もします。次は瀬戸内予定。",
+    tags:["旅行","カフェ巡り","犬"],
+    score:83,
+    highlights:[
+      ["✈️","<b>“予定を詰めない旅”</b>の価値観が一致"],
+      ["☕","<b>純喫茶</b>の好みがかなり近い"],
+      ["🐕","休日のテンポ（朝型・散歩）が合う"]
+    ],
+    trailer:[
+      {s:"me", t:"瀬戸内、いいなあ。旅って予定みっちり派？それとも行き当たりばったり？"},
+      {s:"you", t:"完全に後者です。宿だけ決めてあとは犬の散歩みたいにふらふら"},
+      {s:"me", t:"その例え好き笑 僕も“迷子になりに行く”くらいがちょうどいい"},
+      {s:"you", t:"わかる〜！迷い込んだ純喫茶が当たりだと一日勝ちって感じしません？"},
+      {s:"me", t:"一日勝ち、名言。瀬戸内の純喫茶リスト一緒に作りたいレベル"}
+    ],
+    openers:[
+      ["予告編から","旅は“迷子になりに行く”派です。瀬戸内、宿だけ決めて行くタイプでしょ？"],
+      ["共通点で","当たりの純喫茶見つけた日って一日勝ちですよね。最近の優勝店どこでした？"],
+      ["軽め","犬の散歩みたいにふらふら旅する人、すごく気が合いそう"]
+    ]
+  },
+  {
+    id:"ren", name:"れん", age:31, job:"フォトグラファー",
+    grad:"linear-gradient(135deg,#3a3f6b,#7c5cff)", emo:"📷",
+    bio:"街のなんでもない瞬間を撮るのが好き。古いバイクと純喫茶のコーヒーが燃料です。",
+    tags:["写真","バイク","純喫茶"],
+    score:74,
+    highlights:[
+      ["📸","<b>“なんでもない瞬間”を面白がる</b>視点が共通"],
+      ["☕","純喫茶・喫茶店文化への偏愛が一致"],
+      ["🛵","休日に“目的なく出かける”スタイルが近い"]
+    ],
+    trailer:[
+      {s:"me", t:"“なんでもない瞬間”を撮るって、具体的にどういうの撮るんですか？"},
+      {s:"you", t:"信号待ちのおじいちゃんの背中とか。語らないのに語ってる感じが好きで"},
+      {s:"me", t:"うわ、その視点いい。日常を一段スローで見てる人なんだ"},
+      {s:"you", t:"バイクで当てもなく走って、ピンと来た喫茶店で降りる、みたいな休日です"},
+      {s:"me", t:"その“降りる理由が勘”なの最高。撮った写真ちょっと見てみたい"}
+    ],
+    openers:[
+      ["予告編から","“信号待ちのおじいちゃんの背中”の話、刺さりました。最近の一枚見せてほしい"],
+      ["共通点で","当てもなく走ってピンと来た喫茶店で降りる休日、最高だと思う"],
+      ["軽め","日常を一段スローで見てる人って感じがして、話してみたいです"]
+    ]
+  }
+];
+
+/* ---------- ルーター ---------- */
+const screen = document.getElementById('screen');
+let current = null;
+function go(html){ screen.scrollTop=0; screen.innerHTML = html; }
+
+/* ---------- 画面1: オンボーディング ---------- */
+function renderOnboard(){
+  go(`
+    <div class="pad fade-in">
+      <div class="brand"><span class="logo">🎬</span><span>Trailer</span></div>
+      <div class="h1">送る前に、<br>二人の“予告編”を見る。</div>
+      <p class="lead">最初の一通が書けないのは、<b>その人と話したらどうなるか</b>が見えないから。<br>あなたのAIと相手のAIが、先に少しだけ会話します。</p>
+
+      <div class="qblock">
+        <div class="qlabel">あなたの会話のテンション</div>
+        <div class="chips" data-k="tone">
+          ${chip('tone','ゆるめ',true)}${chip('tone','まじめ')}${chip('tone','テンポ早め')}${chip('tone','聞き上手')}
+        </div>
+      </div>
+      <div class="qblock">
+        <div class="qlabel">相手に大事にしてほしいこと</div>
+        <div class="chips" data-k="value">
+          ${chip('value','一緒に笑える人',true)}${chip('value','価値観が合う')}${chip('value','自分の時間も大事')}
+        </div>
+      </div>
+      <div class="qblock">
+        <div class="qlabel">理想の休日</div>
+        <div class="chips" data-k="weekend">
+          ${chip('weekend','街をぶらぶら',true)}${chip('weekend','アウトドア')}${chip('weekend','家でまったり')}${chip('weekend','一人旅')}
+        </div>
+      </div>
+
+      <button class="btn" onclick="renderDeck()">あなたのAIをつくる →</button>
+      <p class="muted" style="text-align:center;margin-top:12px;">3タップで完成。後からいつでも変えられます。</p>
+    </div>
+  `);
+  bindChips();
+}
+function chip(k,label,on){ return `<div class="chip ${on?'on':''}" data-k="${k}" data-v="${label}">${label}</div>`; }
+function bindChips(){
+  screen.querySelectorAll('.chip').forEach(c=>{
+    c.onclick=()=>{
+      const k=c.dataset.k;
+      screen.querySelectorAll(`.chip[data-k="${k}"]`).forEach(x=>x.classList.remove('on'));
+      c.classList.add('on'); me[k]=c.dataset.v;
+    };
+  });
+}
+
+/* ---------- 画面2: 候補デッキ ---------- */
+function renderDeck(){
+  go(`
+    <div class="pad fade-in">
+      <div class="brand"><span class="logo">🎬</span><span>Trailer</span></div>
+      <div class="h1" style="font-size:19px;">気になった人の<br>予告編を見てみよう</div>
+      <p class="lead">メッセージは書かなくてOK。まず ▶ を押すだけ。</p>
+      <div class="deck">
+        ${people.map(p=>`
+          <div class="person">
+            <div class="pho" style="background:${p.grad}">
+              <div style="position:absolute;top:12px;right:14px;font-size:30px;">${p.emo}</div>
+              <div class="nm">${p.name}・${p.age}<span style="font-size:13px;font-weight:600;opacity:.9;"> ${p.job}</span></div>
+            </div>
+            <div class="pinfo">
+              <p class="bio">${p.bio}</p>
+              <div class="tags">${p.tags.map(t=>`<span class="tag"># ${t}</span>`).join('')}</div>
+              <button class="btn" onclick="renderTrailer('${p.id}')">▶ 予告編を見る</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `);
+}
+
+/* ---------- 画面3: 予告編再生 ---------- */
+function renderTrailer(id){
+  const p = people.find(x=>x.id===id); current=p;
+  go(`
+    <div class="back" onclick="renderDeck()">‹</div>
+    <div class="tr-head">
+      <div class="center">
+        <span class="pill">🎬 予告編を生成中…</span>
+      </div>
+      <div class="avs">
+        <div class="av" style="background:linear-gradient(135deg,#6f4dff,#9b6bff)">あ</div>
+        <span class="vs">×</span>
+        <div class="av" style="background:${p.grad}">${p.emo}</div>
+      </div>
+      <div class="center"><div class="muted">あなたのAI（${me.tone}）と ${p.name} のAI</div></div>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="result" id="result"></div>
+    <div class="openers" id="openers" style="display:none;"></div>
+    <div style="height:30px;"></div>
+  `);
+  playTrailer(p);
+}
+
+function playTrailer(p){
+  const chat = document.getElementById('chat');
+  let i=0;
+  function step(){
+    if(i>=p.trailer.length){ showResult(p); return; }
+    const m=p.trailer[i];
+    // typing indicator
+    const typ=document.createElement('div');
+    typ.className='row '+(m.s==='me'?'me':'you')+' show';
+    typ.innerHTML=`<div class="mini" style="background:${m.s==='me'?'linear-gradient(135deg,#6f4dff,#9b6bff)':p.grad}">${m.s==='me'?'あ':p.emo}</div><div class="bub typing"><i></i><i></i><i></i></div>`;
+    chat.appendChild(typ); chat.scrollIntoView(false);
+    screen.scrollTop=screen.scrollHeight;
+    setTimeout(()=>{
+      typ.querySelector('.bub').className='bub';
+      typ.querySelector('.bub').innerHTML=`<div class="who">${m.s==='me'?'あなたのAI':p.name+'のAI'}</div>${m.t}`;
+      screen.scrollTop=screen.scrollHeight;
+      i++; setTimeout(step, 520);
+    }, 760 + Math.min(m.t.length*16,900));
+  }
+  setTimeout(step,500);
+}
+
+function showResult(p){
+  const head=screen.querySelector('.pill'); if(head) head.innerHTML='✅ 予告編 完成';
+  const r=document.getElementById('result');
+  r.innerHTML=`
+    <div class="meter">
+      <div style="display:flex;align-items:flex-end;gap:10px;">
+        <span class="score">${p.score}</span>
+        <span class="muted" style="margin-bottom:5px;">/100 会話の相性</span>
+      </div>
+      <div class="bar"><i id="barfill"></i></div>
+      <div class="high">${p.highlights.map(h=>`<div class="hl"><span style="font-size:16px;">${h[0]}</span><span>${h[1]}</span></div>`).join('')}</div>
+    </div>
+    <p class="muted" style="margin:14px 2px 2px;">この予告編から、刺さりそうな一言を用意しました。</p>
+  `;
+  r.classList.add('show');
+  setTimeout(()=>{ document.getElementById('barfill').style.width=p.score+'%'; },80);
+
+  const op=document.getElementById('openers'); op.style.display='block';
+  op.innerHTML = p.openers.map((o,idx)=>`
+    <button class="op" onclick="sendOpener('${p.id}',${idx})">
+      <span class="lbl">${o[0]}</span>${o[1]}
+    </button>
+  `).join('') + `
+    <button class="op" style="text-align:center;color:var(--sub);" onclick="takeOver('${p.id}')">
+      ＋ 予告編から自分で続きを書く
+    </button>`;
+  setTimeout(()=>{ screen.scrollTop=screen.scrollHeight; },200);
+}
+
+/* ---------- 画面4: 送信 → ライブ会話 ---------- */
+function sendOpener(id,idx){
+  const p=people.find(x=>x.id===id);
+  const text=p.openers[idx][1];
+  toast('送信しました ✓');
+  setTimeout(()=>renderLive(p,text),650);
+}
+function takeOver(id){
+  const p=people.find(x=>x.id===id);
+  // 予告編の自分の最後の発言を下書きとして渡す
+  const draft=p.trailer.filter(m=>m.s==='me').slice(-1)[0].t;
+  toast('下書きを引き継ぎました ✓');
+  setTimeout(()=>renderLive(p,draft),650);
+}
+function renderLive(p,text){
+  go(`
+    <div class="back" onclick="renderTrailer('${p.id}')">‹</div>
+    <div class="tr-head" style="padding-bottom:8px;">
+      <div class="center">
+        <div class="av" style="background:${p.grad};width:40px;height:40px;">${p.emo}</div>
+        <div style="font-weight:800;">${p.name}</div>
+        <span class="pill">予告編から会話スタート</span>
+      </div>
+    </div>
+    <div class="live" id="live"></div>
+  `);
+  const live=document.getElementById('live');
+  add(live,'me',text,0);
+  // mock reply
+  const reply = p.openers ? p.replyMock || `わ、その入り方ずるい笑 ${p.name}です、ちょっと話してみたくなりました☺️` : '';
+  add(live,'you', mockReply(p), 1300);
+}
+function mockReply(p){
+  const r={
+    miki:"えっ完全に見抜かれてる笑　レイトショー直行派です。今度サウナの後どこ行くか相談乗って？",
+    haruto:"同類だ…！焚き火2時間勢、なかなかいないんですよ。今週末も山行く予定です🔥",
+    yui:"宿だけ決める派、当たりです✈️ 一日勝ちの感覚わかってくれて嬉しい〜",
+    ren:"おっ、あの話に反応してくれる人だ。最近の一枚、あとで送りますね📷"
+  };
+  return r[p.id]||"うれしい、話してみたいです☺️";
+}
+function add(box,who,text,delay){
+  const b=document.createElement('div');
+  b.className='lbub '+who; b.textContent=text;
+  b.style.animationDelay=(delay/1000)+'s';
+  box.appendChild(b);
+}
+
+/* ---------- toast ---------- */
+let tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),1400);
+}
+
+renderOnboard();
+</script>
+</body>
+</html>
