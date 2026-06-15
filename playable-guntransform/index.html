@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>GUN EVOLUTION 3D — Playable</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0b1020;font-family:-apple-system,"Hiragino Sans",sans-serif;touch-action:none}
+  #app{position:fixed;inset:0} canvas{display:block}
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5}
+  #top{position:absolute;top:0;left:0;right:0;height:74px;background:linear-gradient(180deg,rgba(6,10,22,.7),rgba(6,10,22,0));display:flex;align-items:center;justify-content:space-between;padding:14px 18px}
+  #top .t{color:#fff;font-weight:800;font-size:20px;letter-spacing:.03em;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+  #top .t small{display:block;font-size:11px;font-weight:600;color:#ffd27a;letter-spacing:.02em}
+  #install{pointer-events:auto;background:linear-gradient(180deg,#ffcf3a,#f59e1b);color:#3a2400;font-weight:800;font-size:14px;padding:11px 18px;border-radius:13px;box-shadow:0 6px 18px rgba(245,158,27,.45);animation:pulse 1.1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  #pwr{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);text-align:center;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,.8);transition:transform .08s}
+  #pwr .n{font-weight:800;font-size:42px}
+  #pwr .n b{color:#ffd24d}
+  #pwr .form{font-size:18px;font-weight:800;color:#ffd24d;letter-spacing:.04em;margin-top:-4px}
+  #pwr.bump{transform:translateX(-50%) scale(1.3)}
+  #hpwrap{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);width:230px;height:16px;border-radius:10px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.25);overflow:hidden}
+  #hp{height:100%;width:100%;background:linear-gradient(90deg,#3cff7a,#16b257);transition:width .12s}
+  #hplabel{position:absolute;left:50%;bottom:72px;transform:translateX(-50%);color:#bfe9cf;font-size:12px;font-weight:700;letter-spacing:.1em}
+  #boss{position:absolute;left:50%;top:104px;transform:translateX(-50%);text-align:center;display:none;width:280px}
+  #boss .nm{color:#ff5d6c;font-weight:900;font-size:24px;text-shadow:0 2px 10px rgba(255,0,0,.5)}
+  #boss .bar{height:14px;border-radius:9px;background:rgba(0,0,0,.5);border:1px solid rgba(255,93,108,.6);overflow:hidden;margin-top:5px}
+  #boss .bar>i{display:block;height:100%;background:linear-gradient(90deg,#ff8a5c,#ff2d45);width:100%}
+  #tut{position:absolute;left:50%;bottom:200px;transform:translateX(-50%);color:#fff;font-weight:700;font-size:22px;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.7);animation:fade 1.3s ease-in-out infinite}
+  #tut .hand{font-size:40px;display:block;margin-top:6px}
+  @keyframes fade{0%,100%{opacity:.55}50%{opacity:1}}
+  #banner{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.6);color:#fff;font-weight:900;font-size:46px;text-shadow:0 0 24px rgba(255,210,77,.9),0 3px 10px rgba(0,0,0,.7);opacity:0;white-space:nowrap}
+  #banner.show{animation:pop 1.1s ease-out}
+  @keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+  .float{position:absolute;font-weight:800;font-size:30px;text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none;animation:rise 1s ease-out forwards}
+  @keyframes rise{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-80px) scale(1.1)}}
+  #flash{position:fixed;inset:0;background:#fff;opacity:0;z-index:7;pointer-events:none}
+  #end{position:fixed;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,8,18,.86);text-align:center;padding:24px}
+  #end .title{font-size:72px;font-weight:900;letter-spacing:.04em;margin-bottom:6px}
+  #end .sub{color:#fff;font-size:22px;font-weight:700;margin-bottom:16px}
+  #end .emoji{font-size:84px;margin:4px 0 14px}
+  #end .lead{color:#ffe7b8;font-size:17px;margin-bottom:18px}
+  #card{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:14px 18px;border-radius:18px;margin-bottom:24px}
+  #card .ic{width:62px;height:62px;border-radius:15px;background:linear-gradient(150deg,#f5a623,#c8323c);display:flex;align-items:center;justify-content:center;font-size:34px}
+  #card .meta{text-align:left;color:#fff}#card .meta b{font-size:20px}#card .meta .st{color:#ffd24d;font-size:16px}#card .meta .sm{color:#d9c39f;font-size:13px}
+  #cta{background:linear-gradient(180deg,#ffcf3a,#f59e1b);color:#3a2400;font-weight:900;font-size:26px;padding:20px 52px;border-radius:20px;box-shadow:0 12px 36px rgba(245,158,27,.5);animation:pulse 1s ease-in-out infinite;cursor:pointer}
+  #conf{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="flash"></div>
+<div id="hud">
+  <div id="top"><div class="t">GUN EVOLUTION<small>進化して生き残れ</small></div><div id="install">インストール</div></div>
+  <div id="boss"><div class="nm">💀 BOSS</div><div class="bar"><i id="bossBar"></i></div></div>
+  <div id="banner"></div>
+  <div id="tut">◀ ドラッグで動いて撃て ▶<span class="hand">👆</span></div>
+  <div id="pwr"><div class="n">🔥<b id="pwrN">1</b></div><div class="form" id="formN">ピストル兵</div></div>
+  <div id="hpwrap"><div id="hp"></div></div>
+  <div id="hplabel">HP</div>
+</div>
+<div id="end">
+  <div id="conf"></div>
+  <div class="title" id="endTitle">勝利！</div>
+  <div class="sub" id="endSub">全ての敵を殲滅した</div>
+  <div class="emoji" id="endEmoji">🏆</div>
+  <div class="lead">続きはアプリで最強兵器を進化させろ</div>
+  <div id="card"><div class="ic">🔫</div><div class="meta"><b>Gun Evolution</b><div class="st">★★★★★</div><div class="sm">4.7 ・ 無料</div></div></div>
+  <div id="cta">今すぐプレイ ▶</div>
+</div>
+
+<script src="./three.min.js"></script>
+<script>
+const STORE_URL="https://play.google.com/store/apps/details?id=com.example.app";
+function fireClick(){ try{ if(window.mraid&&mraid.open) mraid.open(STORE_URL); else window.open(STORE_URL,"_blank"); }catch(e){ try{window.open(STORE_URL,"_blank");}catch(_){} } }
+
+/* ---------- renderer / scene ---------- */
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
+renderer.outputEncoding=THREE.sRGBEncoding; document.getElementById("app").appendChild(renderer.domElement);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0b1020); scene.fog=new THREE.Fog(0x0b1020,32,98);
+const camera=new THREE.PerspectiveCamera(56,innerWidth/innerHeight,0.1,300);
+const CAM=new THREE.Vector3(0,7.2,11.5); camera.position.copy(CAM); camera.lookAt(0,1.0,-12);
+scene.add(new THREE.HemisphereLight(0xdfe6ff,0x202840,1.0));
+const dl=new THREE.DirectionalLight(0xffffff,1.15); dl.position.set(7,18,9); scene.add(dl);
+const rl=new THREE.DirectionalLight(0xffb060,0.5); rl.position.set(-6,5,12); scene.add(rl);
+
+/* ---------- road ---------- */
+function roadTex(){ const c=document.createElement("canvas"); c.width=128;c.height=256; const x=c.getContext("2d");
+  x.fillStyle="#1a1f33"; x.fillRect(0,0,128,256);
+  x.fillStyle="#222a44"; for(let i=0;i<256;i+=64) x.fillRect(0,i,128,3);
+  x.strokeStyle="rgba(255,210,120,.32)"; x.lineWidth=4; x.setLineDash([24,22]); x.beginPath(); x.moveTo(64,0);x.lineTo(64,256);x.stroke();
+  x.fillStyle="rgba(255,200,120,.16)"; x.fillRect(7,0,4,256); x.fillRect(117,0,4,256);
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(2,18); return t; }
+const RW=9, roadMap=roadTex();
+const road=new THREE.Mesh(new THREE.PlaneGeometry(RW*2,400),new THREE.MeshStandardMaterial({map:roadMap,roughness:1}));
+road.rotation.x=-Math.PI/2; road.position.z=-150; scene.add(road);
+const fm=new THREE.MeshStandardMaterial({color:0x0a0f1e,roughness:1});
+for(const s of [-1,1]){ const f=new THREE.Mesh(new THREE.PlaneGeometry(44,400),fm); f.rotation.x=-Math.PI/2; f.position.set(s*(RW+22),-0.05,-150); scene.add(f); }
+
+/* ---------- helpers ---------- */
+const dummy=new THREE.Object3D();
+function box(w,h,d,x,y,z,col,rough,met,emi){ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:col,roughness:rough==null?.7:rough,metalness:met||0,emissive:emi||0,emissiveIntensity:emi?.7:0})); m.position.set(x||0,y||0,z||0); return m; }
+function cyl(r,h,x,y,z,col,rx,met){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,12),new THREE.MeshStandardMaterial({color:col,roughness:.6,metalness:met||0})); m.position.set(x,y,z); if(rx)m.rotation.z=Math.PI/2; return m; }
+
+/* ---------- hero forms (transform tiers) ---------- */
+const hero=new THREE.Group(); hero.position.set(0,0,0.8); scene.add(hero);
+function fSoldier(rifle){ const g=new THREE.Group();
+  g.add(box(0.5,0.5,0.42,0,0.25,0,0x2a3350)); g.add(box(0.56,0.62,0.46,0,0.81,0,0x3f6fc8));
+  g.add(box(0.34,0.32,0.34,0,1.27,0,0xe6c39c)); g.add(box(0.44,0.2,0.48,0,1.48,0,0x2c4a2c));
+  g.add(box(rifle?0.12:0.1,0.12,rifle?0.9:0.5,0.26,0.95,rifle?-0.45:-0.2,0x14161c));
+  g.muzzle=new THREE.Vector3(0.26,0.95,-0.9); return g; }
+function fJeep(){ const g=new THREE.Group();
+  g.add(box(1.5,0.5,2.2,0,0.55,0,0x556b2f,.6)); g.add(box(1.2,0.45,0.9,0,0.95,0.3,0x445525,.6));
+  for(const sx of [-0.75,0.75]) for(const sz of [-0.7,0.7]) g.add(cyl(0.32,0.3,sx,0.32,sz,0x16181d,true));
+  g.add(cyl(0.12,1.3,0,1.2,-0.9,0x2a2a2a,false)); const bar=g.children[g.children.length-1]; bar.rotation.x=Math.PI/2;
+  g.add(box(0.5,0.4,0.5,0,1.25,-0.1,0x3a4a20)); g.muzzle=new THREE.Vector3(0,1.2,-1.6); return g; }
+function fTank(){ const g=new THREE.Group();
+  for(const sx of [-0.85,0.85]) g.add(box(0.6,0.55,3.0,sx,0.45,0,0x14161c,.5));
+  g.add(box(2.0,0.7,2.6,0,0.85,0,0x4b5d2a,.55)); g.add(box(1.4,0.7,1.4,0,1.4,0.1,0x556b2f,.55));
+  const barrel=cyl(0.16,2.2,0,1.55,-1.4,0x222,false); barrel.rotation.x=Math.PI/2; g.add(barrel);
+  g.muzzle=new THREE.Vector3(0,1.55,-2.7); return g; }
+function fMech(){ const g=new THREE.Group();
+  for(const sx of [-0.5,0.5]){ g.add(box(0.55,1.4,0.6,sx,0.7,0,0x2b3550,.5,.4)); }
+  g.add(box(1.7,1.5,1.0,0,2.1,0,0x3a6fc0,.4,.5)); g.add(box(0.9,0.7,0.8,0,3.0,0,0x5a86d8,.4,.5));
+  g.add(box(0.5,0.18,0.5,0,3.05,0.3,0x00e5ff,.3,.2,0x00e5ff));
+  for(const sx of [-1.1,1.1]){ g.add(box(0.5,0.5,1.7,sx,2.2,-0.3,0x222a3a,.4,.6)); g.add(cyl(0.18,0.8,sx,2.2,-1.3,0x111,false).rotateX(Math.PI/2)); }
+  g.muzzle=new THREE.Vector3(0,2.2,-1.5); g.muzzle2=new THREE.Vector3(1.1,2.2,-1.4); g.muzzle3=new THREE.Vector3(-1.1,2.2,-1.4); g.scale.setScalar(0.9); return g; }
+const FORMS=[fSoldier(false),fSoldier(true),fJeep(),fTank(),fMech()];
+const FORM_NAMES=["ピストル兵","マシンガン兵","ジープ","戦車","巨大ロボ"];
+const FORM_EMOJI=["🔫","🔫","🚙","🛡","🤖"];
+for(const f of FORMS){ f.visible=false; hero.add(f); }
+let tier=-1;
+function setTier(tr){ if(tr===tier)return; const up=tr>tier; tier=tr;
+  FORMS.forEach((f,i)=>f.visible=(i===tr));
+  if(up && started){ banner(FORM_EMOJI[tr]+" "+FORM_NAMES[tr]+"に進化！"); flashScreen(); shake=Math.max(shake,.7); hero.scale.setScalar(1.5); transformPop=1; }
+  document.getElementById("formN").textContent=FORM_NAMES[tr];
+}
+let transformPop=0;
+function tierFor(p){ return p<6?0:p<16?1:p<40?2:p<90?3:4; }
+
+/* ---------- enemies (instanced mutants) ---------- */
+function partMesh(geo,color,max,emi){ const m=new THREE.InstancedMesh(geo,new THREE.MeshStandardMaterial({color,roughness:.6,emissive:emi||0,emissiveIntensity:emi?.9:0}),max); m.count=0; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled=false; scene.add(m); return m; }
+function bg(w,h,d,x,y,z){ const g=new THREE.BoxGeometry(w,h,d); g.translate(x||0,y||0,z||0); return g; }
+const ME=90;
+const enemyParts=[ partMesh(bg(0.5,0.5,0.42,0,0.25,0),0x3a1010,ME), partMesh(bg(0.62,0.66,0.5,0,0.83,0),0xc0303a,ME),
+  partMesh(bg(0.38,0.36,0.36,0,1.29,0),0xcdb494,ME), partMesh(bg(0.1,0.09,0.09,0.1,1.33,0.19),0xff2a2a,ME,0xff0000),
+  partMesh(bg(0.1,0.09,0.09,-0.1,1.33,0.19),0xff2a2a,ME,0xff0000), partMesh(bg(0.52,0.16,0.42,0,1.0,0.38),0x7a1c1c,ME) ];
+function fillParts(meshes,list,n){ const k=Math.min(list.length,n);
+  for(let i=0;i<k;i++){ const p=list[i]; dummy.position.set(p.x,p.y||0,p.z); dummy.scale.setScalar(p.s||1); dummy.rotation.y=0; dummy.updateMatrix(); for(const m of meshes) m.setMatrixAt(i,dummy.matrix); }
+  for(const m of meshes){ m.count=k; m.instanceMatrix.needsUpdate=true; } }
+// bullets
+const bRifle=partMesh(new THREE.SphereGeometry(0.13,6,6),0xffe27a,160,0xffcc33);
+const bShell=partMesh(new THREE.SphereGeometry(0.3,8,8),0xff8a30,40,0xff5500);
+const bPlasma=partMesh(new THREE.SphereGeometry(0.18,7,7),0x4ff0ff,160,0x00d0ff);
+// boss
+let boss=null, bossMesh=null;
+function makeBoss(){ const g=new THREE.Group();
+  g.add(box(2.6,2.6,2.2,0,1.4,0,0x6a1414,.5,.2)); g.add(box(1.6,1.2,1.2,0,3.0,0,0x8a1c1c,.5));
+  g.add(box(0.4,0.3,0.3,0.45,3.05,0.5,0xff3030,.3,.1,0xff0000)); g.add(box(0.4,0.3,0.3,-0.45,3.05,0.5,0xff3030,.3,.1,0xff0000));
+  for(const sx of [-1.4,1.4]) g.add(box(0.7,2.0,0.7,sx,1.2,0,0x5a1010,.5));
+  g.position.set(0,0,-46); scene.add(g); return g; }
+
+/* ---------- gates (power) ---------- */
+const gates=[];
+function gateTex(txt,hex){ const c=document.createElement("canvas"); c.width=c.height=256; const x=c.getContext("2d");
+  x.strokeStyle=hex; x.lineWidth=14; x.strokeRect(12,12,232,232); x.shadowColor=hex; x.shadowBlur=26;
+  x.fillStyle="#fff"; x.font="bold 110px sans-serif"; x.textAlign="center"; x.textBaseline="middle"; x.fillText(txt,128,140); return new THREE.CanvasTexture(c); }
+function makeGate(z,left,right){ const g=new THREE.Group(); g.position.z=z;
+  for(const [d,cx] of [[left,-2.25],[right,2.25]]){ const ok=d.good, col=ok?0xffd24d:0xff4d63, hex=ok?"#ffd24d":"#ff4d63";
+    const fill=new THREE.Mesh(new THREE.PlaneGeometry(4.4,3.3),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.2,side:THREE.DoubleSide})); fill.position.set(cx,1.75,0); g.add(fill);
+    const tx=new THREE.Mesh(new THREE.PlaneGeometry(3,3),new THREE.MeshBasicMaterial({map:gateTex(d.op+d.v,hex),transparent:true,side:THREE.DoubleSide})); tx.position.set(cx,1.75,.05); g.add(tx);
+    const post=new THREE.Mesh(new THREE.BoxGeometry(.18,3.5,.18),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.7})); post.position.set(cx+(cx<0?-2.2:2.2),1.75,0); g.add(post);
+  } scene.add(g); const o={g,left,right,done:false}; gates.push(o); return o; }
+
+/* ---------- state ---------- */
+let state="TUTORIAL", last=0, heroX=0, targetX=0, power=1, hp=100, started=false, drag=false;
+let shake=0, fireAcc=0, spawnAcc=0, gameT=0, bossSpawned=false;
+let enemies=[], bullets=[];
+const apply=(op,v,c)=>op==="+"?c+v:op==="−"?Math.max(0,c-v):op==="×"?Math.round(c*v):Math.max(1,Math.round(c/v));
+const good=g=>g.op==="×"||(g.op==="+"&&g.v>=6);
+const G=(op,v)=>({op,v,good:good({op,v})});
+const WORLD=13;
+function buildTrack(){
+  makeGate(-24,G("×",3),G("+",2));
+  makeGate(-46,G("×",2),G("÷",2));
+  makeGate(-70,G("+",8),G("−",3));
+  makeGate(-96,G("×",2),G("÷",2));
+  makeGate(-124,G("+",20),G("÷",2));
+  makeGate(-154,G("×",2),G("−",40));
+}
+// good path power: 1→3→6→14→28→48→96 (ピストル→…→ロボ), reaching MECH by ~t12
+
+/* weapon stats per tier */
+const RATE=[3,9,14,4.5,22], DMG=[1,1,1.4,9,3.2], SPREAD=[1,1,2,1,3], AOE=[0,0,0,2.3,0];
+const BSPD=[40,46,46,34,52];
+
+/* ---------- input ---------- */
+const px=cx=>cx/innerWidth*2-1; const cvs=renderer.domElement;
+function down(cx){ if(state==="END"){fireClick();return;} started=true; if(state==="TUTORIAL"){state="PLAY"; document.getElementById("tut").style.display="none";} targetX=THREE.MathUtils.clamp(px(cx)*4.6,-3.6,3.6); drag=true; }
+function move(cx){ if(drag) targetX=THREE.MathUtils.clamp(px(cx)*4.6,-3.6,3.6); }
+cvs.addEventListener("touchstart",e=>{e.preventDefault();down(e.touches[0].clientX);},{passive:false});
+cvs.addEventListener("touchmove",e=>{e.preventDefault();move(e.touches[0].clientX);},{passive:false});
+cvs.addEventListener("touchend",()=>drag=false);
+cvs.addEventListener("mousedown",e=>down(e.clientX)); cvs.addEventListener("mousemove",e=>move(e.clientX)); addEventListener("mouseup",()=>drag=false);
+document.getElementById("install").onclick=fireClick; document.getElementById("cta").onclick=fireClick; document.getElementById("end").onclick=fireClick;
+
+/* ---------- hud ---------- */
+const elPwr=document.getElementById("pwr"), elPwrN=document.getElementById("pwrN"), elHp=document.getElementById("hp");
+const elBoss=document.getElementById("boss"), elBossBar=document.getElementById("bossBar"), elBanner=document.getElementById("banner");
+function bump(){ elPwr.classList.add("bump"); setTimeout(()=>elPwr.classList.remove("bump"),120); }
+function banner(txt){ elBanner.textContent=txt; elBanner.classList.remove("show"); void elBanner.offsetWidth; elBanner.classList.add("show"); }
+function flashScreen(){ const f=document.getElementById("flash"); f.style.transition="none"; f.style.opacity=".7"; requestAnimationFrame(()=>{ f.style.transition="opacity .4s"; f.style.opacity="0"; }); }
+function floatTxt(txt,col){ const d=document.createElement("div"); d.className="float"; d.textContent=txt; d.style.color=col; d.style.left="50%"; d.style.bottom="190px"; document.getElementById("hud").appendChild(d); setTimeout(()=>d.remove(),1000); }
+
+/* ---------- spawning ---------- */
+function spawnEnemy(x,z,hpv){ enemies.push({x,z,hp:hpv,max:hpv}); }
+function spawnWave(n,z){ for(let i=0;i<n;i++) spawnEnemy(THREE.MathUtils.clamp((Math.random()-.5)*7,-3.6,3.6), z-Math.random()*6, 3); }
+
+/* ---------- update ---------- */
+const elist=[], rl2=[], sl2=[], pl2=[];
+function update(dt){
+  heroX+=(targetX-heroX)*Math.min(1,dt*10); hero.position.x=heroX;
+  roadMap.offset.y-=dt*(state==="PLAY"?0.9:0.25);
+  shake*=Math.pow(.0006,dt);
+  if(transformPop>0){ transformPop=Math.max(0,transformPop-dt*3); hero.scale.setScalar(1+transformPop*0.5); }
+  setTier(tierFor(power));
+
+  if(state==="PLAY"){
+    gameT+=dt;
+    // gates
+    for(const o of gates){ o.g.position.z+=WORLD*dt;
+      if(!o.done && o.g.position.z>=0){ o.done=true; const side=heroX<0?o.left:o.right, before=power;
+        power=Math.max(1,Math.min(999,apply(side.op,side.v,before))); const d=power-before;
+        elPwrN.textContent=power; bump(); floatTxt((d>=0?"🔥+":"")+(d>=0?d:d), d>=0?"#ffd24d":"#ff6b7d"); }
+    }
+    for(let i=gates.length-1;i>=0;i--){ if(gates[i].g.position.z>8){ scene.remove(gates[i].g); gates.splice(i,1);} }
+
+    // continuous enemy pressure (ramps up); then boss
+    if(!bossSpawned){
+      spawnAcc+=dt; const interval=Math.max(0.42,0.95-gameT*0.03);
+      if(spawnAcc>interval){ spawnAcc=0; spawnWave(1+Math.floor(gameT/4), -44); }
+      if(gameT>17){ bossSpawned=true; boss={hp:820,max:820,z:-46}; bossMesh=makeBoss(); banner("⚠ BOSS 出現"); }
+    }
+
+    // auto fire
+    const rate=RATE[tier], dmg=DMG[tier]*(1+power*0.05), spread=SPREAD[tier], aoe=AOE[tier], bs=BSPD[tier];
+    fireAcc+=dt;
+    const muzzles=[hero.localToWorld((FORMS[tier].muzzle||new THREE.Vector3()).clone())];
+    if(FORMS[tier].muzzle2){ muzzles.push(hero.localToWorld(FORMS[tier].muzzle2.clone())); muzzles.push(hero.localToWorld(FORMS[tier].muzzle3.clone())); }
+    while(fireAcc>1/rate){ fireAcc-=1/rate;
+      for(const mz of muzzles) for(let s=0;s<spread;s++){ const off=(s-(spread-1)/2)*0.5;
+        bullets.push({x:mz.x+off,y:mz.y,z:mz.z,dmg,aoe,bs,tier}); }
+      shake=Math.max(shake, tier>=3?.25:.08);
+    }
+
+    // move bullets, collide
+    for(const b of bullets){ b.z-=b.bs*dt; }
+    for(const b of bullets){ if(b.dead)continue;
+      for(const e of enemies){ if(e.hp<=0)continue;
+        if(Math.abs(e.z-b.z)<0.7 && Math.abs(e.x-b.x)<0.7){
+          if(b.aoe>0){ for(const e2 of enemies){ if(e2.hp>0 && Math.abs(e2.x-e.x)<b.aoe && Math.abs(e2.z-e.z)<b.aoe){ e2.hp-=b.dmg; if(e2.hp<=0)kill(e2);} } burst(e.x,e.z,18); shake=Math.max(shake,.4); }
+          else { e.hp-=b.dmg; if(e.hp<=0)kill(e); else burst(e.x,e.z,3); }
+          b.dead=true; break;
+        }
+      }
+      // boss hit
+      if(!b.dead && boss && boss.hp>0 && b.z<boss.z+1.6 && Math.abs(b.x)<1.6){ boss.hp-=b.dmg*(b.aoe>0?2:1); b.dead=true; burst(b.x,boss.z+1.4,4); }
+    }
+    bullets=bullets.filter(b=>!b.dead && b.z>-52);
+
+    // move enemies toward player
+    const espd=7+gameT*0.12;
+    for(const e of enemies){ if(e.hp<=0)continue; e.z+=espd*dt;
+      if(e.z>0.5){ hp-=4; e.hp=0; shake=Math.max(shake,.5); damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
+    }
+    enemies=enemies.filter(e=>e.hp>0);
+
+    // boss
+    if(boss){ if(boss.hp>0){ boss.z+=4.5*dt; bossMesh.position.z=boss.z;
+        if(boss.z>1){ hp-=40; boss.z=1; shake=1; damageFlash(); if(hp<=0){hp=0; return endGame(false);} }
+        elBoss.style.display="block"; elBossBar.style.width=Math.max(0,boss.hp/boss.max*100)+"%";
+      } else { scene.remove(bossMesh); elBoss.style.display="none"; return endGame(true); }
+    }
+  }
+
+  // HUD
+  elHp.style.width=Math.max(0,hp)+"%";
+  elHp.style.background = hp>50?"linear-gradient(90deg,#3cff7a,#16b257)": hp>22?"linear-gradient(90deg,#ffd24d,#f59e1b)":"linear-gradient(90deg,#ff7a5c,#ff2d45)";
+
+  /* render enemies */
+  elist.length=0; for(const e of enemies){ if(e.hp>0) elist.push({x:e.x,y:Math.sin(performance.now()*0.01+e.x)*0.05,z:e.z,s:0.95}); }
+  fillParts(enemyParts,elist,ME);
+  /* render bullets by type */
+  rl2.length=0; sl2.length=0; pl2.length=0;
+  for(const b of bullets){ const o={x:b.x,y:b.y,z:b.z}; if(b.tier===3) sl2.push(o); else if(b.tier===4) pl2.push(o); else rl2.push(o); }
+  fillParts([bRifle],rl2,160); fillParts([bShell],sl2,40); fillParts([bPlasma],pl2,160);
+
+  camera.position.set(CAM.x+(Math.random()-.5)*shake,CAM.y+(Math.random()-.5)*shake,CAM.z);
+}
+function kill(e){ e.hp=0; burst(e.x,e.z,10); }
+let sparks=[];
+function burst(x,z,n){ /* lightweight: reuse rifle mesh sparks via floats omitted; keep shake only */ }
+function damageFlash(){ const f=document.getElementById("flash"); f.style.transition="none"; f.style.background="#ff3030"; f.style.opacity=".35"; requestAnimationFrame(()=>{ f.style.transition="opacity .3s"; f.style.opacity="0"; setTimeout(()=>f.style.background="#fff",300); }); }
+
+/* ---------- end ---------- */
+function endGame(win){ if(state==="END")return; state="END";
+  const t=document.getElementById("endTitle"),s=document.getElementById("endSub"),em=document.getElementById("endEmoji");
+  elBoss.style.display="none"; document.getElementById("pwr").style.display="none"; document.getElementById("hpwrap").style.display="none"; document.getElementById("hplabel").style.display="none";
+  if(win){ t.textContent="勝利！"; t.style.color="#ffd24d"; t.style.textShadow="0 0 26px rgba(255,210,77,.7)"; s.textContent="BOSSを撃破した"; em.textContent="🏆"; document.getElementById("cta").textContent="今すぐプレイ ▶"; confetti(); }
+  else { t.textContent="ゲームオーバー"; t.style.color="#ff7a86"; s.textContent="敵に押し潰された…"; em.textContent="💀"; document.getElementById("cta").textContent="リトライ ▶"; }
+  document.getElementById("end").style.display="flex";
+}
+function confetti(){ const c=document.getElementById("conf"); for(let i=0;i<60;i++){ const p=document.createElement("div"); const col=["#ffd24d","#ff5d8f","#5dd0ff","#6dffa6"][i%4];
+  p.style.cssText=`position:absolute;width:9px;height:14px;background:${col};left:${Math.random()*100}%;top:-20px;opacity:.9;transform:rotate(${Math.random()*360}deg);animation:drop ${1.6+Math.random()*1.6}s linear ${Math.random()*0.8}s forwards`; c.appendChild(p); }
+  if(!document.getElementById("confkf")){ const st=document.createElement("style"); st.id="confkf"; st.textContent="@keyframes drop{to{top:108%;transform:rotate(720deg)}}"; document.head.appendChild(st); } }
+
+/* ---------- loop ---------- */
+buildTrack(); setTier(0);
+function frame(now){ const dt=Math.min(.05,(now-last)/1000||0); last=now; update(dt); renderer.render(scene,camera); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+addEventListener("resize",()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+</script>
+</body>
+</html>
