@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JUNKIE KART — キマってるのは、お前の画面だけ。</title>
+<style>
+  :root{
+    --neon:#ff3ea5; --cyan:#27e1ff; --lime:#b6ff3a; --gold:#ffd34d;
+    --ink:#070411; --panel:rgba(10,6,24,.62);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Segoe UI",system-ui,sans-serif;color:#fff;}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;}
+  #stage{position:relative;width:100%;height:100%;max-width:980px;max-height:100vh;overflow:hidden;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
+    transition:filter .12s linear;}
+  /* color casts */
+  .cast{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity .35s;}
+  #castMeth{background:radial-gradient(120% 90% at 50% 60%,transparent 40%,#ff0033aa 100%);}
+  #castWeed{background:radial-gradient(120% 90% at 50% 55%,#1bff7a22 0%,#0a3d1fcc 100%);mix-blend-mode:multiply;}
+  #castLsd{background:conic-gradient(from 0deg,#ff004c,#ff8a00,#fff700,#27ff7a,#27e1ff,#7a3cff,#ff004c);opacity:0;mix-blend-mode:overlay;}
+  #castAlc{background:radial-gradient(140% 100% at 50% 60%,transparent 30%,#5a2d00cc 100%);mix-blend-mode:multiply;}
+  #castOpi{background:radial-gradient(60% 50% at 50% 55%,transparent 0%,#000000ee 78%);}
+  #vignette{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(130% 100% at 50% 42%,transparent 55%,#000a 100%);}
+
+  /* ===== 正直バー (HONEST TRUTH) ===== */
+  #truth{position:absolute;left:0;right:0;top:0;padding:10px 12px 12px;
+    background:linear-gradient(#000c,#0000);z-index:6;pointer-events:none;}
+  #truthLabel{font-size:10px;letter-spacing:.22em;color:#9fb;opacity:.85;
+    display:flex;justify-content:space-between;font-weight:700;}
+  #truthLabel b{color:var(--cyan);}
+  #track{position:relative;height:14px;margin-top:7px;border-radius:8px;
+    background:#0c1622;border:1px solid #1e3a4a;overflow:hidden;}
+  #trackFill{position:absolute;inset:0 100% 0 0;background:linear-gradient(90deg,#0e3,#27e1ff);opacity:.25;}
+  .marker{position:absolute;top:-4px;width:0;height:22px;transition:left .1s linear;}
+  .marker .dot{position:absolute;left:-9px;top:-3px;width:18px;height:18px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;}
+  #mYou .dot{background:var(--neon);box-shadow:0 0 12px var(--neon);}
+  #mGhost .dot{background:#eaf6ff;color:#123;box-shadow:0 0 10px #fff;}
+  #rankNote{margin-top:6px;font-size:12px;font-weight:800;}
+  #rivalMarks .marker .dot{width:15px;height:15px;font-size:8px;color:#06121a;}
+
+  /* 順位バッジ */
+  #posBadge{position:absolute;left:12px;top:96px;z-index:6;pointer-events:none;
+    display:flex;align-items:baseline;gap:3px;
+    background:rgba(8,5,20,.55);backdrop-filter:blur(6px);border:1px solid #ffffff22;
+    border-radius:14px;padding:6px 14px 8px;transition:transform .12s;}
+  #posBadge.pulse{transform:scale(1.18);}
+  #posNum{font-size:40px;font-weight:900;line-height:.8;font-style:italic;
+    text-shadow:0 0 16px var(--cyan);font-variant-numeric:tabular-nums;}
+  #posOrd{font-size:14px;font-weight:900;margin-left:-1px;}
+  #posDen{font-size:13px;font-weight:800;opacity:.6;}
+  #posLbl{position:absolute;top:-8px;left:14px;font-size:9px;letter-spacing:.25em;
+    color:#bfefff;font-weight:800;background:#1a0730;padding:1px 6px;border-radius:6px;}
+
+  /* ===== 体感スピードメーター (THE LIE) ===== */
+  #speedo{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);
+    text-align:center;z-index:5;pointer-events:none;}
+  #subjKmh{font-size:64px;font-weight:900;line-height:.9;letter-spacing:-2px;
+    text-shadow:0 0 18px var(--cyan),0 0 40px #27e1ff88;font-variant-numeric:tabular-nums;}
+  #subjUnit{font-size:13px;letter-spacing:.4em;color:#bfefff;font-weight:700;}
+  #feel{font-size:12px;font-weight:800;margin-top:4px;height:16px;letter-spacing:.08em;
+    text-shadow:0 0 10px currentColor;}
+  #realKmh{margin-top:2px;font-size:11px;color:#7fd9a0;font-weight:700;opacity:.9;}
+
+  /* ===== drug deck ===== */
+  #deck{position:absolute;left:0;right:0;bottom:0;display:flex;gap:6px;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom));justify-content:center;z-index:7;}
+  .drug{flex:1;max-width:150px;border:none;border-radius:14px;padding:9px 4px 8px;
+    background:var(--panel);backdrop-filter:blur(8px);
+    border:1px solid #ffffff22;color:#fff;font-family:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .08s,box-shadow .15s;}
+  .drug:active{transform:scale(.93);}
+  .drug .em{font-size:24px;line-height:1;}
+  .drug .nm{font-size:11px;font-weight:800;}
+  .drug .key{font-size:9px;opacity:.55;}
+  .drug.lit{box-shadow:0 0 22px var(--c),inset 0 0 0 1px var(--c);}
+  #d1{--c:#ff4d4d}#d2{--c:#5cff8f}#d3{--c:#c46bff}#d4{--c:#ffb04d}#d5{--c:#8fb6ff}
+
+  /* steer pads */
+  .steer{position:absolute;bottom:64px;width:34%;height:46%;z-index:6;opacity:0;}
+  #steerL{left:0}#steerR{right:0}
+
+  /* tolerance / craving */
+  #meters{position:absolute;right:10px;top:74px;width:120px;z-index:6;pointer-events:none;font-size:9px;font-weight:800;letter-spacing:.12em;}
+  .meter{margin-bottom:7px;}
+  .meter .bar{height:7px;border-radius:5px;background:#1a1030;overflow:hidden;margin-top:3px;border:1px solid #ffffff1a;}
+  .meter .bar i{display:block;height:100%;width:0;border-radius:5px;transition:width .2s;}
+  #tolBar i{background:linear-gradient(90deg,#ff8a00,#ff2d6f);}
+  #cravBar i{background:linear-gradient(90deg,#7a3cff,#ff3ea5);}
+  #trustBar i{background:linear-gradient(90deg,#ff2d6f,#ffd34d,#5cff8f);}
+  #flowBar i{background:linear-gradient(90deg,#27e1ff,#7dff9a);}
+  #muteBtn{position:absolute;right:10px;top:38px;z-index:10;width:34px;height:26px;
+    background:rgba(8,5,20,.5);border:1px solid #ffffff22;border-radius:9px;
+    color:#fff;font-size:14px;cursor:pointer;padding:0;line-height:1;}
+
+  /* ===== 着信メール ===== */
+  #mailBanner{position:absolute;left:50%;top:120px;width:min(440px,88%);z-index:9;
+    opacity:0;transform:translateX(-50%) translateY(-18px);pointer-events:none;
+    transition:opacity .25s,transform .25s;}
+  #mailBanner.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+  .mailCard{background:rgba(12,8,24,.92);backdrop-filter:blur(10px);
+    border:1px solid #ffffff2a;border-radius:16px;padding:11px 13px;box-shadow:0 12px 40px #000c;}
+  .mailHead{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;}
+  .mailHead .em{font-size:18px;}
+  .mailHead .new{margin-left:auto;font-size:9px;color:#ff5d6c;font-weight:900;letter-spacing:.1em;}
+  .mailText{margin:9px 2px 3px;font-size:14.5px;line-height:1.55;font-weight:600;color:#eef;
+    transition:filter .25s;}
+  .mailText.blur{filter:blur(5px);opacity:.78;color:#ffb3c8;}
+  .mailNote{font-size:10px;color:#e29bff;height:13px;margin-bottom:6px;font-weight:700;}
+  .mailTimer{height:4px;border-radius:3px;background:#221634;overflow:hidden;margin-bottom:9px;}
+  .mailTimer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff3ea5,#ffd34d);}
+  .mailBtns{display:flex;gap:8px;}
+  .mailBtns button{flex:1;border:none;border-radius:10px;padding:10px;font-family:inherit;
+    font-weight:800;font-size:13px;cursor:pointer;}
+  #mailReply{background:linear-gradient(90deg,#27e1ff,#7dff9a);color:#06121a;}
+  #mailIgnore{background:#2a2238;color:#cbd;}
+  /* result life card */
+  #resLife{background:linear-gradient(135deg,#2a0f12,#140607);border:1px solid #ff6b8a55;}
+  .lostlist{margin-top:8px;font-size:11.5px;line-height:1.75;color:#ffd0da;}
+  .lostlist b{color:#fff;}
+
+  /* overlays: start / result */
+  .screen{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:24px;
+    background:radial-gradient(120% 120% at 50% 30%,#1a0730,#040109 70%);}
+  .hidden{display:none!important;}
+  h1{font-size:clamp(30px,8vw,62px);margin:0;line-height:.95;font-weight:900;font-style:italic;
+    background:linear-gradient(90deg,#27e1ff,#ff3ea5,#ffd34d);-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 40px #ff3ea533;}
+  .tag{margin:14px 0 22px;font-size:clamp(13px,3.6vw,17px);font-weight:800;color:#cfe;letter-spacing:.04em;}
+  .how{font-size:12.5px;line-height:1.85;color:#bcd;max-width:430px;}
+  .how b{color:var(--gold);}
+  .btn{margin-top:26px;border:none;border-radius:40px;padding:15px 40px;font-family:inherit;
+    font-size:17px;font-weight:900;letter-spacing:.05em;color:#06121a;cursor:pointer;
+    background:linear-gradient(90deg,#27e1ff,#b6ff3a);box-shadow:0 0 30px #27e1ff66;}
+  .btn:active{transform:scale(.96);}
+  /* result */
+  #resTitle{font-size:clamp(24px,6vw,40px);font-weight:900;}
+  .resCard{width:100%;max-width:420px;margin:8px 0;padding:16px 18px;border-radius:18px;text-align:left;}
+  #resSubj{background:linear-gradient(135deg,#3a0d4f,#1a0730);border:1px solid #ff3ea566;}
+  #resReal{background:linear-gradient(135deg,#06251f,#03110d);border:1px solid #27e1ff66;}
+  .resCard .cap{font-size:10px;letter-spacing:.25em;font-weight:800;opacity:.8;}
+  .resCard .big{font-size:30px;font-weight:900;margin-top:2px;}
+  .resCard .sub{font-size:12px;opacity:.85;margin-top:4px;line-height:1.6;}
+  #resMsg{margin-top:14px;font-size:15px;font-weight:800;line-height:1.7;max-width:430px;color:#fff;}
+  #resMsg .hi{color:var(--gold);}
+  .small{font-size:11px;opacity:.6;margin-top:10px;}
+  #flash{position:absolute;left:50%;top:34%;transform:translateX(-50%);z-index:8;
+    font-size:20px;font-weight:900;pointer-events:none;opacity:0;text-shadow:0 0 16px currentColor;text-align:center;}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <canvas id="cv"></canvas>
+  <div class="cast" id="castWeed"></div>
+  <div class="cast" id="castAlc"></div>
+  <div class="cast" id="castMeth"></div>
+  <div class="cast" id="castLsd"></div>
+  <div class="cast" id="castOpi"></div>
+  <div id="vignette"></div>
+
+  <!-- 正直バー -->
+  <div id="truth">
+    <div id="truthLabel"><span>実際の順位 <b>／ 嘘をつかない指標</b></span><span id="clock">0.0s</span></div>
+    <div id="track">
+      <div id="trackFill"></div>
+      <div id="rivalMarks"></div>
+      <div class="marker" id="mYou"><div class="dot">君</div></div>
+    </div>
+    <div id="rankNote">　</div>
+  </div>
+
+  <div id="posBadge"><div id="posLbl">順位 POSITION</div><div id="posNum">1</div><div id="posOrd">st</div><div id="posDen">/6</div></div>
+
+  <div id="meters">
+    <div class="meter">耐性 TOLERANCE<div class="bar" id="tolBar"><i></i></div></div>
+    <div class="meter">渇望 CRAVING<div class="bar" id="cravBar"><i></i></div></div>
+    <div class="meter">人間関係 LIFE<div class="bar" id="trustBar"><i></i></div></div>
+    <div class="meter">集中 FLOW（素）<div class="bar" id="flowBar"><i></i></div></div>
+  </div>
+  <button id="muteBtn">🔊</button>
+
+  <!-- 着信メール -->
+  <div id="mailBanner"><div class="mailCard">
+    <div class="mailHead"><span class="em" id="mailEm">📩</span><span class="from" id="mailFrom">　</span><span class="new">● 新着</span></div>
+    <div class="mailText" id="mailText">　</div>
+    <div class="mailNote" id="mailNote"></div>
+    <div class="mailTimer"><i id="mailTimerBar"></i></div>
+    <div class="mailBtns"><button id="mailReply">返信する</button><button id="mailIgnore">無視する</button></div>
+  </div></div>
+
+  <div id="flash"></div>
+
+  <!-- 体感メーター -->
+  <div id="speedo">
+    <div id="subjKmh">0</div>
+    <div id="subjUnit">KM / H（体感）</div>
+    <div id="feel">　</div>
+    <div id="realKmh">実速度 0 km/h</div>
+  </div>
+
+  <div class="steer" id="steerL"></div>
+  <div class="steer" id="steerR"></div>
+
+  <!-- drug deck -->
+  <div id="deck">
+    <button class="drug" id="d1"><span class="em">💉</span><span class="nm">覚醒剤</span><span class="key">1</span></button>
+    <button class="drug" id="d2"><span class="em">🌿</span><span class="nm">大麻</span><span class="key">2</span></button>
+    <button class="drug" id="d3"><span class="em">🌈</span><span class="nm">LSD</span><span class="key">3</span></button>
+    <button class="drug" id="d4"><span class="em">🍺</span><span class="nm">酒</span><span class="key">4</span></button>
+    <button class="drug" id="d5"><span class="em">💊</span><span class="nm">オピオイド</span><span class="key">5</span></button>
+  </div>
+
+  <!-- start -->
+  <div class="screen" id="start">
+    <h1>JUNKIE KART</h1>
+    <div class="tag">キマってるのは、お前の画面だけ。</div>
+    <div class="how">
+      <b>← →</b>（または画面左右タップ）でハンドル。アクセルは自動。<br>
+      <b>1〜5</b>キー／下のボタンで“アイテム”を使える。<br><br>
+      使うと画面は最高に<b>速く・気持ちよく</b>感じる。<br>
+      でも上の<b>正直バー</b>を見ろ。前に進んでるのは…<br>
+      何も使わない<b>「素」のお前（白）</b>だ。<br>
+      レールの外（場外）はキメた時だけ行ける。その先に道は無い。
+    </div>
+    <button class="btn" id="goBtn">スタート</button>
+    <div class="small">※ これは薬物の主観と現実のズレを体験する啓発デモです</div>
+  </div>
+
+  <!-- result -->
+  <div class="screen hidden" id="result">
+    <div id="resTitle">RESULT</div>
+    <div class="resCard" id="resSubj">
+      <div class="cap">🧠 体感リザルト（君の脳内）</div>
+      <div class="big" id="resSubjRank">1位！最高だった</div>
+      <div class="sub" id="resSubjSub"></div>
+    </div>
+    <div class="resCard" id="resReal">
+      <div class="cap">📡 現実リザルト（リプレイ）</div>
+      <div class="big" id="resRealRank"></div>
+      <div class="sub" id="resRealSub"></div>
+    </div>
+    <div class="resCard" id="resLife">
+      <div class="cap">💔 失ったもの（人間関係）</div>
+      <div class="big" id="resLifeHead"></div>
+      <div class="sub" id="resLifeBody"></div>
+    </div>
+    <div id="resMsg"></div>
+    <div class="small" id="bestNote"></div>
+    <button class="btn" id="againBtn">もう一度（素で走る？）</button>
+  </div>
+
+</div></div>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let W=800,H=450;
+function resize(){
+  const r=document.getElementById('stage').getBoundingClientRect();
+  W=Math.max(360,Math.floor(r.width)); H=Math.max(300,Math.floor(r.height));
+  cv.width=W; cv.height=H;
+}
+window.addEventListener('resize',resize); resize();
+
+/* ===== pseudo-3D road ===== */
+const segLen=200, rumbleLen=3, roadW=2000, camH=1500, camDepth=0.84, drawDist=220;
+let segments=[];
+function lastY(){return segments.length===0?0:segments[segments.length-1].p2.world.y;}
+function ease(a,b,p){return a+(b-a)*((-Math.cos(p*Math.PI)/2)+0.5);}
+function addSeg(curve,y){
+  const n=segments.length;
+  segments.push({index:n,
+    p1:{world:{y:lastY(),z:n*segLen},camera:{},screen:{}},
+    p2:{world:{y:y,z:(n+1)*segLen},camera:{},screen:{}},
+    curve:curve, light:Math.floor(n/rumbleLen)%2});
+}
+function addRoad(enter,hold,leave,curve,h){
+  const startY=lastY(), endY=startY+h*segLen;
+  const total=enter+hold+leave;
+  for(let n=0;n<enter;n++) addSeg(ease(0,curve,n/enter), ease(startY,endY,n/total));
+  for(let n=0;n<hold;n++) addSeg(curve, ease(startY,endY,(enter+n)/total));
+  for(let n=0;n<leave;n++) addSeg(ease(curve,0,n/leave), ease(startY,endY,(enter+hold+n)/total));
+}
+function buildTrack(){
+  segments=[];
+  addRoad(40,40,40,0,0);
+  addRoad(40,30,40, 3, 30);
+  addRoad(40,40,40,-4,-20);
+  addRoad(30,20,30, 5, 0);
+  addRoad(40,60,40, 0, 40);
+  addRoad(40,30,40,-5,-25);
+  addRoad(30,20,30, 4, 0);
+  addRoad(40,40,40,-2, 25);
+  addRoad(40,50,40, 0,-15);
+  addRoad(40,30,40, 6, 0);
+  addRoad(40,40,40,-3, 0);
+}
+buildTrack();
+const trackLen=segments.length*segLen;
+function findSeg(z){return segments[Math.floor(z/segLen)%segments.length];}
+function project(p,cx,cy,cz){
+  p.camera.x=(p.world.x||0)-cx;
+  p.camera.y=(p.world.y||0)-cy;
+  p.camera.z=(p.world.z||0)-cz;
+  p.screen.scale=camDepth/p.camera.z;
+  p.screen.x=Math.round((W/2)+(p.screen.scale*p.camera.x*W/2));
+  p.screen.y=Math.round((H/2)-(p.screen.scale*p.camera.y*H/2));
+  p.screen.w=Math.round(p.screen.scale*roadW*W/2);
+}
+function poly(x1,y1,x2,y2,x3,y3,x4,y4,c){
+  ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.lineTo(x3,y3);ctx.lineTo(x4,y4);ctx.closePath();ctx.fill();
+}
+
+/* ===== game state ===== */
+const maxSpeed=4350, accel=2500, TARGET=156000;
+const RIVALS=[
+  {name:'アオイ', ini:'青', color:'#27e1ff', base:3300, laneX:-0.58},
+  {name:'ミドリ', ini:'緑', color:'#5cff8f', base:3150, laneX:0.30},
+  {name:'キン',   ini:'金', color:'#ffd34d', base:3420, laneX:-0.18},
+  {name:'シロ',   ini:'白', color:'#eef7ff', base:3050, laneX:0.58},
+  {name:'アカ',   ini:'赤', color:'#ff6b8a', base:3500, laneX:0.02},
+];
+let S;
+function reset(){
+  S={position:0,playerX:0,speed:0,subj:0,
+     playerDist:0,t:0,
+     effect:null, tol:0, crav:0,
+     fall:0, spin:0, used:false, drugCount:0,
+     playerTime:0, done:false,
+     steer:0, steerBuf:[], shake:0,
+     rank:RIVALS.length+1, prevRank:RIVALS.length+1, rankFlash:0, rankDir:0,
+     trust:100, mail:null, nextMailAt:5, seqIdx:0, lost:[], collapsed:false,
+     flow:0, peakTol:0, fb:0, fbText:'', lastUseT:-99, healT:0, heartT:0,
+     rivals:RIVALS.map((r,i)=>({name:r.name,ini:r.ini,color:r.color,base:r.base,laneX:r.laneX,
+        dist:0,speed:0,fin:0,phase:i*1.7}))};
+}
+reset();
+
+/* ===== audio (Web Audio API, 素材ゼロ) ===== */
+let AC=null, master=null, engOsc=null, engGain=null, engFilt=null, muted=false;
+function audioInit(){
+  if(AC){ if(AC.state==='suspended') AC.resume(); return; }
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain(); master.gain.value=0.5; master.connect(AC.destination);
+    engOsc=AC.createOscillator(); engOsc.type='sawtooth';
+    engFilt=AC.createBiquadFilter(); engFilt.type='lowpass'; engFilt.frequency.value=600;
+    engGain=AC.createGain(); engGain.gain.value=0;
+    engOsc.connect(engFilt); engFilt.connect(engGain); engGain.connect(master);
+    engOsc.frequency.value=60; engOsc.start();
+  }catch(e){ AC=null; }
+}
+function engineUpdate(){
+  if(!AC) return;
+  if(muted || !playing || S.done){ engGain.gain.setTargetAtTime(0,AC.currentTime,0.1); return; }
+  const spd=S.subj/maxSpeed;
+  engOsc.frequency.setTargetAtTime(55+spd*120+(S.effect&&S.effect.type==='meth'?40:0),AC.currentTime,0.08);
+  engFilt.frequency.setTargetAtTime(400+spd*1600,AC.currentTime,0.08);
+  engGain.gain.setTargetAtTime(0.06,AC.currentTime,0.1);
+}
+function tone(freq,dur,type,vol,when){
+  if(!AC||muted) return;
+  const t=when||AC.currentTime;
+  const o=AC.createOscillator(); o.type=type||'sine'; o.frequency.value=freq;
+  const g=AC.createGain(); o.connect(g); g.connect(master);
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol||0.2,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.start(t); o.stop(t+dur+0.03);
+}
+function noise(dur,vol,freq){
+  if(!AC||muted) return;
+  const n=AC.createBufferSource(), buf=AC.createBuffer(1,Math.floor(AC.sampleRate*dur),AC.sampleRate);
+  const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+  n.buffer=buf; const g=AC.createGain(); g.gain.value=vol||0.3;
+  const f=AC.createBiquadFilter(); f.type='bandpass'; f.frequency.value=freq||800;
+  n.connect(f); f.connect(g); g.connect(master); n.start();
+}
+function arp(fs,step,type,vol){ if(!AC||muted)return; fs.forEach((f,i)=>tone(f,0.18,type||'triangle',vol||0.18,AC.currentTime+i*(step||0.06))); }
+function sfxDrug(t){
+  if(t==='meth'){ arp([330,440,660,880],0.05,'sawtooth',0.16); noise(0.25,0.16,1200); }
+  else if(t==='weed'){ tone(120,0.9,'sine',0.18); tone(180,0.9,'sine',0.1); }
+  else if(t==='lsd'){ arp([523,659,784,988,1319],0.07,'triangle',0.12); }
+  else if(t==='alc'){ tone(200,0.5,'sawtooth',0.16); tone(208,0.5,'sawtooth',0.16); }
+  else if(t==='opi'){ tone(140,1.2,'sine',0.16); }
+}
+function sfxMail(){ tone(880,0.1,'square',0.1); tone(1175,0.13,'square',0.1,AC?AC.currentTime+0.12:0); }
+function sfxGood(){ arp([659,880,1319],0.07,'triangle',0.2); }
+function sfxBad(){ tone(160,0.3,'sawtooth',0.22); noise(0.18,0.13,500); }
+function sfxRank(up){ arp(up?[440,660,880]:[660,440,330],0.06,'square',0.15); }
+function sfxCrash(){ noise(0.5,0.4,400); tone(80,0.4,'sawtooth',0.25); }
+function heartbeat(){ tone(48,0.18,'sine',0.3); tone(60,0.14,'sine',0.18,AC?AC.currentTime+0.18:0); }
+
+/* drug defs */
+const DRUGS={
+  meth:{em:'💉',nm:'覚醒剤',dur:6.6, feel:'💥 ラッシュ!!! 脳が灼ける、最高だ', cast:'castMeth', tolAdd:0.16},
+  weed:{em:'🌿',nm:'大麻',dur:6.4, feel:'🍃 ふわ…からだが溶ける、なにも怖くない', cast:'castWeed', tolAdd:0.10},
+  lsd:{em:'🌈',nm:'LSD',dur:8.5, feel:'✨ 道が虹になった!! 行ける!!', cast:'castLsd', tolAdd:0.13},
+  alc:{em:'🍺',nm:'酒',dur:6.2, feel:'😤 イケる、運転うまい', cast:'castAlc', tolAdd:0.12},
+  opi:{em:'💊',nm:'オピオイド',dur:5.4, feel:'😌 痛みも不安も消えた', cast:'castOpi', tolAdd:0.15},
+};
+const KEYMAP={'1':'meth','2':'weed','3':'lsd','4':'alc','5':'opi'};
+const BTNMAP={d1:'meth',d2:'weed',d3:'lsd',d4:'alc',d5:'opi'};
+
+function useDrug(type){
+  if(!playing||S.done) return;
+  const d=DRUGS[type];
+  S.effect={type,t:0,dur:d.dur*(1-S.tol*0.35)}; // 耐性が上がると効きが短い
+  S.tol=Math.min(1,S.tol+d.tolAdd);
+  S.crav=Math.max(0,S.crav-0.5); // 一時的に渇望が消える
+  S.used=true; S.drugCount++; S.lastUseT=S.t;
+  showFeel(d.feel, castColor(type));
+  pulseCast(d.cast); sfxDrug(type);
+}
+function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':'#9ec1ff';}
+
+/* casts */
+const casts={meth:document.getElementById('castMeth'),weed:document.getElementById('castWeed'),
+  lsd:document.getElementById('castLsd'),alc:document.getElementById('castAlc'),opi:document.getElementById('castOpi')};
+function setCasts(){
+  for(const k in casts) casts[k].style.opacity=0;
+  if(S.effect){
+    const e=S.effect, d=DRUGS[e.type];
+    let o=0.85;
+    if(e.type==='meth') o=e.t<1.4?0.9:0.45;
+    if(e.type==='lsd') o=0.55+0.25*Math.sin(S.t*6);
+    if(e.type==='opi') o=Math.min(0.92,e.t/e.dur*0.95);
+    casts[e.type].style.opacity=o;
+  }
+}
+let castPulse=null;
+function pulseCast(id){castPulse={id,t:0};}
+
+/* rival markers on truth bar */
+const rivalMarkEls=[];
+(function(){
+  const host=document.getElementById('rivalMarks');
+  for(const rv of S.rivals){
+    const m=document.createElement('div'); m.className='marker';
+    const d=document.createElement('div'); d.className='dot'; d.textContent=rv.ini;
+    d.style.background=rv.color; d.style.boxShadow='0 0 8px '+rv.color;
+    m.appendChild(d); host.appendChild(m); rivalMarkEls.push(m);
+  }
+})();
+
+/* ui feel flash */
+const flash=document.getElementById('flash');
+let feelTimer=0;
+function showFeel(txt,col){flash.textContent=txt;flash.style.color=col;flash.style.opacity=1;feelTimer=1.4;}
+
+/* ===== 着信メール（現実が壊れていくレイヤー） ===== */
+/* real=しらふで見える本当の文 / para=覚醒剤の被害妄想で歪む文。imp=重要度 */
+const MAILSEQ=[
+  {from:'上司 田中',  em:'🏢', imp:2, real:'明日10時の定例、資料お願いね。期待してるよ', para:'お前、会議で全員に笑われてるぞ'},
+  {from:'母',        em:'👩', imp:2, real:'ちゃんとご飯食べてる？無理しないでね', para:'お前なんか産むんじゃなかった'},
+  {from:'取引先',    em:'📑', imp:2, real:'お見積もりの件、ご連絡お待ちしております', para:'詐欺師が。訴えてやるからな'},
+  {from:'恋人 ゆい',  em:'💗', imp:3, real:'今日は帰ってくる？ごはん作って待ってるね', para:'どうせ他の奴といるんだろ。バレてんだよ'},
+  {from:'上司 田中',  em:'🏢', imp:3, real:'昨日の無断欠勤、大丈夫…？体調心配してる', para:'クビだ。お前の居場所はもう無い'},
+  {from:'母',        em:'👩', imp:3, real:'声だけでも聞かせて。お願いだから', para:'警察にお前のこと全部話したから'},
+  {from:'相談窓口',   em:'🆘', imp:1, real:'【依存症相談】いつでも話せます。一人で抱えないで', para:'監視窓口：お前の居場所は掴んでいる'},
+  {from:'恋人 ゆい',  em:'💔', imp:3, real:'ごめん。もう待てない。荷物まとめて出ていくね', para:'ざまあみろ。せいせいした、二度と関わるな'},
+];
+const banner=document.getElementById('mailBanner'),
+  mailEm=document.getElementById('mailEm'), mailFrom=document.getElementById('mailFrom'),
+  mailText=document.getElementById('mailText'), mailNote=document.getElementById('mailNote'),
+  mailTimerBar=document.getElementById('mailTimerBar'),
+  mailReply=document.getElementById('mailReply'), mailIgnore=document.getElementById('mailIgnore');
+function spawnMail(){
+  const d=MAILSEQ[S.seqIdx++]; S.mail={data:d,t:0,dur:7.5};
+  mailEm.textContent=d.em; mailFrom.textContent=d.from;
+  banner.classList.add('show'); sfxMail();
+}
+function hideMail(){ banner.classList.remove('show'); S.mail=null; S.nextMailAt=S.t+(5.5+Math.random()*3); }
+function resolveMail(kind){
+  const m=S.mail; if(!m) return; const d=m.data; const high=!!S.effect;
+  let dT=0,msg='',col='#9fb';
+  if(kind==='reply'){
+    if(!high){ dT=d.imp*3; msg='✅ ちゃんと向き合って返信した'; col='#7dff9a'; }
+    else if(S.effect.type==='meth'||S.effect.type==='lsd'){
+      dT=-d.imp*4; msg='😡 キレて暴言を送りつけた'; col='#ff5d5d';
+      if(d.imp>=2) S.lost.push({from:d.from,real:d.real,why:'暴言'}); }
+    else { dT=-d.imp*2; msg='🥴 ろれつの回らない返信を送った'; col='#ffb04d';
+      if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'意味不明な返信'}); }
+  } else { // ignore / expire
+    if(!high){ dT=-d.imp*3; msg='…既読をつけず無視した'; col='#ff9bb0'; }
+    else { dT=-d.imp*2.5; msg=(S.effect.type==='weed')?'😶「…あとでいいや」':'😶 既読もつかない'; col='#ff9bb0'; }
+    if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'無視'});
+  }
+  S.trust=Math.max(0,Math.min(100,S.trust+dT));
+  if(dT>0) sfxGood(); else sfxBad();
+  showFeel(msg,col); hideMail();
+}
+mailReply.addEventListener('click',()=>resolveMail('reply'));
+mailIgnore.addEventListener('click',()=>resolveMail('ignore'));
+function tickMail(dt){
+  if(S.done) return;
+  if(S.mail){
+    S.mail.t+=dt;
+    mailTimerBar.style.width=Math.max(0,(1-S.mail.t/S.mail.dur)*100)+'%';
+    const d=S.mail.data;
+    if(S.effect){ mailText.textContent=d.para; mailText.classList.add('blur');
+      mailNote.textContent='（ハイで歪んで、ぼやけて読めない…）'; }
+    else { mailText.textContent=d.real; mailText.classList.remove('blur'); mailNote.textContent=''; }
+    if(S.mail.t>=S.mail.dur) resolveMail('expire');
+  } else if(S.t>=S.nextMailAt && S.seqIdx<MAILSEQ.length){ spawnMail(); }
+}
+
+/* ===== input ===== */
+let keyL=false,keyR=false, playing=false;
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a')keyL=true;
+  if(e.key==='ArrowRight'||e.key==='d')keyR=true;
+  if(KEYMAP[e.key]) useDrug(KEYMAP[e.key]);
+});
+document.addEventListener('keyup',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a')keyL=false;
+  if(e.key==='ArrowRight'||e.key==='d')keyR=false;
+});
+const sL=document.getElementById('steerL'),sR=document.getElementById('steerR');
+function bindHold(el,set){
+  el.addEventListener('pointerdown',e=>{e.preventDefault();set(true);});
+  el.addEventListener('pointerup',e=>{e.preventDefault();set(false);});
+  el.addEventListener('pointerleave',()=>set(false));
+  el.addEventListener('pointercancel',()=>set(false));
+}
+bindHold(sL,v=>keyL=v); bindHold(sR,v=>keyR=v);
+for(const id in BTNMAP){
+  document.getElementById(id).addEventListener('click',()=>useDrug(BTNMAP[id]));
+}
+
+/* ===== update ===== */
+function update(dt){
+  if(!playing||S.done) return;
+  S.t+=dt;
+  tickMail(dt);
+  if(S.trust<=0 && !S.collapsed){ S.collapsed=true; showFeel('🧹 何もかも、失った',' #aaa'); }
+
+  // ---- tolerance decay & craving ----
+  S.tol=Math.max(0,S.tol-0.012*dt);
+  let inhigh=!!S.effect;
+  if(!inhigh && S.tol>0.04){ S.crav=Math.min(1,S.crav+S.tol*0.20*dt); }
+  S.crav=Math.max(0,S.crav-(inhigh?0.6:0.05)*dt);
+
+  // ---- peak耐性 / クリーン・フロー / フラッシュバック / 立て直し ----
+  S.peakTol=Math.max(S.peakTol,S.tol);
+  const centered=Math.abs(S.playerX)<0.6, onroad=Math.abs(S.playerX)<=1;
+  if(!S.effect && onroad && centered && S.speed>maxSpeed*0.8) S.flow=Math.min(1,S.flow+dt*0.22);
+  else S.flow=Math.max(0,S.flow-dt*(S.effect?1.4:0.6));
+  // フラッシュバック：やめても歪みが戻る（過去の使用が残る）
+  if(S.fb>0){ S.fb-=dt; S.shake=Math.max(S.shake,3); S.playerX+=Math.sin(S.t*22)*0.35*dt; }
+  else if(!S.effect && S.peakTol>0.35 && Math.random()<(S.peakTol-0.3)*0.12*dt){
+    S.fb=1.6; S.fbText=['まだ誰かに見られてる…','さっきの声、空耳か？','背後に、誰かいる'][Math.floor(Math.random()*3)];
+    showFeel('👁 '+S.fbText,'#c08bff'); sfxBad();
+  }
+  // 渇望に耐えてシラフが続けば人間関係が少しずつ戻る（立て直し）
+  if(!S.effect && S.t-S.lastUseT>4 && S.trust<100) S.trust=Math.min(100,S.trust+dt*1.6);
+  // 渇望のドクン（心音）
+  if(S.crav>0.5 && !S.effect){ S.heartT-=dt; if(S.heartT<=0){ heartbeat(); S.heartT=1.1-S.crav*0.4; } }
+
+  // ---- effect resolve -> speed cap & subjective multiplier ----
+  let cap=1.0, subjMul, guard=true, invert=false, lag=0, authority=1, wobble=0;
+  if(S.effect){
+    const e=S.effect; e.t+=dt;
+    const p=e.t/e.dur;
+    switch(e.type){
+      case 'meth':
+        if(e.t<1.4){cap=1.32; subjMul=1.65;}
+        else {cap=0.40; subjMul=e.t<2.6?1.5:0.5;} // 体感も遅れて墜ちる
+        S.shake=Math.max(S.shake,e.t<1.4?6:2);
+        break;
+      case 'weed':
+        cap=0.70; subjMul=1.28; lag=0.34; break;
+      case 'lsd':
+        cap=0.86; subjMul=1.5; guard=false; break; // ガードレール消滅
+      case 'alc':
+        cap=0.88; subjMul=1.4; invert=true; wobble=0.22; break;
+      case 'opi':
+        cap=Math.max(0,0.80*(1-p)); subjMul=Math.max(0,1.2*(1-p)); authority=Math.max(0,1-p*1.1);
+        break;
+    }
+    if(e.t>=e.dur){
+      if(e.type==='opi'){ // 入力ゼロまで墜ちたら オーバードーズ
+        S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash();
+      }
+      S.effect=null;
+    }
+  } else {
+    subjMul=cap; // シラフはほぼ正直
+  }
+  // 渇望ペナルティ：キメてなくても依存してると本来の力が出ない（離脱）
+  let withdrawal = inhigh?0:(S.crav*0.30);
+  let finalCap = Math.max(0, cap*(1-withdrawal));
+  if(!S.effect) finalCap += S.flow*0.20; // 素の集中で本来以上に伸びる
+
+  // ---- steering (with lag buffer for weed) ----
+  let rawSteer=(keyR?1:0)-(keyL?1:0);
+  S.steerBuf.push({t:S.t,v:rawSteer});
+  if(S.steerBuf.length>120) S.steerBuf.shift();
+  let useSteer=rawSteer;
+  if(lag>0){
+    for(let i=S.steerBuf.length-1;i>=0;i--){ if(S.t-S.steerBuf[i].t>=lag){useSteer=S.steerBuf[i].v;break;} }
+  }
+  if(invert) useSteer=-useSteer;
+  useSteer*=authority;
+
+  // ---- speed ----
+  const target=maxSpeed*finalCap;
+  if(S.spin>0){ S.spin-=dt; S.speed=Math.max(0,S.speed-6000*dt); useSteer+=Math.sin(S.t*30)*1.5; }
+  else if(S.speed<target) S.speed=Math.min(target,S.speed+accel*dt);
+  else S.speed=Math.max(target,S.speed-accel*1.4*dt);
+
+  const spd=S.speed/maxSpeed;
+  // steering & centrifugal
+  S.playerX += useSteer*dt*2.3*Math.max(0.25,spd);
+  S.playerX += Math.sin(S.t*5.5)*wobble*dt;
+  const base=findSeg(S.position);
+  S.playerX -= base.curve*0.0016*spd*spd*(dt*60);
+
+  // ---- offroad / レール外れ ----
+  const off=Math.abs(S.playerX)>1;
+  if(off){
+    if(guard){ // シラフ：ガードレールが守る → 強烈に減速
+      S.speed=Math.max(maxSpeed*0.18,S.speed-7000*dt);
+      S.shake=Math.max(S.shake,3);
+      S.playerX=Math.max(-1.45,Math.min(1.45,S.playerX)); // 壁
+    } else { // キメてる：行ける感。でも戻れないと「落ちる」
+      S.fall+=dt;
+      if(S.fall>1.5){ S.spin=1.2; S.shake=12; S.playerX=S.playerX>0?0.8:-0.8; S.fall=0;
+        showFeel('🕳 レール外れて墜落', '#ff5d5d'); sfxCrash(); }
+    }
+  } else S.fall=Math.max(0,S.fall-dt*2);
+  S.playerX=Math.max(-2,Math.min(2,S.playerX));
+
+  // ---- subjective speed (THE LIE) ----
+  const subjTarget=maxSpeed*subjMul;
+  S.subj += (subjTarget-S.subj)*Math.min(1,dt*6);
+
+  // ---- advance ----
+  S.position+=S.speed*dt; if(S.position>=trackLen) S.position-=trackLen;
+  S.playerDist+=S.speed*dt;
+
+  // ---- rivals (普通に走り切る車) ----
+  for(const rv of S.rivals){
+    const tgt=rv.base + Math.sin(S.t*0.7+rv.phase)*170; // 自然な速度ゆらぎ
+    if(rv.speed<tgt) rv.speed=Math.min(tgt,rv.speed+2200*dt);
+    else rv.speed=Math.max(tgt,rv.speed-2200*dt);
+    rv.dist+=rv.speed*dt;
+    if(rv.fin===0 && rv.dist>=TARGET) rv.fin=S.t;
+  }
+
+  // ---- rank ----
+  let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
+  S.rank=ahead+1;
+  if(S.rank!==S.prevRank){
+    S.rankDir=S.rank<S.prevRank?1:-1; S.rankFlash=0.9; sfxRank(S.rankDir>0); S.prevRank=S.rank;
+  } else S.rankFlash=Math.max(0,S.rankFlash-dt);
+
+  if(S.playerDist>=TARGET){ S.playerTime=S.t; finish(); }
+
+  S.shake=Math.max(0,S.shake-dt*14);
+}
+
+/* ===== render ===== */
+function render(){
+  const base=findSeg(S.position);
+  const basePct=(S.position%segLen)/segLen;
+  const playerY=ease(base.p1.world.y,base.p2.world.y,basePct)+camH;
+  const lsd=S.effect&&S.effect.type==='lsd';
+
+  // sky
+  let g=ctx.createLinearGradient(0,0,0,H*0.62);
+  if(S.effect){
+    if(lsd){const h=(S.t*60)%360;g.addColorStop(0,`hsl(${h},90%,18%)`);g.addColorStop(1,`hsl(${(h+120)%360},80%,40%)`);}
+    else if(S.effect.type==='meth'){g.addColorStop(0,'#2a0008');g.addColorStop(1,'#7a0e2a');}
+    else if(S.effect.type==='weed'){g.addColorStop(0,'#06170d');g.addColorStop(1,'#10402a');}
+    else if(S.effect.type==='opi'){g.addColorStop(0,'#05060a');g.addColorStop(1,'#0a0d18');}
+    else {g.addColorStop(0,'#1a0f2e');g.addColorStop(1,'#3a2a55');}
+  } else {g.addColorStop(0,'#0c1b3a');g.addColorStop(1,'#3b6ea5');}
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  // sun
+  ctx.save();
+  const sunY=H*0.30+ease(base.p1.world.y,base.p2.world.y,basePct)*0.00004*H;
+  let sg=ctx.createRadialGradient(W/2,sunY,4,W/2,sunY,W*0.16);
+  if(lsd){sg.addColorStop(0,'#fff');sg.addColorStop(1,'#ff00aa00');}
+  else{sg.addColorStop(0,'#ffe39a');sg.addColorStop(.6,'#ff6ea688');sg.addColorStop(1,'#ff6ea600');}
+  ctx.fillStyle=sg; ctx.beginPath();ctx.arc(W/2,sunY,W*0.16,0,7);ctx.fill();
+  ctx.restore();
+
+  // rival lookup: segment index + gap ahead
+  const rivalInfo=S.rivals.map(rv=>{
+    let dz=rv.dist-S.playerDist;
+    return {rv, dz, seg:Math.floor((((rv.dist%trackLen)+trackLen)%trackLen)/segLen)};
+  });
+
+  // road
+  const sprites=[];
+  let x=0, dx=-(base.curve*basePct), maxy=H;
+  for(let n=0;n<drawDist;n++){
+    const seg=segments[(base.index+n)%segments.length];
+    const looped=seg.index<base.index;
+    const camZ=S.position-(looped?trackLen:0);
+    project(seg.p1, S.playerX*roadW - x, playerY, camZ);
+    project(seg.p2, S.playerX*roadW - x - dx, playerY, camZ);
+    x+=dx; dx+=seg.curve;
+    if(seg.p1.camera.z<=camDepth || seg.p2.screen.y>=maxy) continue;
+    drawSeg(seg,lsd,n); maxy=seg.p2.screen.y;
+    const sc=seg.p1.screen;
+    // roadside posts (speed sensation)
+    if(seg.index%16===0){
+      const side=(Math.floor(seg.index/16)%2)?1:-1;
+      sprites.push({kind:'post',scale:sc.scale,x:sc.x+side*sc.w*1.22,y:sc.y,w:sc.w,
+        color: lsd?`hsl(${(seg.index*12+S.t*200)%360},95%,62%)`:(S.effect?'#ff3ea5':'#27e1ff')});
+    }
+    // rival cars
+    for(const ri of rivalInfo){
+      if(ri.seg===seg.index && ri.dz>-40 && ri.dz<drawDist*segLen){
+        sprites.push({kind:'car',scale:sc.scale,x:sc.x+ri.rv.laneX*sc.w,y:sc.y,w:sc.w,
+          color:ri.rv.color,label:ri.rv.ini});
+      }
+    }
+  }
+  // depth sort: far (small scale) first
+  sprites.sort((a,b)=>a.scale-b.scale);
+  for(const s of sprites){ if(s.kind==='post') drawPost(s); else drawCarSprite(s); }
+
+  drawEuphoria();
+  drawFlow();
+  drawCar();
+}
+function drawFlow(){
+  if(S.effect || S.flow<0.4) return;
+  const cx=W/2, cy=H*0.42, N=30, intensity=(S.flow-0.4)/0.6;
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<N;i++){
+    const a=i/N*Math.PI*2;
+    const r1=W*0.20, r2=r1+W*0.16*intensity*(0.6+0.4*Math.sin(S.t*5+i));
+    const al=0.13*intensity*(0.6+0.4*Math.sin(S.t*4+i));
+    ctx.strokeStyle=`rgba(120,240,255,${al})`; ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*r1, cy+Math.sin(a)*r1);
+    ctx.lineTo(cx+Math.cos(a)*r2, cy+Math.sin(a)*r2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawEuphoria(){
+  if(!S.effect) return;
+  const e=S.effect;
+  // ---- 集中線（爽快感） ----
+  let rush=0;
+  if(e.type==='meth') rush=e.t<1.6?(1-e.t/1.6):0.14;
+  else if(e.type==='lsd') rush=0.22;
+  else if(e.type==='alc') rush=0.10;
+  const intensity=Math.max(rush, (S.subj/maxSpeed)*0.12);
+  if(intensity>0.02){
+    const cx=W/2, cy=H*0.42, N=48;
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<N;i++){
+      const a=i/N*Math.PI*2;
+      const r1=W*(0.16+0.10*((i*7%5)/5));
+      const r2=r1+W*0.34*intensity*(0.6+0.4*Math.sin(S.t*9+i));
+      const al=0.20*intensity*(0.55+0.45*Math.sin(S.t*7+i*1.3));
+      const col=e.type==='meth'?`rgba(255,235,235,${al})`:e.type==='lsd'?`hsla(${(i*14+S.t*200)%360},95%,75%,${al})`:`rgba(255,255,255,${al})`;
+      ctx.strokeStyle=col; ctx.lineWidth=Math.max(1,2.4*intensity);
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*r1, cy+Math.sin(a)*r1);
+      ctx.lineTo(cx+Math.cos(a)*r2, cy+Math.sin(a)*r2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  // ---- メス・ラッシュの白フラッシュ ----
+  if(e.type==='meth'&&e.t<0.55){
+    ctx.save(); ctx.globalAlpha=(0.55-e.t)/0.55*0.7; ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); ctx.restore();
+  }
+  // ---- 大麻：漂う粒子（リラックス） ----
+  if(e.type==='weed'){
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<26;i++){
+      const px=(i*101+S.t*16*((i%3)+1))%W;
+      const py=H-(((S.t*26*((i%4)+1))+i*57)%H);
+      const r=3+(i%3)*2.2;
+      ctx.fillStyle=`rgba(150,255,185,${0.08+0.05*Math.sin(S.t*2+i)})`;
+      ctx.beginPath(); ctx.arc(px,py,r,0,7); ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+function drawPost(s){
+  const w=Math.max(2,s.w*0.05), h=s.w*0.62;
+  ctx.save(); ctx.shadowColor=s.color; ctx.shadowBlur=Math.min(18,s.w*0.12);
+  ctx.fillStyle=s.color; ctx.fillRect(s.x-w/2, s.y-h, w, h);
+  ctx.globalAlpha=0.5; ctx.fillRect(s.x-w*1.4, s.y-h*0.18, w*2.8, h*0.12);
+  ctx.restore();
+}
+function drawCarSprite(s){
+  const w=Math.max(14,s.scale*roadW*W*0.16), h=w*0.82, cx=s.x, cy=s.y;
+  ctx.save();
+  ctx.fillStyle='#0009'; ctx.beginPath();ctx.ellipse(cx,cy,w*0.55,h*0.16,0,0,7);ctx.fill();
+  ctx.fillStyle='#15121c'; roundRect(cx-w/2,cy-h,w,h,w*0.16);ctx.fill();
+  ctx.fillStyle=s.color; roundRect(cx-w*0.42,cy-h*0.82,w*0.84,h*0.46,w*0.1);ctx.fill();
+  ctx.fillStyle='#0c0e14'; roundRect(cx-w*0.3,cy-h*0.74,w*0.6,h*0.26,w*0.06);ctx.fill();
+  ctx.fillStyle='#ff5a5a'; ctx.fillRect(cx-w*0.38,cy-h*0.16,w*0.16,h*0.12);
+  ctx.fillStyle='#ff5a5a'; ctx.fillRect(cx+w*0.22,cy-h*0.16,w*0.16,h*0.12);
+  if(w>34){ctx.fillStyle='#fff';ctx.font=`900 ${w*0.3}px sans-serif`;ctx.textAlign='center';
+    ctx.fillText(s.label,cx,cy-h*0.5);}
+  ctx.restore();
+}
+function drawSeg(seg,lsd,n){
+  const p1=seg.p1.screen,p2=seg.p2.screen;
+  let grass,rumble,road,lane;
+  const hue=(n*9+S.t*120)%360;
+  if(lsd){
+    grass=`hsl(${(hue+200)%360},70%,22%)`;
+    rumble=`hsl(${hue},95%,60%)`;
+    road=seg.light?`hsl(${(hue+40)%360},60%,30%)`:`hsl(${(hue+60)%360},55%,24%)`;
+    lane=`hsl(${(hue+180)%360},95%,75%)`;
+  } else if(S.effect&&S.effect.type==='meth'){
+    grass=seg.light?'#3a0010':'#2a000c'; rumble=seg.light?'#ff2d2d':'#fff'; road=seg.light?'#241016':'#1d0c12'; lane='#ffd0d0';
+  } else if(S.effect&&S.effect.type==='weed'){
+    grass=seg.light?'#0c3a1f':'#0a2e19'; rumble=seg.light?'#9bff6a':'#dfffcf'; road=seg.light?'#16271c':'#122016'; lane='#cfffbf';
+  } else if(S.effect&&S.effect.type==='opi'){
+    grass=seg.light?'#0a0c14':'#080a10'; rumble=seg.light?'#3a4258':'#2a3145'; road=seg.light?'#10121b':'#0c0e15'; lane='#3a4258';
+  } else if(S.effect&&S.effect.type==='alc'){
+    grass=seg.light?'#2c1a05':'#241405'; rumble=seg.light?'#ffb04d':'#fff'; road=seg.light?'#231a12':'#1d150e'; lane='#ffe3b0';
+  } else {
+    grass=seg.light?'#1f8a3a':'#1a7d34'; rumble=seg.light?'#e23a3a':'#ffffff'; road=seg.light?'#3a3f48':'#34383f'; lane='#ffffff';
+  }
+  ctx.fillStyle=grass; ctx.fillRect(0,p2.y,W,p1.y-p2.y+1);
+  poly(p1.x-p1.w*1.18,p1.y,p1.x-p1.w,p1.y,p2.x-p2.w,p2.y,p2.x-p2.w*1.18,p2.y,rumble);
+  poly(p1.x+p1.w,p1.y,p1.x+p1.w*1.18,p1.y,p2.x+p2.w*1.18,p2.y,p2.x+p2.w,p2.y,rumble);
+  poly(p1.x-p1.w,p1.y,p1.x+p1.w,p1.y,p2.x+p2.w,p2.y,p2.x-p2.w,p2.y,road);
+  if(seg.light){
+    const lw1=p1.w*0.04,lw2=p2.w*0.04;
+    poly(p1.x-lw1,p1.y,p1.x+lw1,p1.y,p2.x+lw2,p2.y,p2.x-lw2,p2.y,lane);
+  }
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawCar(){
+  const cw=W*0.16, ch=cw*0.62;
+  const cx=W/2 + (keyR?1:0)*8 - (keyL?1:0)*8 + (S.spin>0?Math.sin(S.t*30)*30:0);
+  const cy=H-150;
+  const lean=((keyR?1:0)-(keyL?1:0));
+  ctx.save();
+  ctx.translate(cx,cy); ctx.rotate(lean*0.06 + (S.spin>0?Math.sin(S.t*20)*0.2:0));
+  // shadow
+  ctx.fillStyle='#0008'; ctx.beginPath();ctx.ellipse(0,ch*0.55,cw*0.6,ch*0.18,0,0,7);ctx.fill();
+  // body
+  ctx.fillStyle='#16131f'; roundRect(-cw/2,-ch*0.5,cw,ch,cw*0.16);ctx.fill();
+  ctx.fillStyle='#ff3ea5'; roundRect(-cw*0.42,-ch*0.36,cw*0.84,ch*0.4,cw*0.1);ctx.fill();
+  ctx.fillStyle='#27e1ff'; roundRect(-cw*0.3,-ch*0.3,cw*0.6,ch*0.22,cw*0.06);ctx.fill();
+  // wheels
+  ctx.fillStyle='#000';
+  roundRect(-cw*0.56,-ch*0.18,cw*0.16,ch*0.5,cw*0.05);ctx.fill();
+  roundRect(cw*0.40,-ch*0.18,cw*0.16,ch*0.5,cw*0.05);ctx.fill();
+  // tail lights
+  ctx.fillStyle=S.effect?'#fff':'#ff5a5a';
+  ctx.fillRect(-cw*0.4,ch*0.34,cw*0.16,ch*0.1);ctx.fillRect(cw*0.24,ch*0.34,cw*0.16,ch*0.1);
+  ctx.restore();
+}
+
+/* ===== HUD ===== */
+const elSubj=document.getElementById('subjKmh'),elReal=document.getElementById('realKmh'),
+  elFeel=document.getElementById('feel'),elClock=document.getElementById('clock'),
+  elRank=document.getElementById('rankNote'),elFill=document.getElementById('trackFill'),
+  mYou=document.getElementById('mYou'),
+  posBadge=document.getElementById('posBadge'),posNum=document.getElementById('posNum'),
+  posOrd=document.getElementById('posOrd'),posDen=document.getElementById('posDen'),
+  tolBar=tol(),cravBar=crav(),trustBar=document.querySelector('#trustBar i'),
+  flowBar=document.querySelector('#flowBar i'),muteBtn=document.getElementById('muteBtn');
+posDen.textContent='/'+(RIVALS.length+1);
+muteBtn.addEventListener('click',()=>{ muted=!muted; muteBtn.textContent=muted?'🔇':'🔊'; });
+function tol(){return document.querySelector('#tolBar i');}
+function crav(){return document.querySelector('#cravBar i');}
+function ord(n){return n===1?'st':n===2?'nd':n===3?'rd':'th';}
+function hud(){
+  const k=v=>Math.round(v/maxSpeed*320);
+  const M=v=>Math.round(v/maxSpeed*320*0.42); // dist -> "m" feel
+  elSubj.textContent=k(S.subj);
+  elReal.textContent='実速度 '+k(S.speed)+' km/h';
+  elClock.textContent=S.t.toFixed(1)+'s';
+  const yp=Math.min(100,S.playerDist/TARGET*100);
+  mYou.style.left=yp+'%';
+  for(let i=0;i<S.rivals.length;i++)
+    rivalMarkEls[i].style.left=Math.min(100,S.rivals[i].dist/TARGET*100)+'%';
+  elFill.style.inset='0 '+(100-yp)+'% 0 0';
+  tolBar.style.width=(S.tol*100)+'%'; cravBar.style.width=(S.crav*100)+'%';
+  trustBar.style.width=S.trust+'%'; flowBar.style.width=(S.flow*100)+'%';
+  elSubj.style.textShadow=(!S.effect&&S.flow>0.5)
+    ? '0 0 20px #7dff9a,0 0 44px #27e1ff'
+    : '0 0 18px var(--cyan),0 0 40px #27e1ff88';
+  // position badge
+  posNum.textContent=S.rank; posOrd.textContent=ord(S.rank);
+  posBadge.classList.toggle('pulse',S.rankFlash>0.5);
+  const col=S.rank===1?'#7dff9a':S.rank<=3?'#ffd34d':'#ff6b8a';
+  posNum.style.color=col; posNum.style.textShadow='0 0 16px '+col;
+  // nearest car ahead / behind note
+  if(S.rankFlash>0){
+    elRank.style.color=S.rankDir>0?'#7dff9a':'#ff6b8a';
+    elRank.textContent=(S.rankDir>0?'▲ ':'▼ ')+S.rank+'位 '+(S.rankDir>0?'に浮上！':'に転落…');
+  } else if(S.rank===1){
+    let next=Infinity; for(const rv of S.rivals){const d=S.playerDist-rv.dist; if(d>0&&d<next)next=d;}
+    elRank.style.color='#7dff9a';
+    elRank.textContent=next===Infinity?'🏁 独走！':'🏁 首位！2位に '+M(next)+'m 差';
+  } else {
+    let gap=Infinity,nm=''; for(const rv of S.rivals){const d=rv.dist-S.playerDist; if(d>0&&d<gap){gap=d;nm=rv.name;}}
+    elRank.style.color='#ff6b8a';
+    elRank.textContent='前の '+nm+' まで '+M(gap)+'m';
+  }
+  // feel text
+  if(feelTimer>0){feelTimer-=1/60; flash.style.opacity=Math.min(1,feelTimer*2);}
+  else flash.style.opacity=0;
+  if(S.effect){elFeel.textContent=DRUGS[S.effect.type].feel; elFeel.style.color=castColor(S.effect.type);}
+  else if(S.crav>0.45){elFeel.textContent='…もう一回、欲しい'; elFeel.style.color='#c08bff';}
+  else {elFeel.textContent='　';}
+  // lit buttons
+  for(const id in BTNMAP){
+    const on=S.effect&&S.effect.type===BTNMAP[id];
+    document.getElementById(id).classList.toggle('lit',on);
+  }
+  // canvas filters (the trip)
+  let blur=Math.min(7,(S.subj/maxSpeed)*3.2), sat=1, hue=0, bri=1;
+  if(S.effect){
+    const e=S.effect;
+    if(e.type==='meth'){blur+=1.5;sat=1.5;}
+    if(e.type==='weed'){blur+=2.2;sat=1.2;bri=0.92;}
+    if(e.type==='lsd'){sat=1.8;hue=(S.t*120)%360;blur+=1;}
+    if(e.type==='alc'){blur+=2.6;}
+    if(e.type==='opi'){bri=Math.max(0.4,1-e.t/e.dur*0.7);sat=Math.max(0.2,1-e.t/e.dur*0.9);blur+=1;}
+  }
+  if(S.fb>0){ blur+=3.5; hue=(hue+265)%360; sat=1.5; } // フラッシュバックの歪み
+  cv.style.filter=`blur(${blur.toFixed(1)}px) saturate(${sat}) hue-rotate(${hue}deg) brightness(${bri})`;
+  // shake / drunk wobble via transform on stage canvas
+  let tx=0,ty=0,rot=0,sc=1;
+  if(S.shake>0){tx=(Math.random()-.5)*S.shake;ty=(Math.random()-.5)*S.shake;}
+  if(S.effect&&S.effect.type==='alc'){rot=Math.sin(S.t*2.3)*1.4;tx+=Math.sin(S.t*1.7)*8;}
+  if(S.effect&&S.effect.type==='lsd'){tx+=Math.sin(S.t*3)*6;ty+=Math.cos(S.t*2.2)*6;}
+  if(S.effect&&S.effect.type==='weed') sc=1+0.04*Math.sin(S.t*1.5);        // ゆったり呼吸
+  if(S.effect&&S.effect.type==='meth'&&S.effect.t<1.6) sc=1+0.16*(1-S.effect.t/1.6); // ラッシュのズーム
+  cv.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
+  setCasts();
+  engineUpdate();
+}
+
+/* ===== finish ===== */
+function finish(){
+  if(S.done) return; S.done=true; playing=false;
+  banner.classList.remove('show'); S.mail=null;
+  const youT=S.playerTime||S.t;
+  // 最終順位 = ゴール時点で前にいる車の数+1
+  let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
+  const pos=ahead+1, field=RIVALS.length+1, won=pos===1;
+
+  document.getElementById('resSubjRank').textContent = S.used? '1位！最高だった' : pos+'位 — 普通に走った';
+  document.getElementById('resSubjRank').style.color = S.used?'#fff':'#cfe';
+  document.getElementById('resSubjSub').textContent = S.used
+    ? `体感トップスピード ${Math.round(S.subj/maxSpeed*320)}km/h。脳内では誰よりも速かった。`
+    : '体感も現実も一致。嘘がなかった。';
+
+  document.getElementById('resRealRank').textContent = pos+'位 / '+field+'台'+(won?'（優勝）':'');
+  document.getElementById('resRealRank').style.color = won?'#7dff9a':pos<=3?'#ffd34d':'#ff6b8a';
+
+  // standings list (ライバルはゴール済みなら実タイム、未到達なら距離で換算)
+  const board=[{name:'あなた',color:'#ff3ea5',t:youT}]
+    .concat(S.rivals.map(rv=>({name:rv.name,color:rv.color,
+       t: rv.fin || youT + (TARGET-rv.dist)/rv.base})));
+  board.sort((a,b)=>a.t-b.t);
+  const lines=board.map((b,i)=>
+    `${i+1}. <span style="color:${b.color}">${b.name}</span> ${b.t.toFixed(1)}s`).join('　/　');
+  document.getElementById('resRealSub').innerHTML=lines;
+
+  // ---- 人間関係（失ったもの） ----
+  const life=Math.round(S.trust);
+  const lifeHead = life<=0 ? '崩壊 — 職も、家族も、恋人も失った'
+    : life<40 ? 'ボロボロ（'+life+'/100）'
+    : life<75 ? 'すり減った（'+life+'/100）'
+    : '保てた（'+life+'/100）';
+  document.getElementById('resLifeHead').textContent=lifeHead;
+  document.getElementById('resLifeHead').style.color = life<40?'#ff6b8a':life<75?'#ffd34d':'#7dff9a';
+  const lifeEl=document.getElementById('resLifeBody');
+  if(S.lost.length){
+    const seen=new Set(), items=[];
+    for(const l of S.lost){ const key=l.from+l.real; if(seen.has(key))continue; seen.add(key);
+      items.push(`<div>📨 <b>${l.from}</b>「${l.real}」<br><span style="opacity:.65">　↑ ${l.why}</span></div>`);
+      if(items.length>=4)break; }
+    lifeEl.innerHTML='ハイの裏で、本当はこう書いてあった：<div class="lostlist">'+items.join('')+'</div>';
+  } else {
+    lifeEl.textContent='大事な連絡を、ちゃんと受け取れた。';
+  }
+  document.getElementById('resLife').style.display = (S.used||S.lost.length)?'block':'none';
+
+  const cleanFinish = S.used && (S.t-S.lastUseT)>12; // 最後は断ち切った
+  let msg;
+  if(!S.used){
+    msg=won
+      ? '<span class="hi">何も使わずに優勝</span>。速さは、集中から来てた。'
+      : `${pos}位。でも全部<span class="hi">自分の実力</span>。ここから上げていける。`;
+  } else if(cleanFinish){
+    msg=`途中まではキメてた。でも最後は<span class="hi">自分の足で走り切った。</span><br>耐性は残る。それでも、立て直せる。`;
+  } else if(life<=0){
+    msg=`体感は1位。現実は${pos}位で、<span class="hi">隣にはもう、誰もいない。</span>`;
+  } else if(!won){
+    msg=`薬物を ${S.drugCount} 回。体感は1位、現実は ${pos}位。<br><span class="hi">「速い」と感じてる間、君は一番遅かった。</span>`;
+  } else {
+    msg=`今回は勝てた。でも耐性は残り、連絡はいくつも消えた。<br><span class="hi">次は同じ量じゃ効かない。</span>`;
+  }
+  document.getElementById('resMsg').innerHTML=msg;
+
+  // ベストタイム（クリーン完走のみ）
+  let best=NaN, isNew=false;
+  try{
+    best=parseFloat(localStorage.getItem('jk_best')||'');
+    if(won && !S.used && (isNaN(best)||youT<best)){ best=youT; localStorage.setItem('jk_best',String(youT)); isNew=true; }
+  }catch(e){}
+  document.getElementById('bestNote').textContent = isNaN(best)
+    ? '※ 何も使わずクリーン完走でベスト記録に挑戦'
+    : ('🏅 クリーン最速：'+best.toFixed(1)+'s'+(isNew?'（新記録！）':''));
+
+  if(won) sfxGood(); else sfxBad();
+  document.getElementById('result').classList.remove('hidden');
+}
+
+/* ===== loop ===== */
+let last=0;
+function frame(ts){
+  if(!last)last=ts; let dt=(ts-last)/1000; last=ts;
+  dt=Math.min(0.05,dt);
+  if(playing) update(dt);
+  render(); hud();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ===== buttons ===== */
+document.getElementById('goBtn').addEventListener('click',()=>{
+  audioInit();
+  document.getElementById('start').classList.add('hidden');
+  reset(); playing=true; last=0;
+});
+document.getElementById('againBtn').addEventListener('click',()=>{
+  audioInit();
+  document.getElementById('result').classList.add('hidden');
+  reset(); playing=true; last=0;
+});
+})();
+</script>
+</body>
+</html>
