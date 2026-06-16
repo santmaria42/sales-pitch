@@ -27,6 +27,8 @@
   #castCoke{background:radial-gradient(120% 90% at 50% 42%,#dff3ffaa 0%,transparent 45%,#0a3a6acc 100%);}
   #vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(130% 100% at 50% 42%,transparent 55%,#000a 100%);}
+  /* 自車レイヤー：薬物のぼかし/色被りを受けず、常にくっきり描く */
+  #cv2{z-index:2;pointer-events:none;}
 
   /* ===== 正直バー (HONEST TRUTH) ===== */
   #truth{position:absolute;left:0;right:0;top:0;padding:10px 12px 12px;
@@ -322,6 +324,8 @@
   <div class="cast" id="castOpi"></div>
   <div class="cast" id="castCoke"></div>
   <div id="vignette"></div>
+  <!-- 自車だけを描く、ぼやけない上層キャンバス -->
+  <canvas id="cv2"></canvas>
 
   <!-- 正直バー -->
   <div id="truth">
@@ -344,9 +348,9 @@
   <div id="eventLog"></div>
 
   <div id="meters">
-    <div class="meter">耐性 TOLERANCE<div class="bar" id="tolBar"><i></i></div></div>
+    <div class="meter" style="display:none">耐性 TOLERANCE<div class="bar" id="tolBar"><i></i></div></div>
     <div class="meter">渇望 CRAVING<div class="bar" id="cravBar"><i></i></div></div>
-    <div class="meter">人間関係 LIFE<div class="bar" id="trustBar"><i></i></div></div>
+    <div class="meter" style="display:none">人間関係 LIFE<div class="bar" id="trustBar"><i></i></div></div>
     <div class="meter">集中 FLOW（素）<div class="bar" id="flowBar"><i></i></div></div>
     <div class="meter">崩壊負債 DEBT<div class="bar" id="debtBar"><i></i></div></div>
   </div>
@@ -415,7 +419,8 @@
     <div class="tag">キマってるのは、お前の画面だけ。</div>
     <div class="how">
       <b>← →</b>（または画面左右タップ）でハンドル。アクセルは自動。<br>
-      <b>1〜5</b>キー／下のボタンで“アイテム”を使える。<br><br>
+      コース上の<b>？アイテムブロック</b>を拾うと、右上で<b>ルーレット</b>が回り中身が決まる。<br>
+      <b>下のボタン</b>（または右上ボックスをタップ／<b>Space</b>）で“アイテム”を使える。<br><br>
       使うと画面は最高に<b>速く・気持ちよく</b>感じる。<br>
       でも上の<b>正直バー</b>を見ろ。前に進んでるのは…<br>
       何も使わない<b>「素」のお前（白）</b>だ。<br>
@@ -489,12 +494,13 @@
 <script>
 (function(){
 "use strict";
-const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const cv=document.getElementById('cv'); let ctx=cv.getContext('2d');
+const cv2=document.getElementById('cv2'), ctx2=cv2.getContext('2d');
 let W=800,H=450;
 function resize(){
   const r=document.getElementById('stage').getBoundingClientRect();
   W=Math.max(360,Math.floor(r.width)); H=Math.max(300,Math.floor(r.height));
-  cv.width=W; cv.height=H;
+  cv.width=W; cv.height=H; cv2.width=W; cv2.height=H;
 }
 window.addEventListener('resize',resize); resize();
 // スマホのダブルタップ拡大／ピンチ拡大を抑止
@@ -574,6 +580,7 @@ function reset(){
      cravEvent:null, craveCool:0, relapses:0, resisted:0,
      bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
      drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0,coke:0},
+     item:null, roulette:null, itemsGrabbed:0,
      nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
      draft:0, draftActive:0, draftBurst:0, draftRv:null, draftPop:0, draftTotal:0,
      hitCool:0, hits:0, dodges:0, dodgeGlow:0, obstHitSeg:-1,
@@ -642,6 +649,8 @@ function sfxDrug(t){
 }
 function sfxMail(){ tone(880,0.1,'square',0.1); tone(1175,0.13,'square',0.1,AC?AC.currentTime+0.12:0); }
 function sfxGood(){ arp([659,880,1319],0.07,'triangle',0.2); }
+function sfxItemGrab(){ arp([523,659,784,1047,1319],0.045,'square',0.13); }
+function sfxItemGet(){ arp([784,1047,1319,1568],0.06,'triangle',0.18); }
 function sfxBad(){ tone(160,0.3,'sawtooth',0.22); noise(0.18,0.13,500); }
 function sfxRank(up){ arp(up?[440,660,880]:[660,440,330],0.06,'square',0.15); }
 function sfxCrash(){ noise(0.5,0.4,400); tone(80,0.4,'sawtooth',0.25); }
@@ -679,6 +688,34 @@ function useDrug(type){
   logEvent('💊 '+d.nm+'を使った（'+S.drugCount+'回目）', castColor(type));
 }
 function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':t==='coke'?'#9fe4ff':'#9ec1ff';}
+
+/* ===== アイテム（マリオカート式：ブロックを拾う→ルーレット→所持→使用） ===== */
+const DRUG_KEYS=Object.keys(DRUGS);
+function grabItem(){
+  if(S.item || S.roulette) return; // 既に所持/抽選中は拾えない（MK式）
+  const result=DRUG_KEYS[Math.floor(Math.random()*DRUG_KEYS.length)];
+  S.roulette={t:0, dur:1.5, result};
+  S.itemsGrabbed++;
+  sfxItemGrab();
+  showFeel('🎁 アイテムブロック！','#ffd34d'); logEvent('🎁 アイテムブロックを拾った','#ffd34d');
+}
+function tickItemRoulette(dt){
+  if(!S.roulette) return;
+  S.roulette.t+=dt;
+  if(S.roulette.t>=S.roulette.dur){
+    S.item=S.roulette.result; S.roulette=null;
+    sfxItemGet();
+    const d=DRUGS[S.item];
+    showFeel('🎰 '+d.em+' '+d.nm+' を入手！', castColor(S.item));
+    logEvent('🎰 アイテム確定：'+d.nm, castColor(S.item));
+  }
+}
+function useItem(){
+  if(!playing||S.done) return;
+  if(!S.item || S.roulette) return;
+  const t=S.item; S.item=null;
+  useDrug(t);
+}
 
 /* casts */
 const casts={meth:document.getElementById('castMeth'),weed:document.getElementById('castWeed'),
@@ -921,7 +958,7 @@ let keyL=false,keyR=false, playing=false;
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft'||e.key==='a')keyL=true;
   if(e.key==='ArrowRight'||e.key==='d')keyR=true;
-  if(KEYMAP[e.key]) useDrug(KEYMAP[e.key]);
+  if(e.key===' '||e.key==='Enter'||e.key==='Spacebar'){ e.preventDefault(); useItem(); }
 });
 document.addEventListener('keyup',e=>{
   if(e.key==='ArrowLeft'||e.key==='a')keyL=false;
@@ -935,9 +972,10 @@ function bindHold(el,set){
   el.addEventListener('pointercancel',()=>set(false));
 }
 bindHold(sL,v=>keyL=v); bindHold(sR,v=>keyR=v);
-for(const id in BTNMAP){
-  document.getElementById(id).addEventListener('click',()=>useDrug(BTNMAP[id]));
-}
+const useBtn=document.getElementById('useBtn'), itemBoxEl=document.getElementById('itemBox'),
+  itemIconEl=document.getElementById('itemIcon');
+useBtn.addEventListener('click',useItem);
+itemBoxEl.addEventListener('click',useItem);
 
 /* ===== update ===== */
 function update(dt){
@@ -1128,7 +1166,7 @@ function update(dt){
   if(S.playerDist>=TARGET){ S.playerTime=S.t; finish(); }
 
   if(S.nearGlow>0) S.nearGlow=Math.max(0,S.nearGlow-dt*1.6);
-  tickBody(dt); tickClean(dt); tickObstacles(dt);
+  tickBody(dt); tickClean(dt); tickObstacles(dt); tickItems(dt);
   S.shake=Math.max(0,S.shake-dt*14);
 }
 
@@ -1215,17 +1253,25 @@ function render(){
         sprites.push({kind:'obst',okind:ob.kind,scale:sc.scale,x:sc.x+ob.laneX*sc.w,y:sc.y,w:sc.w});
       }
     }
+    // アイテムブロック（？キューブ）
+    for(const b of itemBoxes){
+      if(b.seg===seg.index && !b.taken){
+        sprites.push({kind:'item',scale:sc.scale,x:sc.x+b.laneX*sc.w,y:sc.y,w:sc.w});
+      }
+    }
   }
   // depth sort: far (small scale) first
   sprites.sort((a,b)=>a.scale-b.scale);
-  for(const s of sprites){ if(s.kind==='post') drawPost(s); else if(s.kind==='obst') drawObstacleSprite(s); else drawCarSprite(s); }
+  for(const s of sprites){ if(s.kind==='post') drawPost(s); else if(s.kind==='obst') drawObstacleSprite(s); else if(s.kind==='item') drawItemBoxSprite(s); else drawCarSprite(s); }
 
   drawEuphoria();
   drawFlow();
   drawNearGlow();
   drawDraftFx();
   drawDodgeGlow();
-  drawCar();
+  // 自車は別レイヤー(ctx2)へ。ぼかしフィルタを受けず、常にくっきり。
+  ctx2.clearRect(0,0,W,H);
+  const _ctx=ctx; ctx=ctx2; drawCar(); ctx=_ctx;
 }
 /* ===== ライバル人格（煽り/応援/ラバーバンド） ===== */
 const RIVAL_TEMPER={'アオイ':'cheer','ミドリ':'cocky','キン':'taunt','シロ':'quiet','アカ':'taunt'};
@@ -1573,6 +1619,56 @@ function buildObstacles(){
   }
 }
 buildObstacles();
+
+/* ===== アイテムブロック（？キューブ）配置・取得・描画 ===== */
+let itemBoxes=[];
+function buildItemBoxes(){
+  itemBoxes=[];
+  const lanes=[-0.42,0,0.42];
+  for(let i=70;i<segments.length-16;i+=Math.floor(30+Math.random()*18)){
+    itemBoxes.push({seg:i, laneX:lanes[Math.floor(Math.random()*lanes.length)], taken:false, respawn:0});
+  }
+}
+buildItemBoxes();
+function tickItems(dt){
+  tickItemRoulette(dt);
+  const pSeg=Math.floor((S.position/segLen))%segments.length;
+  for(const b of itemBoxes){
+    if(b.taken){ if(b.respawn && S.t>=b.respawn){ b.taken=false; b.respawn=0; } continue; }
+    let d=b.seg-pSeg; if(d<-segments.length/2) d+=segments.length;
+    if(d>=0 && d<=2){
+      const dxLane=Math.abs(S.playerX-b.laneX);
+      if(dxLane<0.42 && Math.abs(S.playerX)<=1){
+        b.taken=true; b.respawn=S.t+4.5;
+        grabItem();
+      }
+    }
+  }
+}
+function drawItemBoxSprite(s){
+  const w=Math.max(14,s.scale*roadW*W*0.16), r=w*0.5, cx=s.x, cy=s.y-w*0.45;
+  const t=S.t*2.2, hue=(S.t*200+s.x)%360;
+  ctx.save();
+  // 浮遊する虹色の角丸キューブ（？ブロック）
+  ctx.translate(cx,cy+Math.sin(t)*w*0.10);
+  ctx.shadowColor=`hsl(${hue},90%,60%)`; ctx.shadowBlur=Math.min(22,w*0.5);
+  const g=ctx.createLinearGradient(-r,-r,r,r);
+  g.addColorStop(0,`hsl(${hue},85%,62%)`);
+  g.addColorStop(0.5,`hsl(${(hue+120)%360},85%,58%)`);
+  g.addColorStop(1,`hsl(${(hue+240)%360},85%,60%)`);
+  ctx.fillStyle=g; roundRect(-r,-r,w,w,w*0.22); ctx.fill();
+  ctx.shadowBlur=0;
+  // 光沢
+  ctx.fillStyle='rgba(255,255,255,0.35)'; roundRect(-r*0.8,-r*0.85,w*0.8,w*0.34,w*0.14); ctx.fill();
+  // 枠
+  ctx.lineWidth=Math.max(1,w*0.05); ctx.strokeStyle='#ffffffcc'; roundRect(-r,-r,w,w,w*0.22); ctx.stroke();
+  // ？マーク
+  if(w>20){ ctx.fillStyle='#fff'; ctx.font=`900 ${w*0.62}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor='#0008'; ctx.shadowBlur=w*0.1; ctx.fillText('?',0,w*0.04); }
+  ctx.restore();
+  ctx.textBaseline='alphabetic';
+}
 const hitFxEl=document.getElementById('hitFx');
 function tickObstacles(dt){
   if(S.hitCool>0) S.hitCool=Math.max(0,S.hitCool-dt);
@@ -1837,9 +1933,12 @@ function hud(){
   for(let i=0;i<S.rivals.length;i++)
     rivalMarkEls[i].style.left=Math.min(100,S.rivals[i].dist/TARGET*100)+'%';
   elFill.style.inset='0 '+(100-yp)+'% 0 0';
-  tolBar.style.width=(S.tol*100)+'%'; cravBar.style.width=(S.crav*100)+'%';
-  document.querySelector('#debtBar i').style.width=(S.debt*100)+'%';
-  trustBar.style.width=S.trust+'%'; flowBar.style.width=(S.flow*100)+'%';
+  // メーターは「関係ある時だけ」出す（素で走ってる間はHUDをすっきり）
+  cravBar.style.width=(S.crav*100)+'%'; cravBar.parentElement.parentElement.style.display=S.crav>0.02?'':'none';
+  flowBar.style.width=(S.flow*100)+'%'; flowBar.parentElement.parentElement.style.display=S.flow>0.02?'':'none';
+  const _dI=document.querySelector('#debtBar i'); _dI.style.width=(S.debt*100)+'%';
+  _dI.parentElement.parentElement.style.display=S.debt>0.02?'':'none';
+  tolBar.style.width=(S.tol*100)+'%'; trustBar.style.width=S.trust+'%';
   elSubj.style.textShadow=(!S.effect&&S.flow>0.5)
     ? '0 0 20px #7dff9a,0 0 44px #27e1ff'
     : '0 0 18px var(--cyan),0 0 40px #27e1ff88';
@@ -1867,12 +1966,23 @@ function hud(){
   if(S.effect){elFeel.textContent=DRUGS[S.effect.type].feel; elFeel.style.color=castColor(S.effect.type);}
   else if(S.crav>0.45){elFeel.textContent='…もう一回、欲しい'; elFeel.style.color='#c08bff';}
   else {elFeel.textContent='　';}
-  // lit buttons
-  for(const id in BTNMAP){
-    const on=S.effect&&S.effect.type===BTNMAP[id];
-    document.getElementById(id).classList.toggle('lit',on);
-    // 一度ハマった薬が、渇望でうずいて誘ってくる
-    document.getElementById(id).classList.toggle('tempt', !S.effect && S.crav>0.4 && BTNMAP[id]===S.lastDrug);
+  // アイテムボックスUI（マリオカート風：空 / ルーレット / 所持）
+  itemBoxEl.classList.remove('empty','spin','ready');
+  if(S.roulette){
+    const idx=Math.floor(S.roulette.t*16)%DRUG_KEYS.length;
+    itemIconEl.textContent=DRUGS[DRUG_KEYS[idx]].em;
+    itemBoxEl.classList.add('spin');
+    useBtn.classList.remove('ready'); useBtn.textContent='抽選中…';
+  } else if(S.item){
+    const d=DRUGS[S.item];
+    itemIconEl.textContent=d.em;
+    itemBoxEl.classList.add('ready');
+    itemBoxEl.style.setProperty('--ic', castColor(S.item));
+    useBtn.classList.add('ready'); useBtn.textContent=d.em+' '+d.nm+' を使う';
+  } else {
+    itemIconEl.textContent='';
+    itemBoxEl.classList.add('empty');
+    useBtn.classList.remove('ready'); useBtn.textContent='アイテム無し（？ブロックを拾え）';
   }
   // canvas filters (the trip)
   let blur=Math.min(7,(S.subj/maxSpeed)*3.2), sat=1, hue=0, bri=1;
@@ -1894,7 +2004,8 @@ function hud(){
   if(S.effect&&S.effect.type==='lsd'){tx+=Math.sin(S.t*3)*6;ty+=Math.cos(S.t*2.2)*6;}
   if(S.effect&&S.effect.type==='weed') sc=1+0.04*Math.sin(S.t*1.5);        // ゆったり呼吸
   if(S.effect&&S.effect.type==='meth'&&S.effect.t<1.6) sc=1+0.16*(1-S.effect.t/1.6); // ラッシュのズーム
-  cv.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
+  const tf=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
+  cv.style.transform=tf; cv2.style.transform=tf; // 自車レイヤーは動きは合わせる（ぼかしは無し）
   comboHud();
   draftHud();
   cpHud();
@@ -2144,7 +2255,9 @@ function freshUI(){
   bodyHud.classList.add('hidden'); fcv.classList.remove('on');
   afterBanner.classList.remove('show'); cravePopup.classList.remove('show');
   banner.classList.remove('show'); elCombo.classList.remove('show');
-  clutchEl.classList.remove('show','hot'); buildObstacles(); hitFxEl.classList.remove('on');
+  clutchEl.classList.remove('show','hot'); buildObstacles(); buildItemBoxes(); hitFxEl.classList.remove('on');
+  itemBoxEl.classList.remove('spin','ready'); itemBoxEl.classList.add('empty'); itemIconEl.textContent='';
+  useBtn.classList.remove('ready'); useBtn.textContent='アイテム無し（？ブロックを拾え）';
 }
 document.getElementById('goBtn').addEventListener('click',()=>{
   audioInit();
