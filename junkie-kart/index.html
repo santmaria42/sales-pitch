@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>JUNKIE KART — キマってるのは、お前の画面だけ。</title>
+<title>JUNKIE KART — キメて飛ばす、トリップ・レース。</title>
 <style>
   :root{
     --neon:#ff3ea5; --cyan:#27e1ff; --lime:#b6ff3a; --gold:#ffd34d;
@@ -280,7 +280,7 @@
     background:rgba(8,5,20,.55);border:1px solid currentColor;text-shadow:0 0 10px currentColor;}
   /* 連絡先チップ（保留状態） */
   #contacts{position:absolute;left:50%;top:90px;transform:translateX(-50%);z-index:6;
-    display:flex;gap:6px;pointer-events:none;}
+    display:none;gap:6px;pointer-events:none;}
   .cchip{min-width:62px;background:rgba(8,5,20,.55);backdrop-filter:blur(6px);
     border:1px solid #ffffff22;border-radius:11px;padding:4px 8px 5px;text-align:center;transition:border-color .3s,box-shadow .3s;}
   .cchip.alert{box-shadow:0 0 14px #ff5d6c;animation:cblink .8s infinite;}
@@ -334,7 +334,7 @@
 
   <!-- 正直バー -->
   <div id="truth">
-    <div id="truthLabel"><span>実際の順位 <b>／ 嘘をつかない指標</b></span><span id="clock" style="display:none">0.0s</span></div>
+    <div id="truthLabel"><span>レース進行 <b>／ 順位</b></span><span id="clock" style="display:none">0.0s</span></div>
     <div id="track">
       <div id="trackFill"></div>
       <div id="rivalMarks"></div>
@@ -424,18 +424,17 @@
   <!-- start -->
   <div class="screen" id="start">
     <h1>JUNKIE KART</h1>
-    <div class="tag">キマってるのは、お前の画面だけ。</div>
+    <div class="tag">キメて飛ばす、終わりなきトリップ・ドライブ。</div>
     <div class="how">
       運転もアクセルもハンドルも<b>全部自動</b>。お前がやることは、ただ一つ。<br>
-      コースの<b>？アイテムブロック</b>を通過すると右上で<b>ルーレット</b>が回り、中身（薬）が決まる。<br>
-      <b>使うか、使わないか</b>──<b>下のボタン</b>（または右上ボックス／<b>Space</b>）だけ。<br><br>
-      使うと画面は最高に<b>速く・気持ちよく</b>感じる。<br>
-      でも上の<b>正直バー</b>を見ろ。前に進んでるのは…<br>
-      何も使わない<b>「素」のお前（白）</b>だ。<br>
-      アイテムは<b>めったに出ない</b>。1個を、いつ切るか。
+      コースの<b>？ブロック</b>を通過すると右上で<b>ルーレット</b>→中身（薬）が決まる。<br>
+      <b>使うか、温存か</b>──<b>下のボタン</b>（または右上ボックス／<b>Space</b>）だけ。<br><br>
+      キメると画面が<b>ぐにゃっと変わって、本物の加速</b>。<br>
+      <b>同じ薬でも出る効果は毎回ランダム</b>。爆速・万華鏡・千鳥足・記憶飛び…<br>
+      そして時々<b>👁勘ぐり</b>——誰かに見られてる気がしてくる。<br>
+      <b>ゴールは無い</b>。ただひたすら走って、<b>いろんな効果をキメ続けろ</b>。
     </div>
     <button class="btn" id="goBtn">スタート</button>
-    <div class="small">※ これは薬物の主観と現実のズレを体験する啓発デモです</div>
   </div>
 
   <!-- result -->
@@ -448,53 +447,18 @@
       <div class="scoreLine" id="resScoreBreak"></div>
       <div class="scoreLine" id="resScoreHi" style="margin-top:7px;opacity:.85"></div>
     </div>
-    <!-- 体感↔現実を1枚に統合（核の対比） -->
+    <!-- 結果 / 順位 -->
     <div class="resCard" id="resContrast">
-      <div class="cap">🧠 体感（脳内）　↔　📡 現実（リプレイ）</div>
-      <div class="big" id="resSubjRank">1位！最高だった</div>
+      <div class="cap">🏁 結果 ／ 順位</div>
+      <div class="big" id="resSubjRank">―</div>
       <div class="sub" id="resSubjSub"></div>
       <div class="cdiv"></div>
       <div class="big" id="resRealRank"></div>
       <div class="sub" id="resRealSub"></div>
     </div>
-    <!-- 物語を中心に（上へ） -->
-    <div class="resCard" id="resStory">
-      <div class="cap">📖 その夜、何があったか</div>
-      <div class="recline" id="resStoryBody" style="margin-top:6px"></div>
-    </div>
-    <div class="resCard hidden" id="resRecovery">
-      <div class="cap">🌱 もうひとつの結末</div>
-      <div class="big" id="resRecoveryHead"></div>
-      <div class="recline" id="resRecoveryBody"></div>
-    </div>
-    <div class="resCard" id="resLife">
-      <div class="cap">💔 失ったもの（人間関係）</div>
-      <div class="big" id="resLifeHead"></div>
-      <div class="sub" id="resLifeBody"></div>
-    </div>
-    <div class="resCard" id="resJunkie">
-      <div class="cap">🃏 ジャンキーランキング（不名誉）</div>
-      <div class="big" id="resJunkieRank"></div>
-      <div class="juse" id="resJunkieUse"></div>
-    </div>
     <div id="resMsg"></div>
-    <!-- 実在の相談窓口（常時表示） -->
-    <div id="helpCard">
-      <div class="cap">ひとりで抱えないで</div>
-      <h4>話せる場所は、本当にある</h4>
-      <div class="helprow"><b>精神保健福祉センター</b>（全国・無料）
-        <span class="desc">薬物・依存の相談窓口。地域の窓口は厚労省サイトから</span>
-        <a href="https://www.mhlw.go.jp/kokoro/support/mhcenter.html" target="_blank" rel="noopener">mhlw.go.jp/kokoro/support/mhcenter.html</a></div>
-      <div class="helprow"><b>よりそいホットライン　0120-279-338</b>
-        <span class="desc">24時間・通話無料。どんな悩みでも、まず声を。</span></div>
-      <div class="helprow"><b>ご家族の薬物問題で困っている方へ</b>
-        <span class="desc">国立精神・神経医療研究センター（家族向けガイド）</span>
-        <a href="https://www.ncnp.go.jp/nimh/yakubutsu/" target="_blank" rel="noopener">ncnp.go.jp/nimh/yakubutsu</a></div>
-      <div class="helprow" style="opacity:.62;font-size:11px;margin-top:10px">気持ちよさは、本物だったかもしれない。でも、戻ってこられる道もちゃんとある。</div>
-    </div>
-    <div class="small" id="bestNote"></div>
     <button id="shareBtn">📸 結果を画像でシェア</button>
-    <button class="btn" id="againBtn">もう一度（素で走る？）</button>
+    <button class="btn" id="againBtn">もう一度</button>
   </div>
 
 </div></div>
@@ -592,7 +556,7 @@ function reset(){
      shownRank:RIVALS.length+1, prevShownRank:RIVALS.length+1, visPeakRank:RIVALS.length+1,
      shownFlash:0, shownDir:0,
      drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0,coke:0},
-     item:null, roulette:null, itemsGrabbed:0,
+     item:null, roulette:null, itemsGrabbed:0, topSpeed:0, paraFigs:[], paraWhisperT:0,
      nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
      draft:0, draftActive:0, draftBurst:0, draftRv:null, draftPop:0, draftTotal:0,
      hitCool:0, hits:0, dodges:0, dodgeGlow:0, obstHitSeg:-1,
@@ -681,25 +645,83 @@ const DRUGS={
 const KEYMAP={'1':'meth','2':'weed','3':'lsd','4':'alc','5':'opi','6':'coke'};
 const BTNMAP={d1:'meth',d2:'weed',d3:'lsd',d4:'alc',d5:'opi',d6:'coke'};
 
+/* ===== 各薬物の効果バリアント（使うたびランダム・para=勘ぐりモード） ===== */
+const VARIANTS={
+  meth:[
+    {id:'rush',   label:'🍧 ラッシュ！脳が灼ける加速',          feel:'💥 ラッシュ!!! 最高に速い',      col:'#ff6b6b', cap:1.62, shake:7, fx:'rush'},
+    {id:'jitter', label:'⚡ ジッタ — 手が震えて視界チカチカ',    feel:'⚡ 手が震える、目がチカチカする',  col:'#ff8a8a', cap:1.42, wobble:0.16, shake:5, fx:'jitter'},
+    {id:'para',   label:'👁 勘ぐり — 誰かに見られてる気がする',  feel:'👁 …誰かに、見られてる？',        col:'#ff5db0', cap:1.45, shake:3, para:true},
+  ],
+  coke:[
+    {id:'god',    label:'🚲 全能感、トップスピード',             feel:'🚲 怖いものなんて何もない',       col:'#9fe4ff', cap:1.85, wobble:0.08, shake:6, fx:'rush'},
+    {id:'manic',  label:'🗣 多弁モード、全部いける気がする',     feel:'🗣 喋りが止まらない、全部いける', col:'#bff0ff', cap:1.55, wobble:0.05, fx:'manic'},
+    {id:'para',   label:'🚲 勘ぐり — 後ろの車、つけてきてる？',  feel:'🚲 …あの車、さっきから後ろに',    col:'#ff5db0', cap:1.50, wobble:0.06, para:true},
+  ],
+  weed:[
+    {id:'melt',   label:'🌿 とろけ — からだが溶けてスロー',      feel:'🍃 からだが溶ける…',              col:'#5cff8f', cap:1.06, fx:'melt'},
+    {id:'giggle', label:'😆 爆笑 — 全部おもしろい',             feel:'😆 なんかもう、全部おもろい',     col:'#9bff6a', cap:1.14, wobble:0.06, fx:'giggle'},
+    {id:'para',   label:'🌿 勘ぐり — 今の音、何だった？',        feel:'🌿 …今の音、気のせい？',          col:'#ff5db0', cap:1.00, para:true},
+  ],
+  lsd:[
+    {id:'rainbow',label:'🌈 虹の道を、空へ爆走',                 feel:'✨ 道が虹になった!!',             col:'#c46bff', cap:1.50, fx:'rainbow'},
+    {id:'kaleido',label:'🌀 万華鏡 — 世界が折りたたまれる',      feel:'🌀 世界が万華鏡に折れていく',     col:'#e6b3ff', cap:1.35, wobble:0.08, fx:'kaleido'},
+    {id:'para',   label:'👁 勘ぐり — 看板も木も、こっちを見てる',feel:'👁 …全部が、こっちを見てる',      col:'#ff5db0', cap:1.40, para:true, fx:'rainbow'},
+  ],
+  alc:[
+    {id:'stagger',label:'🍺 千鳥足 — まっすぐ走ってるつもり',    feel:'🍺 まっすぐ走ってる、つもり',     col:'#ffb04d', cap:1.20, wobble:0.30, fx:'stagger'},
+    {id:'bold',   label:'😤 気が大きい — 運転うまい(と思ってる)',feel:'😤 イケる、運転うまい',           col:'#ffd34d', cap:1.32, wobble:0.18, fx:'stagger'},
+    {id:'blackout',label:'🌫 記憶飛び — ここどこ？いつ走り出した',feel:'🌫 …ここ、どこ？いつ走り出した？',col:'#cbbbd0', cap:1.10, wobble:0.22, fx:'blackout'},
+  ],
+  opi:[
+    {id:'tunnel', label:'💊 とろけるトンネル、なめらか加速',     feel:'😌 痛みも不安も消えた',           col:'#9ec1ff', cap:1.18, fx:'tunnel'},
+    {id:'nod',    label:'💤 うとうと — ふっと意識が飛ぶ',        feel:'💤 まぶたが重い…',                col:'#8fa0c0', cap:1.00, fx:'nod'},
+    {id:'warm',   label:'🌊 多幸の波に包まれる',                 feel:'🌊 あったかい波が、全身に',       col:'#bcd0ff', cap:1.25, fx:'warm'},
+  ],
+};
+
 function useDrug(type){
   if(!playing||S.done) return;
   const d=DRUGS[type];
-  S.effect={type,t:0,dur:d.dur*(1-S.tol*0.35)}; // 耐性が上がると効きが短い
-  S.tol=Math.min(1,S.tol+d.tolAdd);
-  S.crav=Math.max(0,S.crav-0.5); // 一時的に渇望が消える
+  const pool=VARIANTS[type]; const v=pool[Math.floor(Math.random()*pool.length)];
+  S.effect={type,t:0,dur:d.dur*(1-S.tol*0.30),variant:v}; // 連続で使うと効きはやや短く
+  S.tol=Math.min(1,S.tol+d.tolAdd*0.6);
   S.used=true; S.drugCount++; S.lastUseT=S.t; S.lastDrug=type; S.drugUse[type]=(S.drugUse[type]||0)+1;
-  S.visPeakRank=S.shownRank; // この一服で「何位まで上がった気になったか」を記録（薬切れの落差用）
-  S.trust=Math.max(0,S.trust-6); // キメる＝周りを放置する。人間関係が即削れる
-  for(const k in S.contacts) S.contacts[k].mood=Math.max(0,S.contacts[k].mood-4);
-  if(type==='lsd') S.lsdStartRank=S.rank; // トリップ前の順位を記録
-  { const pool=INCIDENTS[type]; // ありそうな大失態が確率で発生
-    if(pool && Math.random()<0.5){ const avail=pool.filter(t=>S.incidents.indexOf(t)<0);
-      if(avail.length){ const inc=avail[Math.floor(Math.random()*avail.length)];
-        S.incidents.push(inc); S.trust=Math.max(0,S.trust-9);
-        showFeel('🚨 '+inc,'#ff6b8a'); logEvent('🚨 '+inc,'#ff6b8a'); } } }
-  showFeel(d.feel, castColor(type));
-  pulseCast(d.cast); sfxDrug(type); rivalsReactDrug();
-  logEvent('💊 '+d.nm+'を使った（'+S.drugCount+'回目）', castColor(type));
+  S.paraFigs.length=0; S.paraWhisperT=1.2;
+  if(type==='lsd') S.lsdStartRank=S.rank;
+  showFeel(v.feel, v.col); pulseCast(d.cast); sfxDrug(type);
+  logEvent('💊 '+d.nm+'をキメた → '+v.label, v.col);
+}
+/* ===== 勘ぐり（パラノイア）：囁き＋路肩の人影＋心音 ===== */
+const PARA_LINES=['後ろに、誰かいる','ずっと、見られてる','その看板…さっき動いた','足音が、ついてくる','みんな知ってる気がする','ミラーに、知らない顔','囁き声が聞こえる','早く、振り切らないと'];
+function tickParanoia(dt){
+  S.paraWhisperT-=dt;
+  if(S.paraWhisperT<=0){
+    S.paraWhisperT=1.8+Math.random()*2.2;
+    showFeel('👁 '+PARA_LINES[Math.floor(Math.random()*PARA_LINES.length)],'#d9b3ff',2.2);
+    heartbeat(); S.shake=Math.max(S.shake,3);
+    S.paraFigs.push({side:Math.random()<0.5?-1:1, t:0, dur:1.6+Math.random()*1.2, lane:(Math.random()*1.4-0.7)});
+  }
+  for(let i=S.paraFigs.length-1;i>=0;i--){ const f=S.paraFigs[i]; f.t+=dt; if(f.t>=f.dur) S.paraFigs.splice(i,1); }
+}
+function drawParanoia(){
+  if(!(S.effect&&S.effect.variant&&S.effect.variant.para)) return;
+  ctx2.save();
+  const pul=0.14+0.12*Math.abs(Math.sin(S.t*3));
+  const vg=ctx2.createRadialGradient(W/2,H*0.45,H*0.18,W/2,H*0.45,H*0.72);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(10,0,20,'+(0.5+pul).toFixed(2)+')');
+  ctx2.fillStyle=vg; ctx2.fillRect(0,0,W,H);
+  for(const f of S.paraFigs){
+    const k=Math.min(1,f.t/f.dur), a=Math.sin(k*Math.PI); // フェードイン→アウト
+    const px=W/2 + f.side*(W*0.33) + f.lane*W*0.06;
+    const py=H*0.50 + Math.sin(f.t*2)*4;
+    const h=H*0.17, w=h*0.40;
+    ctx2.globalAlpha=a*0.88; ctx2.fillStyle='#05030a';
+    ctx2.fillRect(px-w/2,py-h,w,h);
+    ctx2.beginPath(); ctx2.arc(px,py-h,w*0.55,0,7); ctx2.fill();
+    ctx2.globalAlpha=a; ctx2.fillStyle='#ff3b6b';
+    ctx2.beginPath(); ctx2.arc(px-w*0.20,py-h,2.4,0,7); ctx2.arc(px+w*0.20,py-h,2.4,0,7); ctx2.fill();
+  }
+  ctx2.globalAlpha=1; ctx2.restore();
 }
 function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':t==='coke'?'#9fe4ff':'#9ec1ff';}
 
@@ -917,7 +939,7 @@ const GAME_URL='santmaria420.github.io/sales-pitch/junkie-kart';
 let lastResult=null;
 function shareText(){
   const r=lastResult||{};
-  return `【JUNKIE KART】体感は1位、現実は${r.realRank||''}。\n「速い」と感じてる間が、一番遅い。\n#JUNKIEKART 反薬物レースゲーム\nhttps://`+GAME_URL+'/';
+  return `【JUNKIE KART】${r.field||6}台中 ${r.pos||''}位・最高速 ${r.topK||''}km/h・RANK ${r.rank||''}！\nキメて飛ばす、トリップ・レース 🏎💊🌈\n#JUNKIEKART\nhttps://`+GAME_URL+'/';
 }
 function rrect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath();}
 function wrapText(x,text,cx,y,maxW,lh){let line='',yy=y;for(const ch of (text||'')){const t=line+ch;if(x.measureText(t).width>maxW&&line){x.fillText(line,cx,yy);line=ch;yy+=lh;}else line=t;}x.fillText(line,cx,yy);}
@@ -930,24 +952,24 @@ function shareResult(){
   x.fillStyle=sg; x.beginPath(); x.arc(540,360,380,0,7); x.fill();
   x.textAlign='center';
   x.fillStyle='#fff'; x.font='900 italic 90px sans-serif'; x.fillText('JUNKIE KART',540,250);
-  x.fillStyle='#bfefff'; x.font='800 30px sans-serif'; x.fillText('キマってるのは、お前の画面だけ。',540,308);
+  x.fillStyle='#bfefff'; x.font='800 30px sans-serif'; x.fillText('キメて飛ばす、トリップ・レース。',540,308);
   // card 1
   x.fillStyle='rgba(10,6,24,.62)'; rrect(x,120,420,840,190,28); x.fill();
   x.lineWidth=3; x.strokeStyle='#ff3ea5'; x.stroke();
   x.textAlign='left';
-  x.fillStyle='#ff9bd0'; x.font='800 28px sans-serif'; x.fillText('🧠 体感リザルト（脳内）',160,485);
-  x.fillStyle='#fff'; x.font='900 70px sans-serif'; x.fillText(r.subjRank,160,575);
+  x.fillStyle='#ff9bd0'; x.font='800 28px sans-serif'; x.fillText('🏁 結果',160,485);
+  x.fillStyle=r.won?'#7dff9a':'#fff'; x.font='900 64px sans-serif'; x.fillText((r.pos||'')+'位 / '+(r.field||6)+'台'+(r.won?' 🏆':''),160,575);
   // card 2
   x.fillStyle='rgba(10,6,24,.62)'; rrect(x,120,650,840,190,28); x.fill();
   x.strokeStyle='#27e1ff'; x.stroke();
-  x.fillStyle='#9fe8ff'; x.font='800 28px sans-serif'; x.fillText('📡 現実リザルト（リプレイ）',160,715);
-  x.fillStyle=r.won?'#7dff9a':'#ff6b8a'; x.font='900 70px sans-serif'; x.fillText(r.realRank,160,805);
+  x.fillStyle='#9fe8ff'; x.font='800 28px sans-serif'; x.fillText('⚡ 最高速 ・ RANK',160,715);
+  x.fillStyle='#fff'; x.font='900 64px sans-serif'; x.fillText((r.topK||0)+' km/h　RANK '+(r.rank||''),160,805);
   // punch
   x.textAlign='center'; x.fillStyle='#ffd34d'; x.font='800 40px sans-serif';
   wrapText(x,r.punch,540,945,880,54);
   x.fillStyle='#cbd'; x.font='700 30px sans-serif';
-  x.fillText('人間関係 '+r.life+'/100　・　薬物 '+r.drugCount+'回',540,1170);
-  x.fillStyle='#9ab'; x.font='800 28px sans-serif'; x.fillText('#JUNKIEKART  反薬物レースゲーム',540,1255);
+  x.fillText((r.score||0).toLocaleString()+' pts　・　薬物 '+(r.drugCount||0)+'回',540,1170);
+  x.fillStyle='#9ab'; x.font='800 28px sans-serif'; x.fillText('#JUNKIEKART  トリップ・レース',540,1255);
   x.fillStyle='#789'; x.font='600 24px sans-serif'; x.fillText(GAME_URL,540,1300);
   c.toBlob(b=>{
     if(!b) return;
@@ -983,218 +1005,76 @@ itemBoxEl.addEventListener('click',useItem);
 function update(dt){
   if(!playing||S.done) return;
   S.t+=dt;
-  tickMail(dt);
   tickCheckpoints(dt);
-  if(S.trust<=0 && !S.collapsed){ S.collapsed=true; showFeel('🧹 何もかも、失った',' #aaa'); }
+  S.tol=Math.max(0,S.tol-0.012*dt); // 耐性はゆっくり戻る（内部のみ）
 
-  // ---- tolerance decay & craving ----
-  S.tol=Math.max(0,S.tol-0.012*dt);
-  let inhigh=!!S.effect;
-  // 一度でも使うと、使わないほど渇望がどんどん募る（断つほど加速）
-  if(!inhigh && S.used){ const since=S.t-S.lastUseT;
-    S.crav=Math.min(1, S.crav + (0.05 + S.tol*0.22 + Math.min(0.45,since*0.012))*dt); }
-  S.crav=Math.max(0,S.crav-(inhigh?0.6:0.05)*dt);
-
-  // ---- peak耐性 / クリーン・フロー / フラッシュバック / 立て直し ----
-  S.peakTol=Math.max(S.peakTol,S.tol);
-  if(S.effect) S.trust=Math.max(0,S.trust-dt*1.2); // ハイの間、誰のことも見えてない＝関係が減り続ける
-  const centered=Math.abs(S.playerX)<0.6, onroad=Math.abs(S.playerX)<=1;
-  if(!S.effect && onroad && centered && S.speed>maxSpeed*0.8) S.flow=Math.min(1,S.flow+dt*0.22);
-  else S.flow=Math.max(0,S.flow-dt*(S.effect?1.4:0.6));
-  comboTick(dt);
-  tickClutch(dt); tickDebt(dt);
-  // フラッシュバック：やめても歪みが戻る（過去の使用が残る）
-  if(S.fb>0){ S.fb-=dt; S.shake=Math.max(S.shake,3); S.playerX+=Math.sin(S.t*22)*0.35*dt; }
-  else if(!S.effect && S.peakTol>0.35 && Math.random()<(S.peakTol-0.3)*0.12*dt){
-    S.fb=1.6; S.fbText=['まだ誰かに見られてる…','さっきの声、空耳か？','背後に、誰かいる'][Math.floor(Math.random()*3)];
-    showFeel('👁 '+S.fbText,'#c08bff'); sfxBad();
-  }
-  // 渇望に耐えてシラフが続けば人間関係が少しずつ戻る（立て直し）
-  if(!S.effect && S.t-S.lastUseT>4){ const capT=S.used?80:100; // 一度でも使うと、もう満点には戻らない
-    if(S.trust<capT) S.trust=Math.min(capT,S.trust+dt*0.8); }
-  // 渇望のドクン（心音）
-  if(S.crav>0.5 && !S.effect){ S.heartT-=dt; if(S.heartT<=0){ heartbeat(); S.heartT=1.1-S.crav*0.4; } }
-  // 渇望ポップアップ（もう一回キメる⇄耐える）は撤去。
-  // 渇望は「アイテムを使うか我慢か」に統合され、心音と画面のざわつきで圧をかけるだけにする。
-  if(S.craveCool>0) S.craveCool-=dt;
-  if(S.afterCool>0) S.afterCool-=dt;
-  maybeAftermath();
-  if(S.snapback>0) S.snapback-=dt;
-
-  // ---- effect resolve -> speed cap & subjective multiplier ----
-  let cap=1.0, subjMul, guard=true, invert=false, lag=0, authority=1, wobble=0;
+  // ===== 薬物の効果＝バリアント駆動（使うたびランダム）。切れても罰は無し =====
+  let cap=1.0, wobble=0;
   if(S.effect){
-    const e=S.effect; e.t+=dt;
-    const p=e.t/e.dur;
-    switch(e.type){
-      case 'meth':
-        {const bdur=1.4*(1-S.tol*0.5), bcap=1.32-S.tol*0.25, fcap=Math.max(0.18,0.40-S.tol*0.18);
-         if(!e._banked){ e._banked=true;
-           let stole=false;
-           if(S.clutch){ const g=S.clutch.rv.dist-S.playerDist; if(g>0&&g<CLUTCH_REACH){stole=true; resolveClutch('survived');} }
-           bankBurstDebt(stole); }
-         if(e.t<bdur){cap=bcap; subjMul=1.65;}
-         else {cap=fcap; subjMul=e.t<2.6?1.5:0.5;} // 体感も遅れて墜ちる
-         S.shake=Math.max(S.shake,e.t<bdur?6:2);}
-        break;
-      case 'coke':
-        {const bdur=0.9*(1-S.tol*0.4), bcap=1.40-S.tol*0.22, fcap=Math.max(0.2,0.45-S.tol*0.15);
-         if(!e._banked){ e._banked=true;
-           let stole=false;
-           if(S.clutch){ const g=S.clutch.rv.dist-S.playerDist; if(g>0&&g<CLUTCH_REACH){stole=true; resolveClutch('survived');} }
-           bankBurstDebt(stole); }
-         if(e.t<bdur){cap=bcap; subjMul=1.9;}
-         else {cap=fcap; subjMul=e.t<1.8?1.6:0.5;} // 一瞬で落ちる
-         authority=1.7; wobble=0.12; // 過信でハンドルが過敏・ガクガク蛇行
-         S.shake=Math.max(S.shake,e.t<bdur?7:2);}
-        break;
-      case 'weed':
-        cap=0.70; subjMul=1.28; lag=0.34; break;
-      case 'lsd':
-        cap=0.30; subjMul=1.7; guard=false; break; // 空の近道に行った気で実進行はほぼ停止
-      case 'alc':
-        cap=0.88; subjMul=1.4; invert=true; wobble=0.22; break;
-      case 'opi':
-        cap=Math.max(0,0.80*(1-p)); subjMul=Math.max(0,1.2*(1-p)); authority=Math.max(0,1-p*1.1);
-        break;
-    }
+    const e=S.effect, v=e.variant; e.t+=dt;
+    cap=v.cap; wobble=v.wobble||0;
+    if(v.shake) S.shake=Math.max(S.shake, e.t<1.6?v.shake:Math.max(2,v.shake*0.5));
+    if(v.fx==='nod' && Math.sin(S.t*1.1)>0.95) S.shake=Math.max(S.shake,4);  // うとうと：ガクッ
+    if(v.para) tickParanoia(dt);
     if(e.t>=e.dur){
-      const endedType=e.type, endNm=DRUGS[endedType].nm;
-      if(endedType==='opi'){ // 入力ゼロまで墜ちたら オーバードーズ
-        S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash(); logEvent('💀 オーバードーズで停止','#ff3b3b');
-      }
-      if(endedType==='coke'){ // 急落＝強烈な渇望（コカインの特徴）
-        S.crav=Math.min(1,S.crav+0.3); }
-      // ===== 全薬物共通：薬切れ＝「抜いた」は嘘。体感順位が現実まで一気に転落 =====
-      S.effect=null;
-      S.snap=SNAP_DUR; S.snapFrom=S.visDist; S.snapback=1.0; S.shake=Math.max(S.shake,13); sfxCrash();
-      const felt=S.visPeakRank||S.rank;            // 何位まで上がった気でいたか
-      const lost=Math.max(0,S.rank-felt);          // 現実で何台に抜き返されたか
-      S.snapLost=lost;
-      if(lost>0){
-        showCpFlash('💊 効果が切れた','「'+felt+'位」のはずが…'+lost+'台に抜き返され '+S.rank+'位','#ff5d6c',6.5);
-        showFeel('⬇ '+endNm+'が切れた…現実は '+S.rank+'位','#ff5d6c',4);
-        logEvent('💊 '+endNm+'が切れた。体感'+felt+'位→現実'+S.rank+'位（'+lost+'台に抜き返された）','#ff5d6c');
-      } else {
-        showCpFlash('💊 効果が切れた','飛ばしてた気が、1mも前に出てなかった','#ffd34d',6.5);
-        showFeel('⬇ '+endNm+'が切れた…元の位置のまま','#ffd34d',4);
-        logEvent('💊 '+endNm+'が切れた。体感だけ速かった（順位は'+S.rank+'位のまま）','#ffd34d');
-      }
-      if(S.rushDodges>0)
-        logEvent('🌈 あれだけ「速い！」と感じても（'+S.rushDodges+'回）— 現実は1mも前に出ていない','#c46bff');
-      S.rushDodges=0; S.rushHits=0; S.rushHaz.length=0;
+      const endNm=DRUGS[e.type].nm; S.effect=null;
+      showFeel('💨 '+endNm+'が抜けた','#bcd',2.0);
+      logEvent('💨 '+endNm+'の効果が切れた','#bcd');
+      S.rushHaz.length=0; S.paraFigs.length=0;
     }
-  } else {
-    subjMul=cap; // シラフはほぼ正直
   }
-  // 渇望ペナルティ：キメてなくても依存してると本来の力が出ない（離脱）
-  let withdrawal = inhigh?0:(S.crav*0.30);
-  let finalCap = Math.max(0, cap*(1-withdrawal));
-  if(!S.effect) finalCap += S.flow*0.20; // 素の集中で本来以上に伸びる
-  if(!S.effect) finalCap += comboBoost(); // クリーンコンボの段位ブースト（素のみ）
-  if(!S.effect) finalCap += draftBoost(); // ドラフト解放/風よけブースト（素のみ）
-  finalCap = Math.max(0, finalCap - debtPenalty()); // 崩壊負債：使うほど素の地力が削れる
-
-  // ---- steering 撤去：プレイヤーは横操作しない。車は自動でレーンを保つ ----
-  let useSteer=0;
+  let finalCap=Math.max(0,cap);
+  if(!S.effect) finalCap += draftBoost(); // スリップストリーム（位置取りのご褒美）
 
   // ---- speed ----
   const target=maxSpeed*finalCap;
-  if(S.spin>0){ S.spin-=dt; S.speed=Math.max(0,S.speed-6000*dt); useSteer+=Math.sin(S.t*30)*1.5; }
+  if(S.spin>0){ S.spin-=dt; S.speed=Math.max(0,S.speed-6000*dt); }
   else if(S.speed<target) S.speed=Math.min(target,S.speed+accel*dt);
   else S.speed=Math.max(target,S.speed-accel*1.4*dt);
+  S.topSpeed=Math.max(S.topSpeed,S.speed);
 
   const spd=S.speed/maxSpeed;
-  // steering & centrifugal（残すのは演出のみ：薬のゆらぎ＋カーブの遠心力で軽く流れる）
-  S.playerX += useSteer*dt*2.3*Math.max(0.25,spd);
+  // 演出：薬のゆらぎ＋カーブの遠心力で軽く流れる（自動でレーン中央へ戻る・落ちない）
   S.playerX += Math.sin(S.t*5.5)*wobble*dt;
   const base=findSeg(S.position);
   S.playerX -= base.curve*0.0016*spd*spd*(dt*60);
-  // オートパイロット：横操作が無いので、車は自動でレーン中央へ戻り続ける（場外には落ちない）
   S.playerX += -S.playerX*Math.min(1,dt*3.2);
-
-  // ---- offroad / レール外れ ----
-  const off=Math.abs(S.playerX)>1;
-  if(off){
-    if(guard){ // シラフ：ガードレールが守る → 強烈に減速
-      S.speed=Math.max(maxSpeed*0.18,S.speed-7000*dt);
-      S.shake=Math.max(S.shake,3);
-      S.playerX=Math.max(-1.45,Math.min(1.45,S.playerX)); // 壁
-    } else { // キメてる：行ける感。でも戻れないと「落ちる」
-      S.fall+=dt;
-      if(S.fall>1.5){ S.spin=1.2; S.shake=12; S.playerX=S.playerX>0?0.8:-0.8; S.fall=0;
-        showFeel('🕳 レール外れて墜落', '#ff5d5d'); sfxCrash(); logEvent('🕳 レール外れて墜落（場外には道が無い）','#ff5d5d'); }
-    }
-  } else S.fall=Math.max(0,S.fall-dt*2);
+  if(Math.abs(S.playerX)>1) S.playerX=Math.max(-1.45,Math.min(1.45,S.playerX)); // ガードレール
   S.playerX=Math.max(-2,Math.min(2,S.playerX));
 
-  // ---- subjective speed (THE LIE) ----
-  const subjTarget=maxSpeed*subjMul;
-  S.subj += (subjTarget-S.subj)*Math.min(1,dt*6);
+  // ---- 体感速度＝実速度（嘘なし）。サウンド/演出用に滑らかに追従 ----
+  S.subj += (S.speed-S.subj)*Math.min(1,dt*6);
 
-  // ---- advance（現実）：順位・関門・ゴール・正直バーは全部これで動く ----
+  // ---- 進行（カメラは現実に一致） ----
   S.playerDist+=S.speed*dt;
-
-  // ---- advance（体感／画面）：カメラとライバルの見え方は“嘘”で動く ----
-  if(S.effect){
-    // キメてる間：景色とライバルが体感速度で流れ、どんどん前へ＝みんな抜いてる感覚
-    S.visDist+=S.subj*dt;
-  } else if(S.snap>0){
-    // 薬切れ：飛ばしてた画面が現実の位置まで一気に引き戻される（ライバルが追い抜き返す）
-    S.snap-=dt;
-    const k=Math.min(1,1-S.snap/SNAP_DUR), e=1-Math.pow(1-k,3); // easeOut
-    S.visDist=S.snapFrom+(S.playerDist-S.snapFrom)*e;
-  } else {
-    // シラフ：画面は現実に寄り添う
-    S.visDist+=(S.playerDist-S.visDist)*Math.min(1,dt*6);
-  }
-  if(S.visDist<S.playerDist) S.visDist=S.playerDist; // 体感は現実より後ろには行かない
-  S.position=((S.visDist%trackLen)+trackLen)%trackLen; // カメラ位置＝体感距離
-  // 路面の縞を「体感速度」で余分に流す
-  S.bandPhase += Math.max(0,(S.subj-S.speed))/segLen*dt*1.6;
+  S.visDist=S.playerDist;
+  S.position=((S.visDist%trackLen)+trackLen)%trackLen;
+  S.bandPhase += S.speed/segLen*dt*1.6;
   if(S.bandPhase>1e7) S.bandPhase-=1e7;
 
-  // ---- rivals (普通に走り切る車) ----
+  // ---- rivals ----
   rivalAI(dt); tickBubbles(dt); tickDraft(dt);
   for(const rv of S.rivals){
-    const tgt=(rv._tgtBoost||rv.base) + Math.sin(S.t*0.7+rv.phase)*170; // 性格/ラバーバンド+ゆらぎ
+    const tgt=(rv._tgtBoost||rv.base) + Math.sin(S.t*0.7+rv.phase)*170;
     if(rv.speed<tgt) rv.speed=Math.min(tgt,rv.speed+2200*dt);
     else rv.speed=Math.max(tgt,rv.speed-2200*dt);
     rv.dist+=rv.speed*dt;
-    if(rv.fin===0 && rv.dist>=TARGET) rv.fin=S.t;
   }
-  // 自分以外が全員ゴールしたら、そこで終了（置いていかれた）
-  if(!S.done && S.cpResult!=='left' && S.playerDist<TARGET && S.rivals.every(rv=>rv.fin>0)){
-    S.cpResult='left'; S.playerTime=S.t;
-    showCpFlash('🏁 全員ゴール','置いていかれた…','#ff5d6c'); sfxCrash();
-    logEvent('🏁 ライバル全員がゴール。君だけ、まだ途中だった','#ff5d6c');
-    finish(); return;
-  }
+  // ★ゴールなし：ライバルはずっと並走し続ける（無限走行）
 
   // ---- rank ----
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
-  S.rank=ahead+1;
+  S.rank=ahead+1; S.shownRank=S.rank;
   if(S.rank!==S.prevRank){
     S.rankDir=S.rank<S.prevRank?1:-1; S.rankFlash=0.9; sfxRank(S.rankDir>0); S.prevRank=S.rank;
-    {let near=null,best=1e9; for(const rv of S.rivals){const g=Math.abs(rv.dist-S.playerDist); if(g<best){best=g;near=rv;}}
-     if(near){ rivalSay(near, S.rankDir>0?'passed':'pass');
-       logEvent((S.rankDir>0?'🏎 ':'🐌 ')+near.name+(S.rankDir>0?' を抜いた':' に抜かれた')+' → '+S.rank+'位', S.rankDir>0?'#7dff9a':'#ff6b8a'); }}
+    let near=null,best=1e9; for(const rv of S.rivals){const g=Math.abs(rv.dist-S.playerDist); if(g<best){best=g;near=rv;}}
+    if(near) logEvent((S.rankDir>0?'🏎 ':'🐌 ')+near.name+(S.rankDir>0?' を抜いた':' に抜かれた')+' → '+S.rank+'位', S.rankDir>0?'#7dff9a':'#ff6b8a');
   } else S.rankFlash=Math.max(0,S.rankFlash-dt);
-
-  // ---- 体感順位（大きな順位バッジに出る“嘘”。キメてる間だけ現実より上に行ける）----
-  let vahead=0; for(const rv of S.rivals) if(rv.dist>S.visDist) vahead++;
-  S.shownRank=vahead+1;
-  if(S.effect) S.visPeakRank=Math.min(S.visPeakRank,S.shownRank);
-  if(S.shownRank!==S.prevShownRank){
-    S.shownDir=S.shownRank<S.prevShownRank?1:-1; S.shownFlash=0.9;
-    if(S.effect && S.shownDir>0) sfxRank(true); // 抜いた“気分”の効果音
-    S.prevShownRank=S.shownRank;
-  } else S.shownFlash=Math.max(0,S.shownFlash-dt);
-
-  if(S.playerDist>=TARGET){ S.playerTime=S.t; finish(); }
+  S.shownFlash=S.rankFlash;
+  // ★ゴール判定なし：走り続けて、いろんな効果を決め続ける
 
   if(S.nearGlow>0) S.nearGlow=Math.max(0,S.nearGlow-dt*1.6);
-  tickBody(dt); tickClean(dt); tickObstacles(dt); tickItems(dt); tickRush(dt);
+  tickItems(dt); tickRush(dt);
   S.shake=Math.max(0,S.shake-dt*14);
 }
 
@@ -1300,6 +1180,7 @@ function render(){
   // 自車は別レイヤー(ctx2)へ。ぼかしフィルタを受けず、常にくっきり。
   ctx2.clearRect(0,0,W,H);
   drawRush();
+  drawParanoia();
   const _ctx=ctx; ctx=ctx2; drawCar(); ctx=_ctx;
 }
 /* ===== ライバル人格（煽り/応援/ラバーバンド） ===== */
@@ -1520,25 +1401,10 @@ function tickClean(dt){
 
 /* ===== 「今の運転」状態表示（クリックの結果が運転にどう効いてるか） ===== */
 function drivingStatus(){
-  if(S.spin>0) return ['💥 スピン！ 立て直せ','#ff5d5d'];
-  if(S.effect && S.hitCool>0.7) return ['💥 ハイで反応が遅れ、被弾','#ff5d5d'];
-  if(Math.abs(S.playerX)>1) return ['⚠️ 場外！ レールに戻れ','#ff8a3a'];
-  if(S.effect){ const e=S.effect;
-    if(e.type==='meth') return e.t<1.4?['🍧 急加速中（でも画面だけ）','#ff6b6b']:['🍧 失速…効果切れで最低速','#ff6b6b'];
-    if(e.type==='coke') return e.t<0.9?['🚲 全能感で過信、ハンドル過敏','#9fe4ff']:['🚲 急落…ガクガクで失速','#9fe4ff'];
-    if(e.type==='weed') return ['🌿 操作が 0.34秒 遅れて効く','#5cff8f'];
-    if(e.type==='lsd') return ['🌈 幻の近道（実際は止まってる）','#c46bff'];
-    if(e.type==='alc') return ['🍺 ハンドルが逆＋勝手に蛇行','#ffb04d'];
-    if(e.type==='opi') return ['💊 操作が効かなくなっていく','#9ec1ff'];
-  }
-  if(S.clutch){ const g=S.clutch.rv.dist-S.playerDist;
-    return (g>0&&g<CLUTCH_REACH)
-      ? ['⚑ 関門・射程内：今なら抜ける（でも代償）','#ffd34d']
-      : ['⚑ 関門：素で食らいつけ','#9fe8ff']; }
-  if(S.debt>0.25) return ['🩸 崩壊負債で地力ダウン（−'+Math.round(debtPenalty()*100)+'%）','#ff6b8a'];
-  if(S.crav>0.55) return ['🥵 渇望でフラつく（離脱症状）','#c08bff'];
-  // 集中ゾーン／スリップストリームの表示は撤去（内部効果は残す）
-  if(S.speed>maxSpeed*0.7) return ['✅ クリーン走行','#9fe8ff'];
+  if(S.spin>0) return ['💥 スピン！','#ff5d5d'];
+  if(Math.abs(S.playerX)>1) return ['⚠️ 場外！','#ff8a3a'];
+  if(S.effect && S.effect.variant) return [S.effect.variant.label, S.effect.variant.col||'#cfe'];
+  if(S.speed>maxSpeed*0.7) return ['✅ ハイスピード走行','#9fe8ff'];
   return ['🚗 加速中…','#cfe'];
 }
 
@@ -1553,6 +1419,7 @@ function logEvent(text,col){
 function contactKey(from){ if(from.indexOf('ゆい')>=0)return'koi'; if(from.indexOf('上司')>=0)return'boss'; if(from==='母')return'fam'; return null; }
 const cEls={koi:document.getElementById('cKoi'),boss:document.getElementById('cBoss'),fam:document.getElementById('cFam')};
 function updateContacts(){
+  return; // 連絡先（人間関係）レイヤーは撤去
   const cur=S.mail?contactKey(S.mail.data.from):null;
   for(const k in S.contacts){
     const c=S.contacts[k], el=cEls[k], s=el.querySelector('.cs');
@@ -1641,8 +1508,8 @@ let itemBoxes=[];
 function buildItemBoxes(){
   itemBoxes=[];
   const lanes=[-0.42,0,0.42];
-  // 出現頻度を従来の約1/5に（150〜240セグ毎）。希少にして「温存か即キメか」の駆け引きを作る
-  for(let i=70;i<segments.length-16;i+=Math.floor(150+Math.random()*90)){
+  // 無限走行：効果を決め続けられるよう？ブロックを多めに（55〜100セグ毎）
+  for(let i=40;i<segments.length-16;i+=Math.floor(55+Math.random()*45)){
     itemBoxes.push({seg:i, laneX:lanes[Math.floor(Math.random()*lanes.length)], taken:false, respawn:0});
   }
 }
@@ -1999,10 +1866,12 @@ function hud(){
   elSubj.textContent=k(S.subj);
   elReal.textContent='実速度 '+k(S.speed)+' km/h';
   // 関門タイマー（時計）は撤去
-  const yp=Math.min(100,S.playerDist/TARGET*100);
+  // 無限走行：周回上の位置（mod trackLen）でバーを表示
+  const lap=v=>(((v%trackLen)+trackLen)%trackLen)/trackLen*100;
+  const yp=lap(S.playerDist);
   mYou.style.left=yp+'%';
   for(let i=0;i<S.rivals.length;i++)
-    rivalMarkEls[i].style.left=Math.min(100,S.rivals[i].dist/TARGET*100)+'%';
+    rivalMarkEls[i].style.left=lap(S.rivals[i].dist)+'%';
   elFill.style.inset='0 '+(100-yp)+'% 0 0';
   // メーターは「関係ある時だけ」出す（素で走ってる間はHUDをすっきり）
   cravBar.style.width=(S.crav*100)+'%'; cravBar.parentElement.parentElement.style.display=S.crav>0.02?'':'none';
@@ -2014,16 +1883,15 @@ function hud(){
   elSubj.style.textShadow=(!S.effect&&S.flow>0.5)
     ? '0 0 20px #7dff9a,0 0 44px #27e1ff'
     : '0 0 18px var(--cyan),0 0 40px #27e1ff88';
-  // position badge — 大きい順位は「体感（嘘）」を映す。素では現実と一致する。
-  const lying = !!S.effect || S.snap>0;
-  const showR = S.shownRank;
+  // position badge — 嘘なし。常に現実の順位。
+  const showR = S.rank;
   posNum.textContent=showR; posOrd.textContent=ord(showR);
-  posBadge.classList.toggle('pulse', S.shownFlash>0.5 || S.snap>0);
-  const col = lying ? '#ff5db0' : (showR===1?'#7dff9a':showR<=3?'#ffd34d':'#ff6b8a');
+  posBadge.classList.toggle('pulse', S.rankFlash>0.5);
+  const col = showR===1?'#7dff9a':showR<=3?'#ffd34d':'#ff6b8a';
   posNum.style.color=col; posNum.style.textShadow='0 0 18px '+col;
-  posLblEl.textContent = lying ? '体感 FEEL' : '順位 POSITION';
-  posLblEl.style.color = lying ? '#ffd0ec' : '#bfefff';
-  posLblEl.style.background = lying ? '#5a0a3a' : '#1a0730';
+  posLblEl.textContent = '順位 POSITION';
+  posLblEl.style.color = '#bfefff';
+  posLblEl.style.background = '#1a0730';
   // nearest car ahead / behind note
   if(S.rankFlash>0){
     elRank.style.color=S.rankDir>0?'#7dff9a':'#ff6b8a';
@@ -2040,8 +1908,7 @@ function hud(){
   // feel text
   if(feelTimer>0){feelTimer-=1/60; flash.style.opacity=Math.min(1,feelTimer*2);}
   else flash.style.opacity=0;
-  if(S.effect){elFeel.textContent=DRUGS[S.effect.type].feel; elFeel.style.color=castColor(S.effect.type);}
-  else if(S.crav>0.45){elFeel.textContent='…もう一回、欲しい'; elFeel.style.color='#c08bff';}
+  if(S.effect){const v=S.effect.variant; elFeel.textContent=v?v.feel:DRUGS[S.effect.type].feel; elFeel.style.color=v?(v.col||castColor(S.effect.type)):castColor(S.effect.type);}
   else {elFeel.textContent='　';}
   // アイテムボックスUI（マリオカート風：空 / ルーレット / 所持）
   itemBoxEl.classList.remove('empty','spin','ready');
@@ -2073,7 +1940,18 @@ function hud(){
     if(e.type==='weed'){blur+=0.8;sat=1.2;bri=0.92;}
     if(e.type==='lsd'){sat=1.8;hue=(S.t*120)%360;}
     if(e.type==='alc'){blur+=1.0;}
-    if(e.type==='opi'){bri=Math.max(0.4,1-e.t/e.dur*0.7);sat=Math.max(0.2,1-e.t/e.dur*0.9);}
+    if(e.type==='opi'){bri=Math.max(0.4,1-e.t/e.dur*0.55);sat=Math.max(0.3,1-e.t/e.dur*0.7);}
+    // ---- バリアント別の追い味 ----
+    const v=e.variant;
+    if(v){
+      if(v.para){ bri*=0.6; sat*=0.7; hue=(hue+295)%360; }                          // 勘ぐり：暗く澱む
+      if(v.fx==='kaleido'){ sat=2.0; hue=(S.t*240)%360; blur+=0.4; }                 // 万華鏡：色が回る
+      if(v.fx==='blackout' && Math.sin(S.t*0.8)>0.55){ bri*=0.22; blur+=2.0; }       // 記憶飛び：瞬断
+      if(v.fx==='nod' && Math.sin(S.t*1.1)>0.92){ bri*=0.3; }                        // うとうと：まぶた
+      if(v.fx==='jitter' && Math.random()<0.16){ bri*=1.45; }                        // チカチカ
+      if(v.fx==='warm'){ sat=1.3; bri=1.06; hue=18; }                               // 多幸の波：あたたかい
+      if(v.fx==='giggle'){ sat=1.4; bri=1.05; }
+    }
   }
   if(S.snap>0) blur+=3.2*(S.snap/SNAP_DUR); // 現実に引き戻される一瞬だけ景色が流れる
   if(S.fb>0){ blur+=2.0; hue=(hue+265)%360; sat=1.5; } // フラッシュバックの歪み
@@ -2137,163 +2015,71 @@ function tickCheckpoints(dt){
 function cpHud(){ /* 関門HUDは撤去 */ }
 const SCORE_BASE=3000, TIME_PAR=42;
 const RANK_COL={S:'#d8ff9a',A:'#27e1ff',B:'#ffd34d',C:'#ffb04d',D:'#ff8a6a',E:'#ff6b8a'};
-function finalScore(pos,field,youT,timeup){
+function finalScore(pos,field,youT,left){
   let s=SCORE_BASE;
-  s+=(field-pos+1)*600; s+=Math.floor(S.longestClean)*40; s+=S.nearTotal*120;
-  s+=Math.round(S.trust*18); s+=S.resisted*150; s+=Math.max(0,(TIME_PAR-youT))*50; s+=S.score;
-  s-=S.drugCount*350; s-=S.relapses*250;
-  const lostU=new Set(S.lost.map(l=>l.from+l.real)).size; s-=lostU*500;
-  s-=Math.floor(S.bodyDamage*100)*6;
-  if(!S.used) s=Math.round(s*1.6);
-  if(timeup) s=Math.round(s*0.4);
+  s+=(field-pos+1)*700;                  // 上位ほど高い
+  s+=Math.max(0,(TIME_PAR-youT))*60;     // 速いほど高い
+  s+=S.nearTotal*120;                    // ニアミスの手応え
+  s+=S.draftTotal*100;                   // スリップストリーム
+  s+=S.drugCount*150;                    // キメるほどスタイル点
+  if(left) s=Math.round(s*0.5);
   s=Math.max(0,Math.round(s));
   let rank;
-  if(timeup) rank=s>=2600?'C':s>=1500?'D':'E';
-  else if(s>=9000) rank='S'; else if(s>=7000) rank='A'; else if(s>=5000) rank='B'; else if(s>=3000) rank='C'; else rank='D';
-  if(rank==='S' && S.used) rank='A';
-  return {score:s, rank, lostU};
+  if(s>=9000) rank='S'; else if(s>=7000) rank='A'; else if(s>=5000) rank='B'; else if(s>=3500) rank='C'; else rank='D';
+  return {score:s, rank};
 }
 
 function finish(){
   if(S.done) return; S.done=true; playing=false;
-  document.getElementById('resStoryBody').innerHTML=buildStory();
-  cpHudEl.classList.remove('warn'); cpFlashEl.classList.remove('show');
+  cpFlashEl.classList.remove('show');
   banner.classList.remove('show'); S.mail=null;
-  cravePopup.classList.remove('show'); S.cravEvent=null;
-  afterBanner.classList.remove('show'); S.after=null;
   for(const b of S.bubbles) b.el.remove(); S.bubbles=[];
-  bodyHud.classList.add('hidden'); fcv.classList.remove('on'); fctx.clearRect(0,0,W,H);
-  clutchEl.classList.remove('show','hot'); S.clutch=null;
   const youT=S.playerTime||S.t;
-  // 最終順位 = ゴール時点で前にいる車の数+1
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
   const pos=ahead+1, field=RIVALS.length+1, won=pos===1;
-  // ---- スコア & ランク ----
-  const timeup=S.cpResult==='timeup', left=S.cpResult==='left';
-  const SR=finalScore(pos,field,youT,timeup||left);
+  const left=S.cpResult==='left';
+  const SR=finalScore(pos,field,youT,left);
+  const topK=Math.round(S.topSpeed/maxSpeed*320);
   let hi=0,hiNew=false;
   try{ hi=parseInt(localStorage.getItem('jk_hiscore')||'0',10)||0;
     if(SR.score>hi){ hi=SR.score; hiNew=true; localStorage.setItem('jk_hiscore',String(SR.score)); } }catch(e){}
+
   document.getElementById('resScoreRank').textContent='RANK '+SR.rank;
   document.getElementById('resScoreRank').style.color=RANK_COL[SR.rank]||'#fff';
   document.getElementById('resScoreVal').textContent=SR.score.toLocaleString()+' pts';
   document.getElementById('resScoreBreak').innerHTML=
-    (timeup?'<span class="sub">⏱ 時間切れ：スコア×0.4・ランク上限C</span><br>':left?'<span class="sub">🏁 全員に先着された：スコア×0.4・ランク上限C</span><br>':'')+
-    '順位 <b>'+pos+'位</b>'+(S.used?'':' ・<span class="add">クリーン完走 ×1.6</span>')+
-    '<br><span class="add">クリーン秒+'+(Math.floor(S.longestClean)*40)+' / ニアミス+'+(S.nearTotal*120)+' / 連絡+'+Math.round(S.trust*18)+' / 耐えた+'+(S.resisted*150)+'</span>'+
-    ((S.drugCount||SR.lostU||S.relapses)?('<br><span class="sub">薬物-'+(S.drugCount*350)+(SR.lostU?' / 失った関係-'+(SR.lostU*500):'')+(S.relapses?' / 渇望敗北-'+(S.relapses*250):'')+'</span>'):'');
+    '順位 <b>'+pos+'位 / '+field+'台</b>'+(won?' 🏆':'')+
+    '<br><span class="add">完走タイム '+youT.toFixed(1)+'s ・ 最高速 '+topK+'km/h ・ 薬物 '+S.drugCount+'回</span>'+
+    (left?'<br><span class="sub">🏁 全員に先着された（スコア×0.5）</span>':'');
   document.getElementById('resScoreHi').innerHTML=
-    (hiNew?'🎉 <b>ハイスコア更新！</b>　':'')+'最高スコア '+hi.toLocaleString()+' pts'+
-    (S.used?'<br><span class="sub">※ 薬物を使うとランクSは出ない。クリーン最速だけが頂点。</span>':'');
+    (hiNew?'🎉 <b>ハイスコア更新！</b>　':'')+'最高スコア '+hi.toLocaleString()+' pts';
 
-  document.getElementById('resSubjRank').textContent = S.used? '1位！最高だった' : pos+'位 — 普通に走った';
-  document.getElementById('resSubjRank').style.color = S.used?'#fff':'#cfe';
-  document.getElementById('resSubjSub').textContent = S.used
-    ? `体感トップスピード ${Math.round(S.subj/maxSpeed*320)}km/h。脳内では誰よりも速かった。`
-    : '体感も現実も一致。嘘がなかった。';
+  // 結果カード（旧・体感↔現実を「結果／順位」に転用）
+  document.getElementById('resSubjRank').textContent = pos+'位 でゴール';
+  document.getElementById('resSubjRank').style.color = won?'#7dff9a':'#cfe';
+  const DN={meth:'🍧覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド',coke:'🚲コカイン'};
+  const uses=Object.keys(S.drugUse).filter(k=>S.drugUse[k]>0).sort((a,b)=>S.drugUse[b]-S.drugUse[a])
+    .map(k=>DN[k]+' ×'+S.drugUse[k]);
+  document.getElementById('resSubjSub').innerHTML = uses.length?'キメた薬物：'+uses.join('　'):'今回はシラフで完走';
+  document.getElementById('resRealRank').textContent = '最高速 '+topK+' km/h';
+  document.getElementById('resRealRank').style.color = '#9fe8ff';
 
-  document.getElementById('resRealRank').textContent = pos+'位 / '+field+'台'+(won?'（優勝）':left?'（全員に先着された）':'');
-  document.getElementById('resRealRank').style.color = won?'#7dff9a':pos<=3?'#ffd34d':'#ff6b8a';
-
-  // standings list (ライバルはゴール済みなら実タイム、未到達なら距離で換算)
+  // standings
   const board=[{name:'あなた',color:'#ff3ea5',t:youT}]
     .concat(S.rivals.map(rv=>({name:rv.name,color:rv.color,
        t: rv.fin || youT + (TARGET-rv.dist)/rv.base})));
   board.sort((a,b)=>a.t-b.t);
-  const lines=board.map((b,i)=>
+  document.getElementById('resRealSub').innerHTML=board.map((b,i)=>
     `${i+1}. <span style="color:${b.color}">${b.name}</span> ${b.t.toFixed(1)}s`).join('　/　');
-  document.getElementById('resRealSub').innerHTML=lines;
 
-  // ---- 人間関係（失ったもの） ----
-  const life=Math.round(S.trust);
-  const lifeHead = life<=0 ? '崩壊 — 職も、家族も、恋人も失った'
-    : life<40 ? 'ボロボロ（'+life+'/100）'
-    : life<75 ? 'すり減った（'+life+'/100）'
-    : '保てた（'+life+'/100）';
-  document.getElementById('resLifeHead').textContent=lifeHead;
-  document.getElementById('resLifeHead').style.color = life<40?'#ff6b8a':life<75?'#ffd34d':'#7dff9a';
-  const lifeEl=document.getElementById('resLifeBody');
-  if(S.lost.length){
-    const seen=new Set(), items=[];
-    for(const l of S.lost){ const key=l.from+l.real+(l.sent||''); if(seen.has(key))continue; seen.add(key);
-      items.push(`<div>📨 <b>${l.from}</b>「${l.real}」<br><span style="color:#ff8aa6;font-weight:700">　→ あなた：「${l.sent||l.why}」</span></div>`);
-      if(items.length>=5)break; }
-    lifeEl.innerHTML='あの優しい連絡に、君はこう返していた：<div class="lostlist">'+items.join('')+'</div>';
-  } else {
-    lifeEl.textContent='大事な連絡を、ちゃんと受け取れた。';
-  }
-  if(S.resisted||S.relapses){
-    lifeEl.innerHTML='誘惑：耐えた <b style="color:#7dff9a">'+S.resisted+'</b> 回 ／ 負けた <b style="color:#ff6b8a">'+S.relapses+'</b> 回<br>'+lifeEl.innerHTML;
-  }
-  document.getElementById('resLife').style.display = (S.used||S.lost.length||S.resisted||S.relapses)?'block':'none';
-
-  const cleanFinish = S.used && (S.t-S.lastUseT)>12; // 最後は断ち切った
   let msg;
-  if(left){
-    msg='全員がゴールした。<span class="hi">君だけ、まだ途中だった。</span><br>「速い」と感じてる間に、世界は先へ行っていた。';
-  } else if(!S.used){
-    msg=won
-      ? '<span class="hi">何も使わずに優勝</span>。速さは、集中から来てた。'
-      : `${pos}位。でも全部<span class="hi">自分の実力</span>。ここから上げていける。`;
-  } else if(cleanFinish){
-    msg=`途中まではキメてた。でも最後は<span class="hi">自分の足で走り切った。</span><br>耐性は残る。それでも、立て直せる。`;
-  } else if(life<=0){
-    msg=`体感は1位。現実は${pos}位で、<span class="hi">隣にはもう、誰もいない。</span>`;
-  } else if(!won){
-    msg=`薬物を ${S.drugCount} 回。体感は1位、現実は ${pos}位。<br><span class="hi">「速い」と感じてる間、君は一番遅かった。</span>`;
-  } else {
-    msg=`今回は勝てた。でも耐性は残り、連絡はいくつも消えた。<br><span class="hi">次は同じ量じゃ効かない。</span>`;
-  }
+  if(left) msg='全員ゴール、<span class="hi">置いていかれた…</span> 次はアイテムを早めに切ろう。';
+  else if(won) msg='<span class="hi">優勝！</span> キメて、飛ばして、抜き切った。';
+  else msg=pos+'位。<span class="hi">アイテムの切りどころ</span>次第で、もっと上にいける。';
   document.getElementById('resMsg').innerHTML=msg;
-  lastResult={ subjRank: S.used?'1位！最高だった':(pos+'位'), realRank: pos+'位 / '+field+'台',
-    won:won, life:life, drugCount:S.drugCount, punch: msg.replace(/<br>/g,' ').replace(/<[^>]+>/g,'') };
 
-  // ---- ジャンキーランキング（不名誉） ----
-  const n=S.drugCount;
-  const jrank = n===0?'クリーン（薬物ゼロ）': n<=2?'チップ（かじっただけ）': n<=5?'常用者': n<=9?'ジャンキー':'廃人';
-  const DN={meth:'🍧覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド',coke:'🚲コカイン'};
-  let jrankShow=jrank, jbonus='';
-  // ギリギリ生還：大量に使って、それでもLIFEを残して完走（皮肉な"勝ち"）
-  if(n>=8 && life>0){ jbonus=' 🃏 ギリギリ生還'; }
-  document.getElementById('resJunkieRank').textContent='ジャンキー度：'+jrankShow+jbonus;
-  const uses=Object.keys(S.drugUse).filter(k=>S.drugUse[k]>0).sort((a,b)=>S.drugUse[b]-S.drugUse[a])
-    .map(k=>DN[k]+' ×'+S.drugUse[k]);
-  let jmax=0; try{ jmax=parseInt(localStorage.getItem('jk_maxdrugs')||'0',10)||0; if(n>jmax){jmax=n;localStorage.setItem('jk_maxdrugs',String(n));} }catch(e){}
-  document.getElementById('resJunkieUse').innerHTML=
-    (uses.length?'使った薬物：'+uses.join('　'):'今回は何も使わなかった')+
-    '<br><span style="opacity:.65">合計 '+n+' 回　/　自己最多記録 '+jmax+' 回</span>'+
-    (n>=8?'<br><span style="color:#ff9bb0">…これだけ使って体感1位。現実は'+pos+'位。割に合うか？</span>':'');
-  document.getElementById('resJunkie').style.display = S.used?'block':'none';
-
-  // ベストタイム（クリーン完走のみ）
-  let best=NaN, isNew=false;
-  try{
-    best=parseFloat(localStorage.getItem('jk_best')||'');
-    if(won && !S.used && (isNaN(best)||youT<best)){ best=youT; localStorage.setItem('jk_best',String(youT)); isNew=true; }
-  }catch(e){}
-  document.getElementById('bestNote').textContent = isNaN(best)
-    ? '※ 何も使わずクリーン完走でベスト記録に挑戦'
-    : ('🏅 クリーン最速：'+best.toFixed(1)+'s'+(isNew?'（新記録！）':''));
-
-  // ---- 身体の蝕み（リザルトに追記） ----
-  if(S.bodyDamage>0.08){
-    let bodyLine='体も削れていた：<div class="lostlist">';
-    if(S.teeth>0.2) bodyLine+='<div>🦷 歯がボロボロに（“メス・マウス”）— 戻らない</div>';
-    if(S.weight>0.2) bodyLine+='<div>⚖️ げっそり痩せて、鏡の顔が知らない人だった</div>';
-    if(S.skin>0.2) bodyLine+='<div>🩹 掻きむしった肌に、消えない傷とあと</div>';
-    bodyLine+='</div>';
-    document.getElementById('resLifeBody').innerHTML += '<div style="margin-top:9px;color:#ffb3c8">'+bodyLine+'</div>';
-    document.getElementById('resLife').style.display='block';
-  }
-  // ---- 回復エンディング：使ったが断ち切って完走した者だけ ----
-  const recEl=document.getElementById('resRecovery');
-  if(S.used && S.longestClean>=12 && S.resisted>0 && life>0){
-    document.getElementById('resRecoveryHead').textContent='🌱 立て直した — 最後は、素のお前だった';
-    document.getElementById('resRecoveryBody').innerHTML=
-      '誘惑に <b style="color:#7dff9a">'+S.resisted+'</b> 回耐え、最長 <b style="color:#7dff9a">'+Math.round(S.longestClean)+'秒</b> 断ち切った。<br>'+
-      '耐性も傷も残る。それは消えない。<br>でも「もう一回」を断れた回数が、戻れる証拠だ。';
-    recEl.classList.remove('hidden');
-  } else recEl.classList.add('hidden');
+  lastResult={ pos, field, won, time:youT, topK, drugCount:S.drugCount,
+    score:SR.score, rank:SR.rank, punch: msg.replace(/<[^>]+>/g,'') };
 
   if(won) sfxGood(); else sfxBad();
   document.getElementById('result').classList.remove('hidden');
