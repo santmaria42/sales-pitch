@@ -1081,6 +1081,13 @@ function update(dt){
     rv.dist+=rv.speed*dt;
     if(rv.fin===0 && rv.dist>=TARGET) rv.fin=S.t;
   }
+  // 自分以外が全員ゴールしたら、そこで終了（置いていかれた）
+  if(!S.done && S.cpResult!=='left' && S.playerDist<TARGET && S.rivals.every(rv=>rv.fin>0)){
+    S.cpResult='left'; S.playerTime=S.t;
+    showCpFlash('🏁 全員ゴール','置いていかれた…','#ff5d6c'); sfxCrash();
+    logEvent('🏁 ライバル全員がゴール。君だけ、まだ途中だった','#ff5d6c');
+    finish(); return;
+  }
 
   // ---- rank ----
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
@@ -1914,8 +1921,8 @@ function finish(){
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
   const pos=ahead+1, field=RIVALS.length+1, won=pos===1;
   // ---- スコア & ランク ----
-  const timeup=S.cpResult==='timeup';
-  const SR=finalScore(pos,field,youT,timeup);
+  const timeup=S.cpResult==='timeup', left=S.cpResult==='left';
+  const SR=finalScore(pos,field,youT,timeup||left);
   let hi=0,hiNew=false;
   try{ hi=parseInt(localStorage.getItem('jk_hiscore')||'0',10)||0;
     if(SR.score>hi){ hi=SR.score; hiNew=true; localStorage.setItem('jk_hiscore',String(SR.score)); } }catch(e){}
@@ -1923,7 +1930,7 @@ function finish(){
   document.getElementById('resScoreRank').style.color=RANK_COL[SR.rank]||'#fff';
   document.getElementById('resScoreVal').textContent=SR.score.toLocaleString()+' pts';
   document.getElementById('resScoreBreak').innerHTML=
-    (timeup?'<span class="sub">⏱ 時間切れ：スコア×0.4・ランク上限C</span><br>':'')+
+    (timeup?'<span class="sub">⏱ 時間切れ：スコア×0.4・ランク上限C</span><br>':left?'<span class="sub">🏁 全員に先着された：スコア×0.4・ランク上限C</span><br>':'')+
     '順位 <b>'+pos+'位</b>'+(S.used?'':' ・<span class="add">クリーン完走 ×1.6</span>')+
     '<br><span class="add">クリーン秒+'+(Math.floor(S.longestClean)*40)+' / ニアミス+'+(S.nearTotal*120)+' / 連絡+'+Math.round(S.trust*18)+' / 耐えた+'+(S.resisted*150)+'</span>'+
     ((S.drugCount||SR.lostU||S.relapses)?('<br><span class="sub">薬物-'+(S.drugCount*350)+(SR.lostU?' / 失った関係-'+(SR.lostU*500):'')+(S.relapses?' / 渇望敗北-'+(S.relapses*250):'')+'</span>'):'');
@@ -1937,7 +1944,7 @@ function finish(){
     ? `体感トップスピード ${Math.round(S.subj/maxSpeed*320)}km/h。脳内では誰よりも速かった。`
     : '体感も現実も一致。嘘がなかった。';
 
-  document.getElementById('resRealRank').textContent = pos+'位 / '+field+'台'+(won?'（優勝）':'');
+  document.getElementById('resRealRank').textContent = pos+'位 / '+field+'台'+(won?'（優勝）':left?'（全員に先着された）':'');
   document.getElementById('resRealRank').style.color = won?'#7dff9a':pos<=3?'#ffd34d':'#ff6b8a';
 
   // standings list (ライバルはゴール済みなら実タイム、未到達なら距離で換算)
@@ -1974,7 +1981,9 @@ function finish(){
 
   const cleanFinish = S.used && (S.t-S.lastUseT)>12; // 最後は断ち切った
   let msg;
-  if(!S.used){
+  if(left){
+    msg='全員がゴールした。<span class="hi">君だけ、まだ途中だった。</span><br>「速い」と感じてる間に、世界は先へ行っていた。';
+  } else if(!S.used){
     msg=won
       ? '<span class="hi">何も使わずに優勝</span>。速さは、集中から来てた。'
       : `${pos}位。でも全部<span class="hi">自分の実力</span>。ここから上げていける。`;
