@@ -66,6 +66,21 @@
   #feel{font-size:12px;font-weight:800;margin-top:4px;height:16px;letter-spacing:.08em;
     text-shadow:0 0 10px currentColor;}
   #realKmh{margin-top:2px;font-size:11px;color:#7fd9a0;font-weight:700;opacity:.9;}
+  #cpHud{margin-top:5px;font-size:11px;font-weight:800;color:#cfe;}
+  #cpHud.warn{color:#ff5d6c;animation:cpblink .7s infinite;}
+  @keyframes cpblink{0%,100%{opacity:1}50%{opacity:.45}}
+  #cpFlash{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.7);
+    z-index:13;pointer-events:none;opacity:0;text-align:center;font-weight:900;font-style:italic;
+    transition:opacity .25s,transform .25s;}
+  #cpFlash.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+  #cpFlash .big{font-size:clamp(26px,7vw,38px);text-shadow:0 0 22px currentColor;line-height:1;}
+  #cpFlash .ext{font-size:clamp(14px,4vw,18px);font-weight:900;margin-top:5px;}
+  /* リザルト スコア＆ランク */
+  #resScore{background:linear-gradient(135deg,#10233a,#04130e);border:1px solid #b6ff3a66;}
+  #resScoreRank{font-size:54px;font-weight:900;font-style:italic;line-height:.9;text-shadow:0 0 26px currentColor;margin:2px 0 4px;}
+  #resScoreVal{font-size:30px;font-weight:900;color:#d8ff9a;}
+  .scoreLine{font-size:11.5px;line-height:1.7;color:#dceeff;margin-top:6px;}
+  .scoreLine .add{color:#9dffc0;} .scoreLine .sub{color:#ff9bb0;} .scoreLine b{color:#fff;}
 
   /* ===== drug deck ===== */
   #deck{position:absolute;left:0;right:0;bottom:0;display:flex;gap:6px;
@@ -333,6 +348,7 @@
   </div></div>
 
   <div id="flash"></div>
+  <div id="cpFlash"><div class="big" id="cpFlashBig"></div><div class="ext" id="cpFlashExt"></div></div>
   <div id="combo"><div id="comboN">0</div><div id="comboL">CLEAN COMBO</div></div>
   <div id="clutch"><div id="clutchLbl">⚑ 関門 — 抜けるチャンス</div>
     <div id="clutchTgt">　</div><div id="clutchBar"><i></i></div></div>
@@ -358,6 +374,7 @@
     <div id="feel">　</div>
     <div id="realKmh">実速度 0 km/h</div>
     <div id="driveState">🚗 加速中…</div>
+    <div id="cpHud">🚩 ―</div>
   </div>
 
   <div id="draftMeter"><div class="dl">DRAFT 吸気</div><div class="db"><i></i></div></div>
@@ -366,12 +383,12 @@
 
   <!-- drug deck -->
   <div id="deck">
-    <button class="drug" id="d1"><span class="em">💉</span><span class="nm">覚醒剤</span><span class="key">1</span></button>
+    <button class="drug" id="d1"><span class="em">🍧</span><span class="nm">覚醒剤</span><span class="key">1</span></button>
     <button class="drug" id="d2"><span class="em">🌿</span><span class="nm">大麻</span><span class="key">2</span></button>
     <button class="drug" id="d3"><span class="em">🌈</span><span class="nm">LSD</span><span class="key">3</span></button>
     <button class="drug" id="d4"><span class="em">🍺</span><span class="nm">酒</span><span class="key">4</span></button>
     <button class="drug" id="d5"><span class="em">💊</span><span class="nm">オピオイド</span><span class="key">5</span></button>
-    <button class="drug" id="d6"><span class="em">❄️</span><span class="nm">コカイン</span><span class="key">6</span></button>
+    <button class="drug" id="d6"><span class="em">🚲</span><span class="nm">コカイン</span><span class="key">6</span></button>
   </div>
 
   <!-- start -->
@@ -393,6 +410,13 @@
   <!-- result -->
   <div class="screen hidden" id="result">
     <div id="resTitle">RESULT</div>
+    <div class="resCard" id="resScore">
+      <div class="cap">🏆 スコア & ランク</div>
+      <div id="resScoreRank">―</div>
+      <div id="resScoreVal">0 pts</div>
+      <div class="scoreLine" id="resScoreBreak"></div>
+      <div class="scoreLine" id="resScoreHi" style="margin-top:7px;opacity:.85"></div>
+    </div>
     <div class="resCard" id="resSubj">
       <div class="cap">🧠 体感リザルト（君の脳内）</div>
       <div class="big" id="resSubjRank">1位！最高だった</div>
@@ -537,7 +561,9 @@ function reset(){
      bubbles:[], rubber:0, rivalChatCool:0, sawDrugCool:0,
      bodyDamage:0, teeth:0, weight:0, skin:0, itchT:0, scratchT:0, formicationSeen:false,
      cleanStreak:0, longestClean:0,
-     log:[], story:[], incidents:[], lsdStartRank:1, contacts:{
+     log:[], story:[], incidents:[], lsdStartRank:1,
+     cpIdx:0, timeLeft:22, cpResult:null, cpFlash:0, cpWarn:false, score:0,
+     contacts:{
        koi:{name:'ゆい',em:'💗',mood:100,pending:0,gone:false},
        boss:{name:'上司',em:'🏢',mood:100,pending:0,gone:false},
        fam:{name:'家族',em:'👩',mood:100,pending:0,gone:false}},
@@ -602,8 +628,8 @@ function heartbeat(){ tone(48,0.18,'sine',0.3); tone(60,0.14,'sine',0.18,AC?AC.c
 
 /* drug defs */
 const DRUGS={
-  meth:{em:'💉',nm:'覚醒剤',dur:6.6, feel:'💥 ラッシュ!!! 脳が灼ける、最高だ', cast:'castMeth', tolAdd:0.16},
-  coke:{em:'❄️',nm:'コカイン',dur:5.0, feel:'❄️ 全能感!! 怖いものなんて何もない', cast:'castCoke', tolAdd:0.18},
+  meth:{em:'🍧',nm:'覚醒剤',dur:6.6, feel:'💥 ラッシュ!!! 脳が灼ける、最高だ', cast:'castMeth', tolAdd:0.16},
+  coke:{em:'🚲',nm:'コカイン',dur:5.0, feel:'🚲 全能感!! 怖いものなんて何もない', cast:'castCoke', tolAdd:0.18},
   weed:{em:'🌿',nm:'大麻',dur:6.4, feel:'🍃 ふわ…からだが溶ける、なにも怖くない', cast:'castWeed', tolAdd:0.10},
   lsd:{em:'🌈',nm:'LSD',dur:8.5, feel:'✨ 道が虹になった!! 行ける!!', cast:'castLsd', tolAdd:0.13},
   alc:{em:'🍺',nm:'酒',dur:6.2, feel:'😤 イケる、運転うまい', cast:'castAlc', tolAdd:0.12},
@@ -897,6 +923,7 @@ function update(dt){
   if(!playing||S.done) return;
   S.t+=dt;
   tickMail(dt);
+  tickCheckpoints(dt);
   if(S.trust<=0 && !S.collapsed){ S.collapsed=true; showFeel('🧹 何もかも、失った',' #aaa'); }
 
   // ---- tolerance decay & craving ----
@@ -975,7 +1002,7 @@ function update(dt){
         S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash(); logEvent('💀 オーバードーズで停止','#ff3b3b');
       }
       if(e.type==='coke'){ // 急落＝強烈な渇望（コカインの特徴）
-        S.crav=Math.min(1,S.crav+0.3); showFeel('❄️ 落ちる…もっと欲しい','#9fe4ff'); }
+        S.crav=Math.min(1,S.crav+0.3); showFeel('🚲 落ちる…もっと欲しい','#9fe4ff'); }
       if(e.type==='lsd'){ // 空の旅は幻覚。現実に引き戻され、その間に抜かれている
         S.snapback=1.0; S.shake=14;
         const passed=Math.max(0,S.rank-(S.lsdStartRank||1));
@@ -1396,8 +1423,8 @@ function drivingStatus(){
   if(S.effect && S.hitCool>0.7) return ['💥 ハイで反応が遅れ、被弾','#ff5d5d'];
   if(Math.abs(S.playerX)>1) return ['⚠️ 場外！ レールに戻れ','#ff8a3a'];
   if(S.effect){ const e=S.effect;
-    if(e.type==='meth') return e.t<1.4?['💉 急加速中（でも画面だけ）','#ff6b6b']:['💉 失速…効果切れで最低速','#ff6b6b'];
-    if(e.type==='coke') return e.t<0.9?['❄️ 全能感で過信、ハンドル過敏','#9fe4ff']:['❄️ 急落…ガクガクで失速','#9fe4ff'];
+    if(e.type==='meth') return e.t<1.4?['🍧 急加速中（でも画面だけ）','#ff6b6b']:['🍧 失速…効果切れで最低速','#ff6b6b'];
+    if(e.type==='coke') return e.t<0.9?['🚲 全能感で過信、ハンドル過敏','#9fe4ff']:['🚲 急落…ガクガクで失速','#9fe4ff'];
     if(e.type==='weed') return ['🌿 操作が 0.34秒 遅れて効く','#5cff8f'];
     if(e.type==='lsd') return ['🌈 幻の近道（実際は止まってる）','#c46bff'];
     if(e.type==='alc') return ['🍺 ハンドルが逆＋勝手に蛇行','#ffb04d'];
@@ -1721,7 +1748,9 @@ function hud(){
   const M=v=>Math.round(v/maxSpeed*320*0.42); // dist -> "m" feel
   elSubj.textContent=k(S.subj);
   elReal.textContent='実速度 '+k(S.speed)+' km/h';
-  elClock.textContent=S.t.toFixed(1)+'s';
+  const tl=Math.max(0,S.timeLeft);
+  elClock.textContent='⏱ '+tl.toFixed(1)+'s';
+  elClock.style.color = tl<5?'#ff5d6c':tl<9?'#ffd34d':'#27e1ff';
   const yp=Math.min(100,S.playerDist/TARGET*100);
   mYou.style.left=yp+'%';
   for(let i=0;i<S.rivals.length;i++)
@@ -1785,6 +1814,7 @@ function hud(){
   cv.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
   comboHud();
   draftHud();
+  cpHud();
   const ds=drivingStatus(); driveStateEl.textContent=ds[0]; driveStateEl.style.color=ds[1];
   updateContacts();
   setCasts();
@@ -1812,9 +1842,67 @@ function buildStory(){
   }
   return parts.length?parts.join(''):'今夜は、誰も傷つけなかった。連絡にもちゃんと応えた。';
 }
+/* ===== 関門チェックポイント（タイム延長レース）＋スコア ===== */
+const CHECKPOINTS=[
+  {at:0.25, give:18, goalPos:4, nm:'第1関門'},
+  {at:0.50, give:16, goalPos:3, nm:'第2関門'},
+  {at:0.75, give:15, goalPos:3, nm:'第3関門'},
+];
+const cpHudEl=document.getElementById('cpHud'),
+  cpFlashEl=document.getElementById('cpFlash'),
+  cpFlashBig=document.getElementById('cpFlashBig'), cpFlashExt=document.getElementById('cpFlashExt');
+function showCpFlash(big,ext,col){ cpFlashBig.textContent=big; cpFlashBig.style.color=col;
+  cpFlashExt.textContent=ext||''; cpFlashExt.style.color=col; cpFlashEl.classList.add('show'); S.cpFlash=1.6; }
+function tickCheckpoints(dt){
+  if(S.done) return;
+  S.timeLeft-=dt;
+  if(S.cpFlash>0){ S.cpFlash-=dt; if(S.cpFlash<=0) cpFlashEl.classList.remove('show'); }
+  const cp=CHECKPOINTS[S.cpIdx];
+  if(cp && S.playerDist>=cp.at*TARGET){
+    S.timeLeft+=cp.give;
+    const okPos=S.rank<=cp.goalPos;
+    showCpFlash('✅ '+cp.nm+' 通過！','+'+cp.give+'秒 延長'+(okPos?'　🎯目標達成':''), okPos?'#7dff9a':'#ffd34d');
+    if(okPos) S.score+=500;
+    sfxRank(true); arp([523,784,1047],0.06,'square',0.16);
+    logEvent('🚩 '+cp.nm+'通過（'+S.rank+'位）→ +'+cp.give+'秒', okPos?'#7dff9a':'#ffd34d');
+    S.cpIdx++;
+  }
+  if(S.timeLeft<=0 && !S.done){ S.timeLeft=0; S.cpResult='timeup';
+    showCpFlash('⏱ TIME UP','関門に間に合わなかった','#ff5d6c'); sfxCrash();
+    logEvent('⏱ 時間切れ。現実に置いていかれた','#ff5d6c'); S.playerTime=S.t; finish(); }
+}
+function cpHud(){
+  if(S.done) return;
+  const cp=CHECKPOINTS[S.cpIdx], M=v=>Math.round(v/maxSpeed*320*0.42);
+  if(cp){ const goalOk=S.rank<=cp.goalPos;
+    cpHudEl.innerHTML='🚩 '+cp.nm+'まで '+M(Math.max(0,cp.at*TARGET-S.playerDist))+'m ・ 目標'+cp.goalPos+'位以内（今'+S.rank+'位'+(goalOk?' ✅':' ⚠️')+'）';
+    cpHudEl.classList.toggle('warn', S.timeLeft<5 || !goalOk);
+  } else { cpHudEl.innerHTML='🏁 ゴールまで '+M(Math.max(0,TARGET-S.playerDist))+'m';
+    cpHudEl.classList.toggle('warn', S.timeLeft<5); }
+}
+const SCORE_BASE=3000, TIME_PAR=42;
+const RANK_COL={S:'#d8ff9a',A:'#27e1ff',B:'#ffd34d',C:'#ffb04d',D:'#ff8a6a',E:'#ff6b8a'};
+function finalScore(pos,field,youT,timeup){
+  let s=SCORE_BASE;
+  s+=(field-pos+1)*600; s+=Math.floor(S.longestClean)*40; s+=S.nearTotal*120;
+  s+=Math.round(S.trust*18); s+=S.resisted*150; s+=Math.max(0,(TIME_PAR-youT))*50; s+=S.score;
+  s-=S.drugCount*350; s-=S.relapses*250;
+  const lostU=new Set(S.lost.map(l=>l.from+l.real)).size; s-=lostU*500;
+  s-=Math.floor(S.bodyDamage*100)*6;
+  if(!S.used) s=Math.round(s*1.6);
+  if(timeup) s=Math.round(s*0.4);
+  s=Math.max(0,Math.round(s));
+  let rank;
+  if(timeup) rank=s>=2600?'C':s>=1500?'D':'E';
+  else if(s>=9000) rank='S'; else if(s>=7000) rank='A'; else if(s>=5000) rank='B'; else if(s>=3000) rank='C'; else rank='D';
+  if(rank==='S' && S.used) rank='A';
+  return {score:s, rank, lostU};
+}
+
 function finish(){
   if(S.done) return; S.done=true; playing=false;
   document.getElementById('resStoryBody').innerHTML=buildStory();
+  cpHudEl.classList.remove('warn'); cpFlashEl.classList.remove('show');
   banner.classList.remove('show'); S.mail=null;
   cravePopup.classList.remove('show'); S.cravEvent=null;
   afterBanner.classList.remove('show'); S.after=null;
@@ -1825,6 +1913,23 @@ function finish(){
   // 最終順位 = ゴール時点で前にいる車の数+1
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
   const pos=ahead+1, field=RIVALS.length+1, won=pos===1;
+  // ---- スコア & ランク ----
+  const timeup=S.cpResult==='timeup';
+  const SR=finalScore(pos,field,youT,timeup);
+  let hi=0,hiNew=false;
+  try{ hi=parseInt(localStorage.getItem('jk_hiscore')||'0',10)||0;
+    if(SR.score>hi){ hi=SR.score; hiNew=true; localStorage.setItem('jk_hiscore',String(SR.score)); } }catch(e){}
+  document.getElementById('resScoreRank').textContent='RANK '+SR.rank;
+  document.getElementById('resScoreRank').style.color=RANK_COL[SR.rank]||'#fff';
+  document.getElementById('resScoreVal').textContent=SR.score.toLocaleString()+' pts';
+  document.getElementById('resScoreBreak').innerHTML=
+    (timeup?'<span class="sub">⏱ 時間切れ：スコア×0.4・ランク上限C</span><br>':'')+
+    '順位 <b>'+pos+'位</b>'+(S.used?'':' ・<span class="add">クリーン完走 ×1.6</span>')+
+    '<br><span class="add">クリーン秒+'+(Math.floor(S.longestClean)*40)+' / ニアミス+'+(S.nearTotal*120)+' / 連絡+'+Math.round(S.trust*18)+' / 耐えた+'+(S.resisted*150)+'</span>'+
+    ((S.drugCount||SR.lostU||S.relapses)?('<br><span class="sub">薬物-'+(S.drugCount*350)+(SR.lostU?' / 失った関係-'+(SR.lostU*500):'')+(S.relapses?' / 渇望敗北-'+(S.relapses*250):'')+'</span>'):'');
+  document.getElementById('resScoreHi').innerHTML=
+    (hiNew?'🎉 <b>ハイスコア更新！</b>　':'')+'最高スコア '+hi.toLocaleString()+' pts'+
+    (S.used?'<br><span class="sub">※ 薬物を使うとランクSは出ない。クリーン最速だけが頂点。</span>':'');
 
   document.getElementById('resSubjRank').textContent = S.used? '1位！最高だった' : pos+'位 — 普通に走った';
   document.getElementById('resSubjRank').style.color = S.used?'#fff':'#cfe';
@@ -1889,7 +1994,7 @@ function finish(){
   // ---- ジャンキーランキング（不名誉） ----
   const n=S.drugCount;
   const jrank = n===0?'クリーン（薬物ゼロ）': n<=2?'チップ（かじっただけ）': n<=5?'常用者': n<=9?'ジャンキー':'廃人';
-  const DN={meth:'💉覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド',coke:'❄️コカイン'};
+  const DN={meth:'🍧覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド',coke:'🚲コカイン'};
   let jrankShow=jrank, jbonus='';
   // ギリギリ生還：大量に使って、それでもLIFEを残して完走（皮肉な"勝ち"）
   if(n>=8 && life>0){ jbonus=' 🃏 ギリギリ生還'; }
