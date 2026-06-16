@@ -166,6 +166,14 @@
   #resJunkie{background:linear-gradient(135deg,#241047,#0c0518);border:1px solid #c46bff66;}
   #resJunkieRank{color:#d9a6ff;}
   .juse{margin-top:8px;font-size:13px;line-height:1.9;color:#e7d6ff;}
+  /* その夜の物語ログ */
+  #resStory{background:linear-gradient(135deg,#0e1320,#05080f);border:1px solid #ffffff22;}
+  .story-ep{font-size:12.5px;line-height:1.7;margin:9px 0;padding-left:10px;border-left:2px solid #2a3550;color:#dbe6ff;}
+  .story-ep b{color:#fff;}
+  .story-ep .bad{color:#ff8aa6;font-weight:800;}
+  .story-ep .good{color:#7dff9a;font-weight:800;}
+  .story-inc{font-size:12.5px;line-height:1.8;margin-top:12px;padding-top:10px;border-top:1px dashed #ffffff22;color:#ffb3c8;}
+  .story-inc b{color:#fff;}
   .hidden{display:none!important;}
   h1{font-size:clamp(30px,8vw,62px);margin:0;line-height:.95;font-weight:900;font-style:italic;
     background:linear-gradient(90deg,#27e1ff,#ff3ea5,#ffd34d);-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -410,6 +418,10 @@
       <div class="big" id="resRecoveryHead"></div>
       <div class="recline" id="resRecoveryBody"></div>
     </div>
+    <div class="resCard" id="resStory">
+      <div class="cap">📖 その夜、何があったか</div>
+      <div class="recline" id="resStoryBody" style="margin-top:6px"></div>
+    </div>
     <div id="resMsg"></div>
     <!-- 実在の相談窓口（常時表示） -->
     <div id="helpCard">
@@ -525,7 +537,7 @@ function reset(){
      bubbles:[], rubber:0, rivalChatCool:0, sawDrugCool:0,
      bodyDamage:0, teeth:0, weight:0, skin:0, itchT:0, scratchT:0, formicationSeen:false,
      cleanStreak:0, longestClean:0,
-     log:[], contacts:{
+     log:[], story:[], incidents:[], lsdStartRank:1, contacts:{
        koi:{name:'ゆい',em:'💗',mood:100,pending:0,gone:false},
        boss:{name:'上司',em:'🏢',mood:100,pending:0,gone:false},
        fam:{name:'家族',em:'👩',mood:100,pending:0,gone:false}},
@@ -609,6 +621,12 @@ function useDrug(type){
   S.used=true; S.drugCount++; S.lastUseT=S.t; S.drugUse[type]=(S.drugUse[type]||0)+1;
   S.trust=Math.max(0,S.trust-6); // キメる＝周りを放置する。人間関係が即削れる
   for(const k in S.contacts) S.contacts[k].mood=Math.max(0,S.contacts[k].mood-4);
+  if(type==='lsd') S.lsdStartRank=S.rank; // トリップ前の順位を記録
+  { const pool=INCIDENTS[type]; // ありそうな大失態が確率で発生
+    if(pool && Math.random()<0.5){ const avail=pool.filter(t=>S.incidents.indexOf(t)<0);
+      if(avail.length){ const inc=avail[Math.floor(Math.random()*avail.length)];
+        S.incidents.push(inc); S.trust=Math.max(0,S.trust-9);
+        showFeel('🚨 '+inc,'#ff6b8a'); logEvent('🚨 '+inc,'#ff6b8a'); } } }
   showFeel(d.feel, castColor(type));
   pulseCast(d.cast); sfxDrug(type); rivalsReactDrug();
   logEvent('💊 '+d.nm+'を使った（'+S.drugCount+'回目）', castColor(type));
@@ -666,6 +684,37 @@ const MAILSEQ=[
 const LASHLINES=['黙れ','うるせえ、ほっとけって','お前には関係ねえだろ','二度と連絡してくんな','消えろ',
   'みんなグルなんだろ？わかってんだよ','監視してんの知ってんだぞ','お前も俺を嗤ってる側か？','金の話ばっかしやがって','どいつもこいつも信用できねえ',
   'は？？俺が悪いって言いたいわけ','うるさいうるさいうるさい','今いいとこなんだよ邪魔すんな','放っといてくれよマジで頼むから'];
+/* キメた時に確率で起きる"ありそうな大失態"。リザルトのストーリーに残る */
+const INCIDENTS={
+  coke:[
+    'キャバクラで札束をばらまき、翌朝カードが止まっていた',
+    'キャバ嬢に高級時計を貢いで、貯金が溶けた',
+    '取引先との会食で一人だけ喋り倒し、商談が飛んだ',
+    '深夜に全員へ電話をかけ続け、友達に着信拒否された',
+  ],
+  meth:[
+    '三日眠らず職場で意味不明な演説をして、机を片づけられた',
+    '部屋中の家電を分解して、二度と組み立てられなかった',
+    '「虫がいる」と壁を爪で剥がし続け、大家に通報された',
+  ],
+  alc:[
+    '電柱に車をこすって、当て逃げで通報された',
+    '記憶をなくし、知らない駅のベンチで朝を迎えた',
+    'SNSに上司の悪口を投稿して、翌朝は消せなかった',
+  ],
+  weed:[
+    '面接の時間を丸ごと忘れて、内定が消えた',
+    '一日ソファから動けず、約束を全部すっぽかした',
+  ],
+  opi:[
+    '処方箋を偽造して、薬局でバレた',
+    '締切も痛みも感じないまま、納期を3本落とした',
+  ],
+  lsd:[
+    '裸足で大通りを歩いて、警察に保護された',
+    '天井の模様と三時間しゃべって、面接をすっぽかした',
+  ],
+};
 const banner=document.getElementById('mailBanner'),
   mailEm=document.getElementById('mailEm'), mailFrom=document.getElementById('mailFrom'),
   mailText=document.getElementById('mailText'), mailNote=document.getElementById('mailNote'),
@@ -679,19 +728,20 @@ function spawnMail(){
 function hideMail(){ banner.classList.remove('show'); S.mail=null; S.nextMailAt=S.t+(5.5+Math.random()*3); }
 function resolveMail(kind){
   const m=S.mail; if(!m) return; const d=m.data; const high=!!S.effect;
-  let dT=0,msg='',col='#9fb';
+  let dT=0,msg='',col='#9fb',did='ignore',sentTxt='';
   if(kind==='reply'){
-    if(!high){ dT=d.imp*3; msg='✅ ちゃんと向き合って返信した'; col='#7dff9a'; }
+    if(!high){ dT=d.imp*3; msg='✅ ちゃんと向き合って返信した'; col='#7dff9a'; did='good'; }
     else if(S.effect.type==='meth'||S.effect.type==='lsd'||S.effect.type==='coke'){
-      const sent=LASHLINES[Math.floor(Math.random()*LASHLINES.length)];
-      dT=-d.imp*4; msg='😡 「'+sent+'」と送りつけた'; col='#ff5d5d';
-      S.lost.push({from:d.from,real:d.real,why:'暴言',sent:sent});
-      S.afterQ.push({from:d.from,em:d.em,sent:sent,reply:d.ire}); }
-    else { const g='…'+['ろれ つが…','あ、えと、なんだっけ','いまむり、ごめ','すぐ いくか ら'][Math.floor(Math.random()*4)];
+      sentTxt=LASHLINES[Math.floor(Math.random()*LASHLINES.length)]; did='lash';
+      dT=-d.imp*4; msg='😡 「'+sentTxt+'」と送りつけた'; col='#ff5d5d';
+      S.lost.push({from:d.from,real:d.real,why:'暴言',sent:sentTxt});
+      S.afterQ.push({from:d.from,em:d.em,sent:sentTxt,reply:d.ire}); }
+    else { sentTxt='…'+['ろれ つが…','あ、えと、なんだっけ','いまむり、ごめ','すぐ いくか ら'][Math.floor(Math.random()*4)]; did='garble';
       dT=-d.imp*2; msg='🥴 ろれつの回らない返信を送った'; col='#ffb04d';
-      S.afterQ.push({from:d.from,em:d.em,sent:g,reply:d.ire});
-      S.lost.push({from:d.from,real:d.real,why:'意味不明な返信',sent:g}); }
+      S.afterQ.push({from:d.from,em:d.em,sent:sentTxt,reply:d.ire});
+      S.lost.push({from:d.from,real:d.real,why:'意味不明な返信',sent:sentTxt}); }
   } else { // ignore / expire
+    did='ignore';
     if(!high){ dT=-d.imp*3; msg='…既読をつけず無視した'; col='#ff9bb0'; }
     else { dT=-d.imp*2.5; msg=(S.effect.type==='weed')?'😶「…あとでいいや」':'😶 既読もつかない'; col='#ff9bb0';
       if(d.imp>=2) S.afterQ.push({from:d.from,em:d.em,sent:'（既読スルー）',reply:d.ire}); }
@@ -702,6 +752,7 @@ function resolveMail(kind){
   if(ck){ const c=S.contacts[ck];
     if(dT>0){ c.mood=Math.min(100,c.mood+10); c.pending=0; }
     else { c.pending++; c.mood=Math.max(0,c.mood-14); if(c.mood<=0) c.gone=true; } }
+  S.story.push({key:ck,from:d.from,em:d.em,their:d.real,did:did,sent:sentTxt,amends:null});
   logEvent((dT>0?'✅ ':'💔 ')+d.from+(dT>0?' に返信した':(kind==='reply'?' に失言した':' を無視した')), dT>0?'#7dff9a':'#ff6b8a');
   if(dT>0) sfxGood(); else sfxBad();
   showFeel(msg,col); hideMail();
@@ -752,6 +803,7 @@ function maybeAftermath(){
 function resolveAfter(kind){
   if(!S.after) return; const from=S.after.from; const ck=contactKey(from);
   afterBanner.classList.remove('show'); S.after=null;
+  for(let i=S.story.length-1;i>=0;i--){ if(S.story[i].from===from && S.story[i].amends===null){ S.story[i].amends=(kind==='sorry'); break; } }
   if(kind==='sorry'){ S.trust=Math.min(100,S.trust+5);
     if(ck){const c=S.contacts[ck];c.mood=Math.min(100,c.mood+12);c.pending=Math.max(0,c.pending-1);}
     showFeel('🙇 ちゃんと謝った','#7dff9a'); sfxGood(); logEvent('🙇 '+from+' に謝った','#7dff9a'); }
@@ -924,8 +976,11 @@ function update(dt){
       }
       if(e.type==='coke'){ // 急落＝強烈な渇望（コカインの特徴）
         S.crav=Math.min(1,S.crav+0.3); showFeel('❄️ 落ちる…もっと欲しい','#9fe4ff'); }
-      if(e.type==='lsd'){ // 空の近道は幻覚。元の位置に引き戻される
-        S.snapback=0.8; S.shake=12; showFeel('🌈 近道は幻だった…元の位置に', '#c46bff'); sfxCrash(); logEvent('🌈 空の近道は幻覚。1mも進んでなかった','#c46bff');
+      if(e.type==='lsd'){ // 空の旅は幻覚。現実に引き戻され、その間に抜かれている
+        S.snapback=1.0; S.shake=14;
+        const passed=Math.max(0,S.rank-(S.lsdStartRank||1));
+        showFeel(passed>0?('🌈 着地…その間に '+passed+'台 に抜かれてた'):'🌈 着地…元の位置に戻された','#c46bff'); sfxCrash();
+        logEvent(passed>0?('🌈 トリップ終了。空を飛んでる間に '+passed+'台に抜かれ '+S.rank+'位まで転落'):'🌈 トリップ終了。1mも進んでなかった','#c46bff');
       }
       S.effect=null;
     }
@@ -1045,6 +1100,20 @@ function render(){
   ctx.fillStyle=sg; ctx.beginPath();ctx.arc(W/2,sunY,W*0.16,0,7);ctx.fill();
   ctx.restore();
 
+  // LSD：上昇するほど星空（別世界）が広がる
+  if(lsd){
+    const asc=Math.min(1,S.effect.t/3.2);
+    ctx.save();
+    for(let i=0;i<90;i++){
+      const sx=((i*73)%100)/100*W, sy=((i*131)%100)/100*H*0.66;
+      const tw=0.35+0.65*Math.abs(Math.sin(S.t*3+i*1.7));
+      const r=(i%7===0)?2.2:1.2;
+      ctx.fillStyle='rgba(255,255,255,'+(tw*asc*0.95).toFixed(2)+')';
+      ctx.beginPath(); ctx.arc(sx,sy,r,0,7); ctx.fill();
+    }
+    ctx.restore();
+  }
+
   // rival lookup: segment index + gap ahead
   const rivalInfo=S.rivals.map(rv=>{
     let dz=rv.dist-S.playerDist;
@@ -1053,7 +1122,7 @@ function render(){
 
   // road
   const sprites=[];
-  const climb = lsd ? Math.min(2.8, S.effect.t*0.55) : 0; // 空へ昇る虹の近道
+  const climb = lsd ? Math.min(5.0, S.effect.t*0.95) : 0; // 平行な道が、空へ昇る別世界の道に変わる
   let x=0, dx=-(base.curve*basePct), maxy=H;
   for(let n=0;n<drawDist;n++){
     const seg=segments[(base.index+n)%segments.length];
@@ -1723,8 +1792,29 @@ function hud(){
 }
 
 /* ===== finish ===== */
+/* ===== その夜の物語（ストーリー形式の詳細ログ） ===== */
+function buildStory(){
+  const parts=[];
+  for(const ep of S.story){
+    let s='<div class="story-ep">'+ep.em+' <b>'+ep.from+'</b>は「'+ep.their+'」と連絡してきた。<br>';
+    if(ep.did==='good') s+='君はちゃんと向き合って、返事をした。';
+    else if(ep.did==='lash') s+='君は <span class="bad">「'+ep.sent+'」</span> と暴言を返した。';
+    else if(ep.did==='garble') s+='君は <span class="bad">ろれつの回らない返信</span> を送りつけた。';
+    else s+='君は <span class="bad">既読もつけなかった</span>。';
+    if(ep.amends===true) s+=' あとで謝って、ギリギリ <span class="good">挽回した</span>。';
+    else if(ep.amends===false) s+=' 謝るチャンスも、<span class="bad">放り投げた</span>。';
+    else if(ep.did!=='good') s+=' 挽回は、<span class="bad">できなかった</span>。';
+    parts.push(s+'</div>');
+  }
+  if(S.incidents.length){
+    parts.push('<div class="story-inc"><b>そして、こんなことも起きた</b><br>'+
+      S.incidents.map(t=>'・'+t).join('<br>')+'</div>');
+  }
+  return parts.length?parts.join(''):'今夜は、誰も傷つけなかった。連絡にもちゃんと応えた。';
+}
 function finish(){
   if(S.done) return; S.done=true; playing=false;
+  document.getElementById('resStoryBody').innerHTML=buildStory();
   banner.classList.remove('show'); S.mail=null;
   cravePopup.classList.remove('show'); S.cravEvent=null;
   afterBanner.classList.remove('show'); S.after=null;
