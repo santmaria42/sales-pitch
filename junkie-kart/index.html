@@ -23,6 +23,7 @@
   #castLsd{background:conic-gradient(from 0deg,#ff004c,#ff8a00,#fff700,#27ff7a,#27e1ff,#7a3cff,#ff004c);opacity:0;mix-blend-mode:overlay;}
   #castAlc{background:radial-gradient(140% 100% at 50% 60%,transparent 30%,#5a2d00cc 100%);mix-blend-mode:multiply;}
   #castOpi{background:radial-gradient(60% 50% at 50% 55%,transparent 0%,#000000ee 78%);}
+  #castCoke{background:radial-gradient(120% 90% at 50% 42%,#dff3ffaa 0%,transparent 45%,#0a3a6acc 100%);}
   #vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(130% 100% at 50% 42%,transparent 55%,#000a 100%);}
 
@@ -78,7 +79,8 @@
   .drug .nm{font-size:11px;font-weight:800;}
   .drug .key{font-size:9px;opacity:.55;}
   .drug.lit{box-shadow:0 0 22px var(--c),inset 0 0 0 1px var(--c);}
-  #d1{--c:#ff4d4d}#d2{--c:#5cff8f}#d3{--c:#c46bff}#d4{--c:#ffb04d}#d5{--c:#8fb6ff}
+  #d1{--c:#ff4d4d}#d2{--c:#5cff8f}#d3{--c:#c46bff}#d4{--c:#ffb04d}#d5{--c:#8fb6ff}#d6{--c:#9fe4ff}
+  .drug .nm{font-size:10px;} .drug .em{font-size:21px;}
 
   /* steer pads */
   .steer{position:absolute;bottom:64px;width:34%;height:46%;z-index:6;opacity:0;}
@@ -273,6 +275,7 @@
   <div class="cast" id="castMeth"></div>
   <div class="cast" id="castLsd"></div>
   <div class="cast" id="castOpi"></div>
+  <div class="cast" id="castCoke"></div>
   <div id="vignette"></div>
 
   <!-- 正直バー -->
@@ -360,6 +363,7 @@
     <button class="drug" id="d3"><span class="em">🌈</span><span class="nm">LSD</span><span class="key">3</span></button>
     <button class="drug" id="d4"><span class="em">🍺</span><span class="nm">酒</span><span class="key">4</span></button>
     <button class="drug" id="d5"><span class="em">💊</span><span class="nm">オピオイド</span><span class="key">5</span></button>
+    <button class="drug" id="d6"><span class="em">❄️</span><span class="nm">コカイン</span><span class="key">6</span></button>
   </div>
 
   <!-- start -->
@@ -512,7 +516,7 @@ function reset(){
      flow:0, peakTol:0, fb:0, fbText:'', lastUseT:-99, healT:0, heartT:0,
      cravEvent:null, craveCool:0, relapses:0, resisted:0,
      bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
-     drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0},
+     drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0,coke:0},
      nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
      draft:0, draftActive:0, draftBurst:0, draftRv:null, draftPop:0, draftTotal:0,
      hitCool:0, hits:0, dodges:0, dodgeGlow:0, obstHitSeg:-1,
@@ -587,13 +591,14 @@ function heartbeat(){ tone(48,0.18,'sine',0.3); tone(60,0.14,'sine',0.18,AC?AC.c
 /* drug defs */
 const DRUGS={
   meth:{em:'💉',nm:'覚醒剤',dur:6.6, feel:'💥 ラッシュ!!! 脳が灼ける、最高だ', cast:'castMeth', tolAdd:0.16},
+  coke:{em:'❄️',nm:'コカイン',dur:5.0, feel:'❄️ 全能感!! 怖いものなんて何もない', cast:'castCoke', tolAdd:0.18},
   weed:{em:'🌿',nm:'大麻',dur:6.4, feel:'🍃 ふわ…からだが溶ける、なにも怖くない', cast:'castWeed', tolAdd:0.10},
   lsd:{em:'🌈',nm:'LSD',dur:8.5, feel:'✨ 道が虹になった!! 行ける!!', cast:'castLsd', tolAdd:0.13},
   alc:{em:'🍺',nm:'酒',dur:6.2, feel:'😤 イケる、運転うまい', cast:'castAlc', tolAdd:0.12},
   opi:{em:'💊',nm:'オピオイド',dur:5.4, feel:'😌 痛みも不安も消えた', cast:'castOpi', tolAdd:0.15},
 };
-const KEYMAP={'1':'meth','2':'weed','3':'lsd','4':'alc','5':'opi'};
-const BTNMAP={d1:'meth',d2:'weed',d3:'lsd',d4:'alc',d5:'opi'};
+const KEYMAP={'1':'meth','2':'weed','3':'lsd','4':'alc','5':'opi','6':'coke'};
+const BTNMAP={d1:'meth',d2:'weed',d3:'lsd',d4:'alc',d5:'opi',d6:'coke'};
 
 function useDrug(type){
   if(!playing||S.done) return;
@@ -602,15 +607,18 @@ function useDrug(type){
   S.tol=Math.min(1,S.tol+d.tolAdd);
   S.crav=Math.max(0,S.crav-0.5); // 一時的に渇望が消える
   S.used=true; S.drugCount++; S.lastUseT=S.t; S.drugUse[type]=(S.drugUse[type]||0)+1;
+  S.trust=Math.max(0,S.trust-6); // キメる＝周りを放置する。人間関係が即削れる
+  for(const k in S.contacts) S.contacts[k].mood=Math.max(0,S.contacts[k].mood-4);
   showFeel(d.feel, castColor(type));
   pulseCast(d.cast); sfxDrug(type); rivalsReactDrug();
   logEvent('💊 '+d.nm+'を使った（'+S.drugCount+'回目）', castColor(type));
 }
-function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':'#9ec1ff';}
+function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':t==='coke'?'#9fe4ff':'#9ec1ff';}
 
 /* casts */
 const casts={meth:document.getElementById('castMeth'),weed:document.getElementById('castWeed'),
-  lsd:document.getElementById('castLsd'),alc:document.getElementById('castAlc'),opi:document.getElementById('castOpi')};
+  lsd:document.getElementById('castLsd'),alc:document.getElementById('castAlc'),opi:document.getElementById('castOpi'),
+  coke:document.getElementById('castCoke')};
 function setCasts(){
   for(const k in casts) casts[k].style.opacity=0;
   if(S.effect){
@@ -654,7 +662,10 @@ const MAILSEQ=[
   {from:'相談窓口',   em:'🆘', imp:1, real:'【依存症相談】いつでも話せます。一人で抱えないで', para:'監視窓口：お前の居場所は掴んでいる', ire:'いつでも、ここにいます。無理しないで。'},
   {from:'恋人 ゆい',  em:'💔', imp:3, real:'ごめん。もう待てない。荷物まとめて出ていくね', para:'ざまあみろ。せいせいした、二度と関わるな', ire:'今までありがとう。さようなら。'},
 ];
-const LASHLINES=['黙れ','うるせえ、ほっとけ','お前には関係ない','二度と連絡するな','消えろ'];
+/* キメてる時に送りつける暴言（被害妄想・支離滅裂＝"おかしいやつ"の実物） */
+const LASHLINES=['黙れ','うるせえ、ほっとけって','お前には関係ねえだろ','二度と連絡してくんな','消えろ',
+  'みんなグルなんだろ？わかってんだよ','監視してんの知ってんだぞ','お前も俺を嗤ってる側か？','金の話ばっかしやがって','どいつもこいつも信用できねえ',
+  'は？？俺が悪いって言いたいわけ','うるさいうるさいうるさい','今いいとこなんだよ邪魔すんな','放っといてくれよマジで頼むから'];
 const banner=document.getElementById('mailBanner'),
   mailEm=document.getElementById('mailEm'), mailFrom=document.getElementById('mailFrom'),
   mailText=document.getElementById('mailText'), mailNote=document.getElementById('mailNote'),
@@ -671,19 +682,20 @@ function resolveMail(kind){
   let dT=0,msg='',col='#9fb';
   if(kind==='reply'){
     if(!high){ dT=d.imp*3; msg='✅ ちゃんと向き合って返信した'; col='#7dff9a'; }
-    else if(S.effect.type==='meth'||S.effect.type==='lsd'){
+    else if(S.effect.type==='meth'||S.effect.type==='lsd'||S.effect.type==='coke'){
       const sent=LASHLINES[Math.floor(Math.random()*LASHLINES.length)];
       dT=-d.imp*4; msg='😡 「'+sent+'」と送りつけた'; col='#ff5d5d';
-      S.lost.push({from:d.from,real:d.real,why:'暴言'});
+      S.lost.push({from:d.from,real:d.real,why:'暴言',sent:sent});
       S.afterQ.push({from:d.from,em:d.em,sent:sent,reply:d.ire}); }
-    else { dT=-d.imp*2; msg='🥴 ろれつの回らない返信を送った'; col='#ffb04d';
-      S.afterQ.push({from:d.from,em:d.em,sent:'…（意味不明な文字列）',reply:d.ire});
-      if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'意味不明な返信'}); }
+    else { const g='…'+['ろれ つが…','あ、えと、なんだっけ','いまむり、ごめ','すぐ いくか ら'][Math.floor(Math.random()*4)];
+      dT=-d.imp*2; msg='🥴 ろれつの回らない返信を送った'; col='#ffb04d';
+      S.afterQ.push({from:d.from,em:d.em,sent:g,reply:d.ire});
+      S.lost.push({from:d.from,real:d.real,why:'意味不明な返信',sent:g}); }
   } else { // ignore / expire
     if(!high){ dT=-d.imp*3; msg='…既読をつけず無視した'; col='#ff9bb0'; }
     else { dT=-d.imp*2.5; msg=(S.effect.type==='weed')?'😶「…あとでいいや」':'😶 既読もつかない'; col='#ff9bb0';
       if(d.imp>=2) S.afterQ.push({from:d.from,em:d.em,sent:'（既読スルー）',reply:d.ire}); }
-    if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'無視'});
+    if(d.imp>=2) S.lost.push({from:d.from,real:d.real,why:'無視',sent:'（既読スルー）'});
   }
   S.trust=Math.max(0,Math.min(100,S.trust+dT));
   const ck=contactKey(d.from);
@@ -843,6 +855,7 @@ function update(dt){
 
   // ---- peak耐性 / クリーン・フロー / フラッシュバック / 立て直し ----
   S.peakTol=Math.max(S.peakTol,S.tol);
+  if(S.effect) S.trust=Math.max(0,S.trust-dt*1.2); // ハイの間、誰のことも見えてない＝関係が減り続ける
   const centered=Math.abs(S.playerX)<0.6, onroad=Math.abs(S.playerX)<=1;
   if(!S.effect && onroad && centered && S.speed>maxSpeed*0.8) S.flow=Math.min(1,S.flow+dt*0.22);
   else S.flow=Math.max(0,S.flow-dt*(S.effect?1.4:0.6));
@@ -855,7 +868,8 @@ function update(dt){
     showFeel('👁 '+S.fbText,'#c08bff'); sfxBad();
   }
   // 渇望に耐えてシラフが続けば人間関係が少しずつ戻る（立て直し）
-  if(!S.effect && S.t-S.lastUseT>4 && S.trust<100) S.trust=Math.min(100,S.trust+dt*1.6);
+  if(!S.effect && S.t-S.lastUseT>4){ const capT=S.used?80:100; // 一度でも使うと、もう満点には戻らない
+    if(S.trust<capT) S.trust=Math.min(capT,S.trust+dt*0.8); }
   // 渇望のドクン（心音）
   if(S.crav>0.5 && !S.effect){ S.heartT-=dt; if(S.heartT<=0){ heartbeat(); S.heartT=1.1-S.crav*0.4; } }
   // 渇望の誘惑イベント（もう一回キメる⇄耐える）
@@ -883,6 +897,17 @@ function update(dt){
          else {cap=fcap; subjMul=e.t<2.6?1.5:0.5;} // 体感も遅れて墜ちる
          S.shake=Math.max(S.shake,e.t<bdur?6:2);}
         break;
+      case 'coke':
+        {const bdur=0.9*(1-S.tol*0.4), bcap=1.40-S.tol*0.22, fcap=Math.max(0.2,0.45-S.tol*0.15);
+         if(!e._banked){ e._banked=true;
+           let stole=false;
+           if(S.clutch){ const g=S.clutch.rv.dist-S.playerDist; if(g>0&&g<CLUTCH_REACH){stole=true; resolveClutch('survived');} }
+           bankBurstDebt(stole); }
+         if(e.t<bdur){cap=bcap; subjMul=1.9;}
+         else {cap=fcap; subjMul=e.t<1.8?1.6:0.5;} // 一瞬で落ちる
+         authority=1.7; wobble=0.12; // 過信でハンドルが過敏・ガクガク蛇行
+         S.shake=Math.max(S.shake,e.t<bdur?7:2);}
+        break;
       case 'weed':
         cap=0.70; subjMul=1.28; lag=0.34; break;
       case 'lsd':
@@ -897,6 +922,8 @@ function update(dt){
       if(e.type==='opi'){ // 入力ゼロまで墜ちたら オーバードーズ
         S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash(); logEvent('💀 オーバードーズで停止','#ff3b3b');
       }
+      if(e.type==='coke'){ // 急落＝強烈な渇望（コカインの特徴）
+        S.crav=Math.min(1,S.crav+0.3); showFeel('❄️ 落ちる…もっと欲しい','#9fe4ff'); }
       if(e.type==='lsd'){ // 空の近道は幻覚。元の位置に引き戻される
         S.snapback=0.8; S.shake=12; showFeel('🌈 近道は幻だった…元の位置に', '#c46bff'); sfxCrash(); logEvent('🌈 空の近道は幻覚。1mも進んでなかった','#c46bff');
       }
@@ -1004,6 +1031,7 @@ function render(){
     else if(S.effect.type==='meth'){g.addColorStop(0,'#2a0008');g.addColorStop(1,'#7a0e2a');}
     else if(S.effect.type==='weed'){g.addColorStop(0,'#06170d');g.addColorStop(1,'#10402a');}
     else if(S.effect.type==='opi'){g.addColorStop(0,'#05060a');g.addColorStop(1,'#0a0d18');}
+    else if(S.effect.type==='coke'){g.addColorStop(0,'#06243a');g.addColorStop(1,'#2a7aae');}
     else {g.addColorStop(0,'#1a0f2e');g.addColorStop(1,'#3a2a55');}
   } else {g.addColorStop(0,'#0c1b3a');g.addColorStop(1,'#3b6ea5');}
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
@@ -1256,6 +1284,7 @@ function tickBody(dt){
   if(S.effect){
     const e=S.effect, r=dt*0.018; S.weight=Math.min(1,S.weight+r);
     if(e.type==='meth'){ S.teeth=Math.min(1,S.teeth+r*1.6); S.skin=Math.min(1,S.skin+r*1.3); }
+    else if(e.type==='coke'){ S.weight=Math.min(1,S.weight+r*1.1); S.skin=Math.min(1,S.skin+r*0.9); }
     else if(e.type==='opi'){ S.weight=Math.min(1,S.weight+r*0.6); }
     else { S.teeth=Math.min(1,S.teeth+r*0.4); }
   }
@@ -1299,6 +1328,7 @@ function drivingStatus(){
   if(Math.abs(S.playerX)>1) return ['⚠️ 場外！ レールに戻れ','#ff8a3a'];
   if(S.effect){ const e=S.effect;
     if(e.type==='meth') return e.t<1.4?['💉 急加速中（でも画面だけ）','#ff6b6b']:['💉 失速…効果切れで最低速','#ff6b6b'];
+    if(e.type==='coke') return e.t<0.9?['❄️ 全能感で過信、ハンドル過敏','#9fe4ff']:['❄️ 急落…ガクガクで失速','#9fe4ff'];
     if(e.type==='weed') return ['🌿 操作が 0.34秒 遅れて効く','#5cff8f'];
     if(e.type==='lsd') return ['🌈 幻の近道（実際は止まってる）','#c46bff'];
     if(e.type==='alc') return ['🍺 ハンドルが逆＋勝手に蛇行','#ffb04d'];
@@ -1563,6 +1593,8 @@ function drawSeg(seg,lsd,n){
     grass=lit?'#0a0c14':'#080a10'; rumble=lit?'#3a4258':'#2a3145'; road=lit?'#10121b':'#0c0e15'; lane='#3a4258';
   } else if(S.effect&&S.effect.type==='alc'){
     grass=lit?'#2c1a05':'#241405'; rumble=lit?'#ffb04d':'#fff'; road=lit?'#231a12':'#1d150e'; lane='#ffe3b0';
+  } else if(S.effect&&S.effect.type==='coke'){
+    grass=lit?'#0a2233':'#081c2a'; rumble=lit?'#9fe4ff':'#fff'; road=lit?'#142838':'#0f2030'; lane='#dff3ff';
   } else {
     grass=lit?'#1f8a3a':'#1a7d34'; rumble=lit?'#e23a3a':'#ffffff'; road=lit?'#3a3f48':'#34383f'; lane='#ffffff';
   }
@@ -1666,6 +1698,7 @@ function hud(){
   if(S.effect){
     const e=S.effect;
     if(e.type==='meth'){blur+=1.5;sat=1.5;}
+    if(e.type==='coke'){blur+=1;sat=1.5;bri=1.1;}
     if(e.type==='weed'){blur+=2.2;sat=1.2;bri=0.92;}
     if(e.type==='lsd'){sat=1.8;hue=(S.t*120)%360;blur+=1;}
     if(e.type==='alc'){blur+=2.6;}
@@ -1732,10 +1765,10 @@ function finish(){
   const lifeEl=document.getElementById('resLifeBody');
   if(S.lost.length){
     const seen=new Set(), items=[];
-    for(const l of S.lost){ const key=l.from+l.real; if(seen.has(key))continue; seen.add(key);
-      items.push(`<div>📨 <b>${l.from}</b>「${l.real}」<br><span style="opacity:.65">　↑ ${l.why}</span></div>`);
-      if(items.length>=4)break; }
-    lifeEl.innerHTML='ハイの裏で、本当はこう書いてあった：<div class="lostlist">'+items.join('')+'</div>';
+    for(const l of S.lost){ const key=l.from+l.real+(l.sent||''); if(seen.has(key))continue; seen.add(key);
+      items.push(`<div>📨 <b>${l.from}</b>「${l.real}」<br><span style="color:#ff8aa6;font-weight:700">　→ あなた：「${l.sent||l.why}」</span></div>`);
+      if(items.length>=5)break; }
+    lifeEl.innerHTML='あの優しい連絡に、君はこう返していた：<div class="lostlist">'+items.join('')+'</div>';
   } else {
     lifeEl.textContent='大事な連絡を、ちゃんと受け取れた。';
   }
@@ -1766,7 +1799,7 @@ function finish(){
   // ---- ジャンキーランキング（不名誉） ----
   const n=S.drugCount;
   const jrank = n===0?'クリーン（薬物ゼロ）': n<=2?'チップ（かじっただけ）': n<=5?'常用者': n<=9?'ジャンキー':'廃人';
-  const DN={meth:'💉覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド'};
+  const DN={meth:'💉覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド',coke:'❄️コカイン'};
   let jrankShow=jrank, jbonus='';
   // ギリギリ生還：大量に使って、それでもLIFEを残して完走（皮肉な"勝ち"）
   if(n>=8 && life>0){ jbonus=' 🃏 ギリギリ生還'; }
