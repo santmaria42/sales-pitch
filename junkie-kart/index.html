@@ -556,7 +556,8 @@ function reset(){
      shownRank:RIVALS.length+1, prevShownRank:RIVALS.length+1, visPeakRank:RIVALS.length+1,
      shownFlash:0, shownDir:0,
      drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0,coke:0},
-     item:null, roulette:null, itemsGrabbed:0, topSpeed:0, paraFigs:[], paraWhisperT:0,
+     item:null, roulette:null, itemsGrabbed:0, topSpeed:0,
+     paraFigs:[], paraWhisperT:0, paraEyes:[], paraFlashT:0, paraStalk:0, paraNextEye:0,
      nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
      draft:0, draftActive:0, draftBurst:0, draftRv:null, draftPop:0, draftTotal:0,
      hitCool:0, hits:0, dodges:0, dodgeGlow:0, obstHitSeg:-1,
@@ -589,6 +590,7 @@ function audioInit(){
     engGain=AC.createGain(); engGain.gain.value=0;
     engOsc.connect(engFilt); engFilt.connect(engGain); engGain.connect(master);
     engOsc.frequency.value=60; engOsc.start();
+    bgmInit();
   }catch(e){ AC=null; }
 }
 function engineUpdate(){
@@ -633,6 +635,94 @@ function sfxRank(up){ arp(up?[440,660,880]:[660,440,330],0.06,'square',0.15); }
 function sfxCrash(){ noise(0.5,0.4,400); tone(80,0.4,'sawtooth',0.25); }
 function heartbeat(){ tone(48,0.18,'sine',0.3); tone(60,0.14,'sine',0.18,AC?AC.currentTime+0.18:0); }
 
+/* ===== 自走BGM（アシッド・テクノ。トリップで歪む / 素材ゼロ） ===== */
+let bgmBus=null, bgmTimer=null, bgmStep=0, bgmNextTime=0, bgmStarted=false;
+const BGM_BPM=126, BGM_ROOT=55; // A1
+// 16ステップ：n=半音, a=アクセント, s=スライド
+const BASS_PAT=[{n:0,a:1},null,{n:12},{n:0},{n:3,a:1},null,{n:7},{n:0},{n:0},{n:10},{n:12,a:1},{n:0},{n:3},{n:7,s:1},{n:0},{n:15}];
+const KICK_PAT=[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0];
+const HAT_PAT =[0,0,1,0,0,0,1,0,0,0,1,0,0,1,1,0];
+function bgmInit(){
+  if(bgmBus) return;
+  bgmBus=AC.createGain(); bgmBus.gain.value=0.5; bgmBus.connect(master);
+  bgmNextTime=AC.currentTime+0.12; bgmStep=0;
+  if(!bgmTimer) bgmTimer=setInterval(bgmTick,25);
+}
+// トリップ状態 → 音楽パラメータ
+function bgmTrip(){
+  const e=S.effect, spd=Math.min(1,(S.subj||0)/maxSpeed);
+  const p={bpm:BGM_BPM,cut:1,res:7,bassRel:0.2,hat:1,swing:0,trans:0,detune:0,lead:0.55,kick:0.95};
+  if(e){
+    if(e.type==='meth'){ p.bpm=BGM_BPM*1.55; p.cut=1.7; p.hat=2; p.res=11; p.lead=0.9; }
+    else if(e.type==='coke'){ p.bpm=BGM_BPM*1.35; p.cut=1.4; p.hat=2; p.lead=0.85; }
+    else if(e.type==='weed'){ p.bpm=BGM_BPM*0.7; p.cut=0.42; p.bassRel=0.55; p.swing=0.14; p.lead=0.3; p.res=4; }
+    else if(e.type==='lsd'){ p.bpm=BGM_BPM*1.06; p.cut=1.2; p.detune=Math.sin(S.t*0.7)*45; p.trans=Math.round(Math.sin(S.t*0.16)*5); p.lead=0.75; }
+    else if(e.type==='alc'){ p.bpm=BGM_BPM*0.9; p.cut=0.7; p.swing=0.24+Math.sin(S.t*1.2)*0.1; p.detune=Math.sin(S.t*3)*30; p.res=9; }
+    else if(e.type==='opi'){ p.bpm=BGM_BPM*0.55; p.cut=0.33; p.bassRel=0.95; p.hat=0; p.lead=0; p.kick=0.6; }
+  }
+  p.cut*=0.78+spd*0.6; p.bpm*=0.96+spd*0.12; // 加速＝明るく・速く
+  return p;
+}
+function bgmKick(t,v){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(135,t); o.frequency.exponentialRampToValueAtTime(45,t+0.11);
+  g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  o.connect(g); g.connect(bgmBus); o.start(t); o.stop(t+0.32);
+}
+function bgmHat(t,v){
+  const dur=0.045, n=AC.createBufferSource(), buf=AC.createBuffer(1,Math.floor(AC.sampleRate*dur),AC.sampleRate);
+  const d=buf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  n.buffer=buf; const f=AC.createBiquadFilter(); f.type='highpass'; f.frequency.value=7200;
+  const g=AC.createGain(); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  n.connect(f); f.connect(g); g.connect(bgmBus); n.start(t); n.stop(t+dur);
+}
+function bgmBass(t,freq,rel,accent,cut,res,detune,glideTo){
+  const o=AC.createOscillator(); o.type='sawtooth';
+  o.frequency.setValueAtTime(freq,t); if(glideTo) o.frequency.exponentialRampToValueAtTime(glideTo,t+rel*0.6);
+  if(detune) o.detune.value=detune;
+  const f=AC.createBiquadFilter(); f.type='lowpass'; f.Q.value=res;
+  const peak=Math.max(220,(accent?2200:1300)*cut);
+  f.frequency.setValueAtTime(peak,t); f.frequency.exponentialRampToValueAtTime(180,t+rel);
+  const g=AC.createGain(), v=accent?0.34:0.23;
+  g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(v,t+0.008); g.gain.exponentialRampToValueAtTime(0.001,t+rel);
+  o.connect(f); f.connect(g); g.connect(bgmBus); o.start(t); o.stop(t+rel+0.05);
+}
+function bgmStab(t,rootHz,vol){
+  if(vol<=0) return;
+  [0,3,7].forEach(iv=>{
+    const o=AC.createOscillator(); o.type='triangle'; o.frequency.value=rootHz*Math.pow(2,iv/12)*4;
+    const g=AC.createGain(); g.gain.setValueAtTime(0.001,t);
+    g.gain.linearRampToValueAtTime(vol*0.1,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
+    o.connect(g); g.connect(bgmBus); o.start(t); o.stop(t+0.36);
+  });
+}
+function bgmTick(){
+  if(!AC||!bgmBus) return;
+  if(bgmNextTime < AC.currentTime) bgmNextTime=AC.currentTime+0.05; // タブ復帰時の追いつき
+  while(bgmNextTime < AC.currentTime+0.1){
+    const p=bgmTrip(), spStep=60/p.bpm/4;
+    let t=bgmNextTime;
+    if(p.swing && (bgmStep%2===1)) t+=spStep*p.swing;
+    if(!muted && playing && !S.done){
+      const step=bgmStep;
+      if(KICK_PAT[step]) bgmKick(t,p.kick);
+      if(p.hat>0){
+        if(HAT_PAT[step]) bgmHat(t,0.12);
+        if(p.hat>=2) bgmHat(t+spStep*0.5,0.06); // 16分連打で煽る
+      }
+      const b=BASS_PAT[step];
+      if(b){
+        const freq=BGM_ROOT*Math.pow(2,(b.n+p.trans)/12);
+        const nx=BASS_PAT[(step+1)%16];
+        const glide=(b.s&&nx)?BGM_ROOT*Math.pow(2,(nx.n+p.trans)/12):0;
+        bgmBass(t,freq,p.bassRel,!!b.a,p.cut,p.res,p.detune,glide);
+      }
+      if(p.lead>0 && (step===0||step===8)) bgmStab(t,BGM_ROOT*Math.pow(2,p.trans/12),p.lead);
+    }
+    bgmNextTime+=spStep; bgmStep=(bgmStep+1)%16;
+  }
+}
+
 /* drug defs */
 const DRUGS={
   meth:{em:'🍧',nm:'覚醒剤',dur:6.6, feel:'💥 ラッシュ!!! 脳が灼ける、最高だ', cast:'castMeth', tolAdd:0.16},
@@ -671,57 +761,110 @@ const VARIANTS={
     {id:'stagger',label:'🍺 千鳥足 — まっすぐ走ってるつもり',    feel:'🍺 まっすぐ走ってる、つもり',     col:'#ffb04d', cap:1.20, wobble:0.30, fx:'stagger'},
     {id:'bold',   label:'😤 気が大きい — 運転うまい(と思ってる)',feel:'😤 イケる、運転うまい',           col:'#ffd34d', cap:1.32, wobble:0.18, fx:'stagger'},
     {id:'blackout',label:'🌫 記憶飛び — ここどこ？いつ走り出した',feel:'🌫 …ここ、どこ？いつ走り出した？',col:'#cbbbd0', cap:1.10, wobble:0.22, fx:'blackout'},
+    {id:'para',   label:'🍺 勘ぐり — 奥の席から、ずっと睨まれてる',feel:'🍺 …あいつ、こっち睨んでる',      col:'#ff5db0', cap:1.15, wobble:0.20, para:true},
   ],
   opi:[
     {id:'tunnel', label:'💊 とろけるトンネル、なめらか加速',     feel:'😌 痛みも不安も消えた',           col:'#9ec1ff', cap:1.18, fx:'tunnel'},
     {id:'nod',    label:'💤 うとうと — ふっと意識が飛ぶ',        feel:'💤 まぶたが重い…',                col:'#8fa0c0', cap:1.00, fx:'nod'},
     {id:'warm',   label:'🌊 多幸の波に包まれる',                 feel:'🌊 あったかい波が、全身に',       col:'#bcd0ff', cap:1.25, fx:'warm'},
+    {id:'para',   label:'💊 勘ぐり — 天井のシミが、顔になって見てる',feel:'💊 …天井のシミ、顔に見える',     col:'#ff5db0', cap:1.10, para:true},
   ],
 };
 
 function useDrug(type){
   if(!playing||S.done) return;
   const d=DRUGS[type];
-  const pool=VARIANTS[type]; const v=pool[Math.floor(Math.random()*pool.length)];
+  const pool=VARIANTS[type];
+  const paras=pool.filter(v=>v.para), others=pool.filter(v=>!v.para);
+  // 勘ぐり率 35%
+  let v;
+  if(paras.length && Math.random()<0.35) v=paras[Math.floor(Math.random()*paras.length)];
+  else { const src=others.length?others:pool; v=src[Math.floor(Math.random()*src.length)]; }
   S.effect={type,t:0,dur:d.dur*(1-S.tol*0.30),variant:v}; // 連続で使うと効きはやや短く
   S.tol=Math.min(1,S.tol+d.tolAdd*0.6);
   S.used=true; S.drugCount++; S.lastUseT=S.t; S.lastDrug=type; S.drugUse[type]=(S.drugUse[type]||0)+1;
-  S.paraFigs.length=0; S.paraWhisperT=1.2;
+  S.paraFigs.length=0; S.paraEyes.length=0; S.paraWhisperT=1.0; S.paraStalk=-0.6; S.paraFlashT=0; S.paraNextEye=0.4;
   if(type==='lsd') S.lsdStartRank=S.rank;
   showFeel(v.feel, v.col); pulseCast(d.cast); sfxDrug(type);
   logEvent('💊 '+d.nm+'をキメた → '+v.label, v.col);
 }
-/* ===== 勘ぐり（パラノイア）：囁き＋路肩の人影＋心音 ===== */
-const PARA_LINES=['後ろに、誰かいる','ずっと、見られてる','その看板…さっき動いた','足音が、ついてくる','みんな知ってる気がする','ミラーに、知らない顔','囁き声が聞こえる','早く、振り切らないと'];
+/* ===== 勘ぐり（パラノイア）：囁き＋路肩の人影＋開く目＋迫る影＋不協和音 ===== */
+const PARA_LINES=['後ろに、誰かいる','ずっと、見られてる','その看板…さっき動いた','足音が、ついてくる','みんな知ってる気がする','ミラーに、知らない顔','囁き声が聞こえる','早く、振り切らないと',
+  '名前を、呼ばれた','助手席に、誰か座ってる','どこから笑い声…？','まばたきしたら、増えてる','道が、こっちを覗いてる','逃げても、同じ顔','「みつけた」って聞こえた','振り向くな、と誰かが言う','後ろのライト…ずっと同じ','ハンドル、誰かが握ってる'];
+function paraSting(big){
+  if(!AC||muted) return;
+  tone(52+Math.random()*16,0.55,'sawtooth',big?0.16:0.09);
+  tone(55,0.55,'sawtooth',0.06);
+  noise(big?0.5:0.25, big?0.13:0.06, 300);
+}
 function tickParanoia(dt){
+  // 囁き（頻度UP）＋人影＋不協和音
   S.paraWhisperT-=dt;
   if(S.paraWhisperT<=0){
-    S.paraWhisperT=1.8+Math.random()*2.2;
-    showFeel('👁 '+PARA_LINES[Math.floor(Math.random()*PARA_LINES.length)],'#d9b3ff',2.2);
-    heartbeat(); S.shake=Math.max(S.shake,3);
-    S.paraFigs.push({side:Math.random()<0.5?-1:1, t:0, dur:1.6+Math.random()*1.2, lane:(Math.random()*1.4-0.7)});
+    S.paraWhisperT=1.0+Math.random()*1.5;
+    showFeel('👁 '+PARA_LINES[Math.floor(Math.random()*PARA_LINES.length)],'#e0a0ff',2.0);
+    heartbeat(); paraSting(); S.shake=Math.max(S.shake,3.5);
+    const n=1+(Math.random()<0.45?1:0);
+    for(let i=0;i<n;i++) S.paraFigs.push({side:Math.random()<0.5?-1:1, t:0, dur:1.3+Math.random()*1.2,
+      lane:(Math.random()*1.6-0.8), big:Math.random()<0.28});
   }
+  // そこら中で目が開く
+  S.paraNextEye-=dt;
+  if(S.paraNextEye<=0){
+    S.paraNextEye=0.4+Math.random()*1.0;
+    S.paraEyes.push({x:Math.random(), y:Math.random()*0.52, t:0, dur:0.7+Math.random()*1.1});
+    if(S.paraEyes.length>16) S.paraEyes.shift();
+  }
+  // 正面奥から迫る大きな影（ストーカー）→近づき切ると消えてビクッ
+  S.paraStalk+=dt*0.24;
+  if(S.paraStalk>1){ S.paraStalk=-0.9-Math.random()*1.6; S.shake=Math.max(S.shake,8); paraSting(true); }
+  // たまに赤いフラッシュ（ビクッ）
+  if(Math.random()<0.013){ S.paraFlashT=0.2; S.shake=Math.max(S.shake,9); }
+  if(S.paraFlashT>0) S.paraFlashT-=dt;
   for(let i=S.paraFigs.length-1;i>=0;i--){ const f=S.paraFigs[i]; f.t+=dt; if(f.t>=f.dur) S.paraFigs.splice(i,1); }
+  for(let i=S.paraEyes.length-1;i>=0;i--){ const e=S.paraEyes[i]; e.t+=dt; if(e.t>=e.dur) S.paraEyes.splice(i,1); }
 }
 function drawParanoia(){
   if(!(S.effect&&S.effect.variant&&S.effect.variant.para)) return;
-  ctx2.save();
-  const pul=0.14+0.12*Math.abs(Math.sin(S.t*3));
-  const vg=ctx2.createRadialGradient(W/2,H*0.45,H*0.18,W/2,H*0.45,H*0.72);
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(10,0,20,'+(0.5+pul).toFixed(2)+')');
-  ctx2.fillStyle=vg; ctx2.fillRect(0,0,W,H);
-  for(const f of S.paraFigs){
-    const k=Math.min(1,f.t/f.dur), a=Math.sin(k*Math.PI); // フェードイン→アウト
-    const px=W/2 + f.side*(W*0.33) + f.lane*W*0.06;
-    const py=H*0.50 + Math.sin(f.t*2)*4;
-    const h=H*0.17, w=h*0.40;
-    ctx2.globalAlpha=a*0.88; ctx2.fillStyle='#05030a';
-    ctx2.fillRect(px-w/2,py-h,w,h);
-    ctx2.beginPath(); ctx2.arc(px,py-h,w*0.55,0,7); ctx2.fill();
-    ctx2.globalAlpha=a; ctx2.fillStyle='#ff3b6b';
-    ctx2.beginPath(); ctx2.arc(px-w*0.20,py-h,2.4,0,7); ctx2.arc(px+w*0.20,py-h,2.4,0,7); ctx2.fill();
+  const c=ctx2; c.save();
+  // 脈打つ赤黒ビネット（濃いめ）
+  const pul=0.20+0.16*Math.abs(Math.sin(S.t*3.2));
+  const vg=c.createRadialGradient(W/2,H*0.46,H*0.10,W/2,H*0.46,H*0.80);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(0.65,'rgba(30,0,12,'+(0.32+pul*0.5).toFixed(2)+')');
+  vg.addColorStop(1,'rgba(8,0,16,'+Math.min(0.96,0.7+pul).toFixed(2)+')');
+  c.fillStyle=vg; c.fillRect(0,0,W,H);
+  // 迫る大きな影
+  if(S.paraStalk>0){
+    const p=S.paraStalk, sc=0.2+p*1.5, h=H*0.5*sc, w=h*0.42;
+    const px=W/2+Math.sin(S.t*1.3)*W*0.04, py=H*0.64;
+    c.globalAlpha=Math.min(0.94,p*1.1); c.fillStyle='#000';
+    c.fillRect(px-w/2,py-h,w,h); c.beginPath(); c.arc(px,py-h,w*0.55,0,7); c.fill();
+    c.globalAlpha=Math.min(1,p*1.3); c.fillStyle='#ff2b4d';
+    const er=Math.max(2.4,w*0.05);
+    c.beginPath(); c.arc(px-w*0.18,py-h,er,0,7); c.arc(px+w*0.18,py-h,er,0,7); c.fill();
   }
-  ctx2.globalAlpha=1; ctx2.restore();
+  // 路肩の人影（大小）
+  for(const f of S.paraFigs){
+    const a=Math.sin(Math.min(1,f.t/f.dur)*Math.PI), big=f.big?1.7:1;
+    const px=W/2 + f.side*(W*0.33) + f.lane*W*0.06, py=H*0.50 + Math.sin(f.t*2)*4;
+    const h=H*0.17*big, w=h*0.40;
+    c.globalAlpha=a*0.9; c.fillStyle='#05030a';
+    c.fillRect(px-w/2,py-h,w,h); c.beginPath(); c.arc(px,py-h,w*0.55,0,7); c.fill();
+    c.globalAlpha=a; c.fillStyle='#ff3b6b';
+    c.beginPath(); c.arc(px-w*0.20,py-h,2.6*big,0,7); c.arc(px+w*0.20,py-h,2.6*big,0,7); c.fill();
+  }
+  // そこら中で開く目
+  for(const e of S.paraEyes){
+    const a=Math.sin(Math.min(1,e.t/e.dur)*Math.PI), ex=e.x*W, ey=e.y*H, r=Math.max(6,W*0.018);
+    c.globalAlpha=a*0.82;
+    c.fillStyle='#f5e9c0'; c.beginPath(); c.ellipse(ex,ey,r,r*0.55,0,0,7); c.fill();
+    c.fillStyle='#3a0008'; c.beginPath(); c.arc(ex,ey,r*0.42,0,7); c.fill();
+    c.fillStyle='#ff2b4d'; c.beginPath(); c.arc(ex,ey,r*0.2,0,7); c.fill();
+  }
+  // ビクッの赤フラッシュ
+  if(S.paraFlashT>0){ c.globalAlpha=Math.min(0.85,S.paraFlashT*4.5); c.fillStyle='#ff0033'; c.fillRect(0,0,W,H); }
+  c.globalAlpha=1; c.restore();
 }
 function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':t==='coke'?'#9fe4ff':'#9ec1ff';}
 
@@ -1765,13 +1908,6 @@ function drawRush(){
     }
     ctx2.restore();
   }
-  // 爽快感の見える化（速い！という気分だけ）
-  ctx2.save();
-  ctx2.globalAlpha=0.5+0.4*Math.abs(Math.sin(S.t*6));
-  ctx2.fillStyle='#bfefff'; ctx2.textAlign='center';
-  ctx2.font='900 '+Math.round(Math.max(14,W*0.038))+'px sans-serif';
-  ctx2.fillText('🌈 最高に速い…！', cx, horizon-12);
-  ctx2.restore();
 }
 function drawCar(){
   const cw=W*0.16, ch=cw*0.62;
