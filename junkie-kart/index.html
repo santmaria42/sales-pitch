@@ -188,6 +188,38 @@
   .small{font-size:11px;opacity:.6;margin-top:10px;}
   #flash{position:absolute;left:50%;top:34%;transform:translateX(-50%);z-index:8;
     font-size:20px;font-weight:900;pointer-events:none;opacity:0;text-shadow:0 0 16px currentColor;text-align:center;}
+  /* クリーン・コンボ */
+  #combo{position:absolute;left:50%;top:62px;transform:translateX(-50%) scale(.8);
+    z-index:6;pointer-events:none;text-align:center;opacity:0;transition:opacity .2s,transform .12s;
+    font-weight:900;font-style:italic;letter-spacing:.02em;}
+  #combo.show{opacity:1;transform:translateX(-50%) scale(1);}
+  #comboN{font-size:30px;line-height:.9;text-shadow:0 0 16px currentColor;font-variant-numeric:tabular-nums;}
+  #comboL{font-size:10px;letter-spacing:.22em;font-weight:800;opacity:.9;}
+  /* 身体の蝕み HUD */
+  #bodyHud{position:absolute;left:12px;top:150px;z-index:6;pointer-events:none;
+    display:flex;flex-direction:column;gap:5px;font-size:9px;font-weight:800;letter-spacing:.1em;}
+  .bd{display:flex;align-items:center;gap:6px;opacity:.92;
+    background:rgba(8,5,20,.5);backdrop-filter:blur(5px);border:1px solid #ffffff1a;
+    border-radius:10px;padding:4px 9px 4px 7px;transition:opacity .3s;}
+  .bd .ic{font-size:15px;line-height:1;transition:filter .4s,opacity .4s;}
+  .bd .bd-bar{width:46px;height:5px;border-radius:4px;background:#1a1030;overflow:hidden;}
+  .bd .bd-bar i{display:block;height:100%;width:0;border-radius:4px;
+    background:linear-gradient(90deg,#7dff9a,#ffd34d,#ff5d5d);transition:width .5s;}
+  .bd .bd-lb{color:#cbb;min-width:30px;}
+  #formication{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .15s;mix-blend-mode:screen;}
+  #formication.on{opacity:1;}
+  /* 回復ED / 相談窓口 */
+  #resRecovery{background:linear-gradient(135deg,#06251f,#021712);border:1px solid #7dff9a66;}
+  #resRecovery .big{color:#9dffc0;}
+  .recline{margin-top:8px;font-size:13px;line-height:1.8;color:#d6ffe7;}
+  #helpCard{width:100%;max-width:430px;margin:10px 0 2px;padding:15px 17px;border-radius:18px;text-align:left;
+    background:linear-gradient(135deg,#10233a,#071320);border:1px solid #27e1ff55;}
+  #helpCard .cap{font-size:10px;letter-spacing:.22em;font-weight:800;color:#9fe8ff;}
+  #helpCard h4{margin:4px 0 8px;font-size:15px;font-weight:900;color:#fff;}
+  .helprow{font-size:12.5px;line-height:1.5;margin:7px 0;color:#dceeff;}
+  .helprow b{color:#7dff9a;font-size:13.5px;}
+  .helprow .desc{display:block;font-size:11px;opacity:.72;margin-top:1px;}
+  .helprow a{color:#7dd9ff;text-decoration:none;font-weight:800;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -239,6 +271,13 @@
   </div></div>
 
   <div id="flash"></div>
+  <div id="combo"><div id="comboN">0</div><div id="comboL">CLEAN COMBO</div></div>
+  <div id="bodyHud" class="hidden">
+    <div class="bd"><span class="ic" id="bdT">🦷</span><span class="bd-lb">歯</span><div class="bd-bar" id="bdTeeth"><i></i></div></div>
+    <div class="bd"><span class="ic" id="bdW">⚖️</span><span class="bd-lb">体重</span><div class="bd-bar" id="bdWeight"><i></i></div></div>
+    <div class="bd"><span class="ic" id="bdS">🩹</span><span class="bd-lb">皮膚</span><div class="bd-bar" id="bdSkin"><i></i></div></div>
+  </div>
+  <canvas id="formication"></canvas>
 
   <!-- 渇望イベント -->
   <div id="cravePopup"><div class="craveCard">
@@ -306,7 +345,26 @@
       <div class="big" id="resJunkieRank"></div>
       <div class="juse" id="resJunkieUse"></div>
     </div>
+    <div class="resCard hidden" id="resRecovery">
+      <div class="cap">🌱 もうひとつの結末</div>
+      <div class="big" id="resRecoveryHead"></div>
+      <div class="recline" id="resRecoveryBody"></div>
+    </div>
     <div id="resMsg"></div>
+    <!-- 実在の相談窓口（常時表示） -->
+    <div id="helpCard">
+      <div class="cap">ひとりで抱えないで</div>
+      <h4>話せる場所は、本当にある</h4>
+      <div class="helprow"><b>精神保健福祉センター</b>（全国・無料）
+        <span class="desc">薬物・依存の相談窓口。地域の窓口は厚労省サイトから</span>
+        <a href="https://www.mhlw.go.jp/kokoro/support/mhcenter.html" target="_blank" rel="noopener">mhlw.go.jp/kokoro/support/mhcenter.html</a></div>
+      <div class="helprow"><b>よりそいホットライン　0120-279-338</b>
+        <span class="desc">24時間・通話無料。どんな悩みでも、まず声を。</span></div>
+      <div class="helprow"><b>ご家族の薬物問題で困っている方へ</b>
+        <span class="desc">国立精神・神経医療研究センター（家族向けガイド）</span>
+        <a href="https://www.ncnp.go.jp/nimh/yakubutsu/" target="_blank" rel="noopener">ncnp.go.jp/nimh/yakubutsu</a></div>
+      <div class="helprow" style="opacity:.62;font-size:11px;margin-top:10px">気持ちよさは、本物だったかもしれない。でも、戻ってこられる道もちゃんとある。</div>
+    </div>
     <div class="small" id="bestNote"></div>
     <button id="shareBtn">📸 結果を画像でシェア</button>
     <button class="btn" id="againBtn">もう一度（素で走る？）</button>
@@ -399,6 +457,10 @@ function reset(){
      cravEvent:null, craveCool:0, relapses:0, resisted:0,
      bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
      drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0},
+     nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
+     bubbles:[], rubber:0, rivalChatCool:0, sawDrugCool:0,
+     bodyDamage:0, teeth:0, weight:0, skin:0, itchT:0, scratchT:0, formicationSeen:false,
+     cleanStreak:0, longestClean:0,
      rivals:RIVALS.map((r,i)=>({name:r.name,ini:r.ini,color:r.color,base:r.base,laneX:r.laneX,
         dist:0,speed:0,fin:0,phase:i*1.7}))};
 }
@@ -477,7 +539,7 @@ function useDrug(type){
   S.crav=Math.max(0,S.crav-0.5); // 一時的に渇望が消える
   S.used=true; S.drugCount++; S.lastUseT=S.t; S.drugUse[type]=(S.drugUse[type]||0)+1;
   showFeel(d.feel, castColor(type));
-  pulseCast(d.cast); sfxDrug(type);
+  pulseCast(d.cast); sfxDrug(type); rivalsReactDrug();
 }
 function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':'#9ec1ff';}
 
@@ -710,6 +772,7 @@ function update(dt){
   const centered=Math.abs(S.playerX)<0.6, onroad=Math.abs(S.playerX)<=1;
   if(!S.effect && onroad && centered && S.speed>maxSpeed*0.8) S.flow=Math.min(1,S.flow+dt*0.22);
   else S.flow=Math.max(0,S.flow-dt*(S.effect?1.4:0.6));
+  comboTick(dt);
   // フラッシュバック：やめても歪みが戻る（過去の使用が残る）
   if(S.fb>0){ S.fb-=dt; S.shake=Math.max(S.shake,3); S.playerX+=Math.sin(S.t*22)*0.35*dt; }
   else if(!S.effect && S.peakTol>0.35 && Math.random()<(S.peakTol-0.3)*0.12*dt){
@@ -766,6 +829,7 @@ function update(dt){
   let withdrawal = inhigh?0:(S.crav*0.30);
   let finalCap = Math.max(0, cap*(1-withdrawal));
   if(!S.effect) finalCap += S.flow*0.20; // 素の集中で本来以上に伸びる
+  if(!S.effect) finalCap += comboBoost(); // クリーンコンボの段位ブースト（素のみ）
 
   // ---- steering (with lag buffer for weed) ----
   let rawSteer=(keyR?1:0)-(keyL?1:0);
@@ -818,8 +882,9 @@ function update(dt){
   if(S.bandPhase>1e7) S.bandPhase-=1e7;
 
   // ---- rivals (普通に走り切る車) ----
+  rivalAI(dt); tickBubbles(dt);
   for(const rv of S.rivals){
-    const tgt=rv.base + Math.sin(S.t*0.7+rv.phase)*170; // 自然な速度ゆらぎ
+    const tgt=(rv._tgtBoost||rv.base) + Math.sin(S.t*0.7+rv.phase)*170; // 性格/ラバーバンド+ゆらぎ
     if(rv.speed<tgt) rv.speed=Math.min(tgt,rv.speed+2200*dt);
     else rv.speed=Math.max(tgt,rv.speed-2200*dt);
     rv.dist+=rv.speed*dt;
@@ -831,10 +896,14 @@ function update(dt){
   S.rank=ahead+1;
   if(S.rank!==S.prevRank){
     S.rankDir=S.rank<S.prevRank?1:-1; S.rankFlash=0.9; sfxRank(S.rankDir>0); S.prevRank=S.rank;
+    {let near=null,best=1e9; for(const rv of S.rivals){const g=Math.abs(rv.dist-S.playerDist); if(g<best){best=g;near=rv;}}
+     if(near) rivalSay(near, S.rankDir>0?'passed':'pass');}
   } else S.rankFlash=Math.max(0,S.rankFlash-dt);
 
   if(S.playerDist>=TARGET){ S.playerTime=S.t; finish(); }
 
+  if(S.nearGlow>0) S.nearGlow=Math.max(0,S.nearGlow-dt*1.6);
+  tickBody(dt); tickClean(dt);
   S.shake=Math.max(0,S.shake-dt*14);
 }
 
@@ -897,6 +966,7 @@ function render(){
       if(ri.seg===seg.index && ri.dz>-40 && ri.dz<drawDist*segLen){
         sprites.push({kind:'car',scale:sc.scale,x:sc.x+ri.rv.laneX*sc.w,y:sc.y,w:sc.w,
           color:ri.rv.color,label:ri.rv.ini});
+        checkNearMiss(ri.rv, ri.dz);
       }
     }
   }
@@ -906,8 +976,168 @@ function render(){
 
   drawEuphoria();
   drawFlow();
+  drawNearGlow();
   drawCar();
 }
+/* ===== ライバル人格（煽り/応援/ラバーバンド） ===== */
+const RIVAL_TEMPER={'アオイ':'cheer','ミドリ':'cocky','キン':'taunt','シロ':'quiet','アカ':'taunt'};
+const RIVAL_LINES={
+  taunt:{ pass:['遅ぇな、置いてくぞ','その程度かよ','バックミラー見とけ'],
+          passed:['は？今の何','調子乗んな','次はねぇぞ'], near:['どけよ','張り付くな鬱陶しい'],
+          seeDrug:['キメて運転とか終わってんな','それ、勝ちじゃねえぞ'] },
+  cocky:{ pass:['ふっ、余裕','見えてる、全部','悪く思うなよ'],
+          passed:['やるじゃん…でも一瞬だ','面白くなってきた'], near:['横、空けてやろうか？','離れな'],
+          seeDrug:['速いのは画面だけだろ？','その“速さ”、止まって見える'] },
+  cheer:{ pass:['先行くね、追いついて！','こっから本番だよ','ファイト！'],
+          passed:['お、やるね！','いいよその調子','負けないからね〜'], near:['いいレースしよ','並んだね！'],
+          seeDrug:['…それ要らないって','素のキミの方が速いよ','戻っておいで'] },
+  quiet:{ pass:[],passed:[],near:[],seeDrug:[] }
+};
+const bubbleHost=(function(){
+  const h=document.createElement('div'); h.id='rivalBubbles';
+  h.style.cssText='position:absolute;left:0;right:0;top:128px;z-index:8;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;';
+  document.getElementById('stage').appendChild(h); return h;
+})();
+function rivalSay(rv,cat){
+  const tmp=RIVAL_TEMPER[rv.name]||'quiet';
+  const arr=(RIVAL_LINES[tmp]||{})[cat]; if(!arr||!arr.length) return;
+  const txt=arr[Math.floor(Math.random()*arr.length)];
+  const el=document.createElement('div');
+  el.style.cssText='background:rgba(10,6,24,.78);border:1px solid '+rv.color+'88;border-radius:14px;padding:5px 12px;font-size:13px;font-weight:800;color:#fff;box-shadow:0 0 14px '+rv.color+'55;backdrop-filter:blur(4px);opacity:0;transform:translateY(-6px);transition:opacity .2s,transform .2s;';
+  el.innerHTML='<b style="color:'+rv.color+'">'+rv.ini+' '+rv.name+'</b>　'+txt;
+  bubbleHost.appendChild(el);
+  requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)';});
+  S.bubbles.push({el,t:0,dur:2.6});
+  if(S.bubbles.length>3){ const old=S.bubbles.shift(); old.el.remove(); }
+}
+function tickBubbles(dt){
+  for(let i=S.bubbles.length-1;i>=0;i--){
+    const b=S.bubbles[i]; b.t+=dt;
+    if(b.t>=b.dur){ b.el.style.opacity='0'; b.el.style.transform='translateY(-6px)';
+      setTimeout(()=>b.el.remove(),220); S.bubbles.splice(i,1); }
+  }
+}
+function rivalAI(dt){
+  let avg=0; for(const rv of S.rivals) avg+=rv.dist; avg/=S.rivals.length;
+  const lead=(S.playerDist-avg)/TARGET;
+  const wantRubber=Math.max(-0.10,Math.min(0.16,lead*0.6));
+  S.rubber += (wantRubber-S.rubber)*Math.min(1,dt*0.8);
+  S.rivalChatCool=Math.max(0,S.rivalChatCool-dt); S.sawDrugCool=Math.max(0,S.sawDrugCool-dt);
+  for(const rv of S.rivals){
+    const tmp=RIVAL_TEMPER[rv.name]||'quiet';
+    let pers=tmp==='cocky'?1.05:tmp==='taunt'?1.03:tmp==='cheer'?1.0:0.99;
+    rv._tgtBoost = rv.base*pers*(1+S.rubber*(tmp==='quiet'?0:1));
+    const gap=rv.dist-S.playerDist;
+    if(S.rivalChatCool<=0 && Math.abs(gap)<2400 && S.t>3){ rivalSay(rv,'near'); S.rivalChatCool=3.0; }
+  }
+}
+function rivalsReactDrug(){
+  if(S.sawDrugCool>0) return; S.sawDrugCool=4;
+  const sp=S.rivals.filter(rv=>(RIVAL_TEMPER[rv.name]||'quiet')!=='quiet');
+  if(sp.length) rivalSay(sp[Math.floor(Math.random()*sp.length)],'seeDrug');
+}
+
+/* ===== ニアミス（すれ違い様の手応え。素の運転だけのご褒美） ===== */
+function checkNearMiss(rv, dz){
+  if(S.effect) return;
+  if(dz>-160 && dz<70){
+    const dxLane=Math.abs(S.playerX - rv.laneX);
+    if(dxLane<0.34 && dxLane>0.10){
+      const now=S.t, last=S.nearCool[rv.ini]||-9;
+      if(now-last>1.0){
+        S.nearCool[rv.ini]=now; S.nearTotal++;
+        S.flow=Math.min(1,S.flow+0.10); S.nearGlow=0.55; S.shake=Math.max(S.shake,2.5);
+        showFeel('⚡ ニアミス！ +FLOW', rv.color); sfxGood();
+      }
+    }
+  }
+}
+function drawNearGlow(){
+  if(S.nearGlow<=0) return;
+  const a=S.nearGlow, cx=W/2, cy=H*0.42, N=24;
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<N;i++){
+    const ang=i/N*Math.PI*2, r1=W*0.10, r2=r1+W*0.40*a;
+    ctx.strokeStyle=`rgba(255,255,255,${0.28*a})`; ctx.lineWidth=2.2;
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*r1,cy+Math.sin(ang)*r1);
+    ctx.lineTo(cx+Math.cos(ang)*r2,cy+Math.sin(ang)*r2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ===== クリーン走行コンボ（素で中央維持＝段位↑、ハイ/場外/被弾でリセット） ===== */
+const COMBO_TIERS=[
+  {at:0,txt:'CLEAN COMBO',col:'#7dff9a'}, {at:8,txt:'IN THE ZONE',col:'#27e1ff'},
+  {at:18,txt:'素で、速い',col:'#b6ff3a'}, {at:32,txt:'ノーミス独走',col:'#ffd34d'},
+];
+const elCombo=document.getElementById('combo'),
+  elComboN=document.getElementById('comboN'), elComboL=document.getElementById('comboL');
+function comboTick(dt){
+  const centered=Math.abs(S.playerX)<0.55, onroad=Math.abs(S.playerX)<=1;
+  if(!S.effect && onroad && centered && S.speed>maxSpeed*0.7 && S.spin<=0){ S.combo+=dt; }
+  else if(S.combo>0){ S.comboBreakT=0.5; S.combo=0; }
+  const sec=Math.floor(S.combo); let tier=0;
+  for(let i=0;i<COMBO_TIERS.length;i++) if(sec>=COMBO_TIERS[i].at) tier=i;
+  if(tier>S.comboTier && S.combo>0){ S.comboTier=tier;
+    showFeel('🔥 '+COMBO_TIERS[tier].txt+' x'+sec, COMBO_TIERS[tier].col); sfxRank(true); }
+  if(S.combo<COMBO_TIERS[S.comboTier].at) S.comboTier=tier;
+}
+function comboHud(){
+  if(S.combo>=2 && !S.effect){
+    const sec=Math.floor(S.combo), t=COMBO_TIERS[S.comboTier];
+    elCombo.classList.add('show'); elComboN.textContent='x'+sec; elComboN.style.color=t.col;
+    elComboL.textContent=t.txt; elComboL.style.color=t.col;
+  } else elCombo.classList.remove('show');
+}
+function comboBoost(){ return Math.min(0.12, S.comboTier*0.035); }
+
+/* ===== 身体の蝕み（Body Decay / Formication）医学的事実に基づく ===== */
+const bodyHud=document.getElementById('bodyHud');
+const bdTeeth=document.querySelector('#bdTeeth i'), bdWeight=document.querySelector('#bdWeight i'),
+  bdSkin=document.querySelector('#bdSkin i'),
+  bdTic=document.getElementById('bdT'), bdWic=document.getElementById('bdW'), bdSic=document.getElementById('bdS');
+const fcv=document.getElementById('formication'), fctx=fcv.getContext('2d');
+function tickBody(dt){
+  if(S.done) return;
+  if(S.effect){
+    const e=S.effect, r=dt*0.018; S.weight=Math.min(1,S.weight+r);
+    if(e.type==='meth'){ S.teeth=Math.min(1,S.teeth+r*1.6); S.skin=Math.min(1,S.skin+r*1.3); }
+    else if(e.type==='opi'){ S.weight=Math.min(1,S.weight+r*0.6); }
+    else { S.teeth=Math.min(1,S.teeth+r*0.4); }
+  }
+  S.bodyDamage=Math.min(1,(S.teeth+S.weight+S.skin)/3);
+  if(S.bodyDamage>0.02) bodyHud.classList.remove('hidden');
+  bdTeeth.style.width=(S.teeth*100)+'%'; bdWeight.style.width=(S.weight*100)+'%'; bdSkin.style.width=(S.skin*100)+'%';
+  bdTic.style.filter='grayscale('+S.teeth+')'; bdTic.style.opacity=1-S.teeth*0.45;
+  bdWic.style.opacity=1-S.weight*0.45; bdSic.style.filter='grayscale('+S.skin+')';
+  if(S.skin>0.35){
+    S.itchT-=dt;
+    if(S.itchT<=0){ S.scratchT=1.4; S.itchT=4+Math.random()*4; noise(0.3,0.10,2400);
+      showFeel('🐛 皮膚の下を、虫が這ってる…（掻きむしる）','#cdb');
+      if(!S.formicationSeen){ S.formicationSeen=true;
+        S.lost.push({from:'自分の体',real:'肌をかきむしって、血が出るまで止まらなかった',why:'formication（実在しない虫の幻触）'}); } }
+  }
+  if(S.scratchT>0){ S.scratchT-=dt; S.shake=Math.max(S.shake,2); }
+  drawFormication();
+}
+function drawFormication(){
+  if(fcv.width!==W){ fcv.width=W; fcv.height=H; }
+  fctx.clearRect(0,0,W,H);
+  if(S.scratchT<=0){ fcv.classList.remove('on'); return; }
+  fcv.classList.add('on');
+  const N=Math.floor(10+S.skin*30); fctx.fillStyle='rgba(180,160,140,0.55)';
+  for(let i=0;i<N;i++){
+    const x=(Math.sin(i*12.9+S.t*3)*0.5+0.5)*W, y=(Math.cos(i*7.7+S.t*2.3)*0.5+0.5)*H;
+    fctx.beginPath(); fctx.ellipse(x,y,2.2,1.1,i+S.t,0,7); fctx.fill();
+  }
+}
+
+/* ===== 断薬ストリーク（回復の芽） ===== */
+function tickClean(dt){
+  if(S.done) return;
+  if(S.effect){ S.cleanStreak=0; } else { S.cleanStreak+=dt; S.longestClean=Math.max(S.longestClean,S.cleanStreak); }
+}
+
 function drawFlow(){
   if(S.effect || S.flow<0.4) return;
   const cx=W/2, cy=H*0.42, N=30, intensity=(S.flow-0.4)/0.6;
@@ -1121,6 +1351,7 @@ function hud(){
   if(S.effect&&S.effect.type==='weed') sc=1+0.04*Math.sin(S.t*1.5);        // ゆったり呼吸
   if(S.effect&&S.effect.type==='meth'&&S.effect.t<1.6) sc=1+0.16*(1-S.effect.t/1.6); // ラッシュのズーム
   cv.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
+  comboHud();
   setCasts();
   engineUpdate();
 }
@@ -1131,6 +1362,8 @@ function finish(){
   banner.classList.remove('show'); S.mail=null;
   cravePopup.classList.remove('show'); S.cravEvent=null;
   afterBanner.classList.remove('show'); S.after=null;
+  for(const b of S.bubbles) b.el.remove(); S.bubbles=[];
+  bodyHud.classList.add('hidden'); fcv.classList.remove('on'); fctx.clearRect(0,0,W,H);
   const youT=S.playerTime||S.t;
   // 最終順位 = ゴール時点で前にいる車の数+1
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
@@ -1222,6 +1455,26 @@ function finish(){
   document.getElementById('bestNote').textContent = isNaN(best)
     ? '※ 何も使わずクリーン完走でベスト記録に挑戦'
     : ('🏅 クリーン最速：'+best.toFixed(1)+'s'+(isNew?'（新記録！）':''));
+
+  // ---- 身体の蝕み（リザルトに追記） ----
+  if(S.bodyDamage>0.08){
+    let bodyLine='体も削れていた：<div class="lostlist">';
+    if(S.teeth>0.2) bodyLine+='<div>🦷 歯がボロボロに（“メス・マウス”）— 戻らない</div>';
+    if(S.weight>0.2) bodyLine+='<div>⚖️ げっそり痩せて、鏡の顔が知らない人だった</div>';
+    if(S.skin>0.2) bodyLine+='<div>🩹 掻きむしった肌に、消えない傷とあと</div>';
+    bodyLine+='</div>';
+    document.getElementById('resLifeBody').innerHTML += '<div style="margin-top:9px;color:#ffb3c8">'+bodyLine+'</div>';
+    document.getElementById('resLife').style.display='block';
+  }
+  // ---- 回復エンディング：使ったが断ち切って完走した者だけ ----
+  const recEl=document.getElementById('resRecovery');
+  if(S.used && S.longestClean>=12 && S.resisted>0 && life>0){
+    document.getElementById('resRecoveryHead').textContent='🌱 立て直した — 最後は、素のお前だった';
+    document.getElementById('resRecoveryBody').innerHTML=
+      '誘惑に <b style="color:#7dff9a">'+S.resisted+'</b> 回耐え、最長 <b style="color:#7dff9a">'+Math.round(S.longestClean)+'秒</b> 断ち切った。<br>'+
+      '耐性も傷も残る。それは消えない。<br>でも「もう一回」を断れた回数が、戻れる証拠だ。';
+    recEl.classList.remove('hidden');
+  } else recEl.classList.add('hidden');
 
   if(won) sfxGood(); else sfxBad();
   document.getElementById('result').classList.remove('hidden');
