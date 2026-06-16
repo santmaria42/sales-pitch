@@ -236,6 +236,33 @@
   /* イベントログ */
   #eventLog{position:absolute;left:8px;bottom:150px;z-index:6;pointer-events:none;
     font-size:10.5px;font-weight:700;line-height:1.55;text-shadow:0 1px 3px #000;max-width:54%;}
+  /* ドラフト（吸気）ゲージ */
+  #draftMeter{position:absolute;left:50%;bottom:196px;transform:translateX(-50%);
+    width:128px;z-index:6;pointer-events:none;text-align:center;opacity:0;transition:opacity .25s;}
+  #draftMeter.on{opacity:1;}
+  #draftMeter .dl{font-size:9px;letter-spacing:.2em;font-weight:800;color:#bff;text-shadow:0 0 8px #27e1ff;}
+  #draftMeter .db{height:8px;margin-top:3px;border-radius:5px;background:#0c1622;
+    border:1px solid #27e1ff44;overflow:hidden;}
+  #draftMeter .db i{display:block;height:100%;width:0;border-radius:5px;
+    background:linear-gradient(90deg,#27e1ff,#b6ff3a);transition:width .1s linear;}
+  #draftMeter.full .db i{background:linear-gradient(90deg,#b6ff3a,#fff);box-shadow:0 0 12px #b6ff3a;}
+  #draftMeter.full .dl{color:#b6ff3a;}
+  /* 回避フィードバック（被弾時の赤フラッシュ枠） */
+  #hitFx{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0;
+    box-shadow:inset 0 0 90px 30px #ff2d2d;transition:opacity .08s;}
+  #hitFx.on{opacity:1;}
+  /* ===== CLUTCH ZONE（関門ゲージ） ===== */
+  #clutch{position:absolute;left:50%;top:188px;transform:translateX(-50%) scale(.9);
+    width:min(300px,80%);z-index:7;pointer-events:none;text-align:center;
+    opacity:0;transition:opacity .18s,transform .18s;}
+  #clutch.show{opacity:1;transform:translateX(-50%) scale(1);}
+  #clutchLbl{font-size:11px;font-weight:900;letter-spacing:.14em;color:#ffd34d;text-shadow:0 0 12px #ff7a3a;}
+  #clutchTgt{font-size:10px;font-weight:800;color:#cfe;margin-top:1px;opacity:.9;}
+  #clutchBar{height:9px;margin-top:5px;border-radius:6px;background:#1a1030;border:1px solid #ffd34d55;overflow:hidden;}
+  #clutchBar i{display:block;height:100%;width:100%;border-radius:6px;background:linear-gradient(90deg,#ff7a3a,#ffd34d);transition:width .12s linear;}
+  #clutch.hot #clutchBar{box-shadow:0 0 18px #ffd34d;animation:clutchPulse .5s infinite;}
+  @keyframes clutchPulse{0%,100%{border-color:#ffd34d}50%{border-color:#ff3ea5}}
+  #debtBar i{background:linear-gradient(90deg,#ff2d6f,#7a0e2a);}
 </style>
 </head>
 <body>
@@ -273,6 +300,7 @@
     <div class="meter">渇望 CRAVING<div class="bar" id="cravBar"><i></i></div></div>
     <div class="meter">人間関係 LIFE<div class="bar" id="trustBar"><i></i></div></div>
     <div class="meter">集中 FLOW（素）<div class="bar" id="flowBar"><i></i></div></div>
+    <div class="meter">崩壊負債 DEBT<div class="bar" id="debtBar"><i></i></div></div>
   </div>
   <button id="muteBtn">🔊</button>
 
@@ -295,12 +323,15 @@
 
   <div id="flash"></div>
   <div id="combo"><div id="comboN">0</div><div id="comboL">CLEAN COMBO</div></div>
+  <div id="clutch"><div id="clutchLbl">⚑ 関門 — 抜けるチャンス</div>
+    <div id="clutchTgt">　</div><div id="clutchBar"><i></i></div></div>
   <div id="bodyHud" class="hidden">
     <div class="bd"><span class="ic" id="bdT">🦷</span><span class="bd-lb">歯</span><div class="bd-bar" id="bdTeeth"><i></i></div></div>
     <div class="bd"><span class="ic" id="bdW">⚖️</span><span class="bd-lb">体重</span><div class="bd-bar" id="bdWeight"><i></i></div></div>
     <div class="bd"><span class="ic" id="bdS">🩹</span><span class="bd-lb">皮膚</span><div class="bd-bar" id="bdSkin"><i></i></div></div>
   </div>
   <canvas id="formication"></canvas>
+  <div id="hitFx"></div>
 
   <!-- 渇望イベント -->
   <div id="cravePopup"><div class="craveCard">
@@ -318,6 +349,7 @@
     <div id="driveState">🚗 加速中…</div>
   </div>
 
+  <div id="draftMeter"><div class="dl">DRAFT 吸気</div><div class="db"><i></i></div></div>
   <div class="steer" id="steerL"></div>
   <div class="steer" id="steerR"></div>
 
@@ -482,6 +514,10 @@ function reset(){
      bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
      drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0},
      nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
+     draft:0, draftActive:0, draftBurst:0, draftRv:null, draftPop:0, draftTotal:0,
+     hitCool:0, hits:0, dodges:0, dodgeGlow:0, obstHitSeg:-1,
+     clutch:null, clutchCool:6, clutchClears:0, clutchSteals:0,
+     debt:0, debtPeak:0, payback:0, methHits:0, doom:0, doomFrom:'',
      bubbles:[], rubber:0, rivalChatCool:0, sawDrugCool:0,
      bodyDamage:0, teeth:0, weight:0, skin:0, itchT:0, scratchT:0, formicationSeen:false,
      cleanStreak:0, longestClean:0,
@@ -811,6 +847,7 @@ function update(dt){
   if(!S.effect && onroad && centered && S.speed>maxSpeed*0.8) S.flow=Math.min(1,S.flow+dt*0.22);
   else S.flow=Math.max(0,S.flow-dt*(S.effect?1.4:0.6));
   comboTick(dt);
+  tickClutch(dt); tickDebt(dt);
   // フラッシュバック：やめても歪みが戻る（過去の使用が残る）
   if(S.fb>0){ S.fb-=dt; S.shake=Math.max(S.shake,3); S.playerX+=Math.sin(S.t*22)*0.35*dt; }
   else if(!S.effect && S.peakTol>0.35 && Math.random()<(S.peakTol-0.3)*0.12*dt){
@@ -837,9 +874,14 @@ function update(dt){
     const p=e.t/e.dur;
     switch(e.type){
       case 'meth':
-        if(e.t<1.4){cap=1.32; subjMul=1.65;}
-        else {cap=0.40; subjMul=e.t<2.6?1.5:0.5;} // 体感も遅れて墜ちる
-        S.shake=Math.max(S.shake,e.t<1.4?6:2);
+        {const bdur=1.4*(1-S.tol*0.5), bcap=1.32-S.tol*0.25, fcap=Math.max(0.18,0.40-S.tol*0.18);
+         if(!e._banked){ e._banked=true;
+           let stole=false;
+           if(S.clutch){ const g=S.clutch.rv.dist-S.playerDist; if(g>0&&g<CLUTCH_REACH){stole=true; resolveClutch('survived');} }
+           bankBurstDebt(stole); }
+         if(e.t<bdur){cap=bcap; subjMul=1.65;}
+         else {cap=fcap; subjMul=e.t<2.6?1.5:0.5;} // 体感も遅れて墜ちる
+         S.shake=Math.max(S.shake,e.t<bdur?6:2);}
         break;
       case 'weed':
         cap=0.70; subjMul=1.28; lag=0.34; break;
@@ -868,6 +910,8 @@ function update(dt){
   let finalCap = Math.max(0, cap*(1-withdrawal));
   if(!S.effect) finalCap += S.flow*0.20; // 素の集中で本来以上に伸びる
   if(!S.effect) finalCap += comboBoost(); // クリーンコンボの段位ブースト（素のみ）
+  if(!S.effect) finalCap += draftBoost(); // ドラフト解放/風よけブースト（素のみ）
+  finalCap = Math.max(0, finalCap - debtPenalty()); // 崩壊負債：使うほど素の地力が削れる
 
   // ---- steering (with lag buffer for weed) ----
   let rawSteer=(keyR?1:0)-(keyL?1:0);
@@ -920,7 +964,7 @@ function update(dt){
   if(S.bandPhase>1e7) S.bandPhase-=1e7;
 
   // ---- rivals (普通に走り切る車) ----
-  rivalAI(dt); tickBubbles(dt);
+  rivalAI(dt); tickBubbles(dt); tickDraft(dt);
   for(const rv of S.rivals){
     const tgt=(rv._tgtBoost||rv.base) + Math.sin(S.t*0.7+rv.phase)*170; // 性格/ラバーバンド+ゆらぎ
     if(rv.speed<tgt) rv.speed=Math.min(tgt,rv.speed+2200*dt);
@@ -942,7 +986,7 @@ function update(dt){
   if(S.playerDist>=TARGET){ S.playerTime=S.t; finish(); }
 
   if(S.nearGlow>0) S.nearGlow=Math.max(0,S.nearGlow-dt*1.6);
-  tickBody(dt); tickClean(dt);
+  tickBody(dt); tickClean(dt); tickObstacles(dt);
   S.shake=Math.max(0,S.shake-dt*14);
 }
 
@@ -1008,14 +1052,22 @@ function render(){
         checkNearMiss(ri.rv, ri.dz);
       }
     }
+    // 路上の障害物（このセグに紐付くもの）
+    for(const ob of obstacles){
+      if(ob.seg===seg.index){
+        sprites.push({kind:'obst',okind:ob.kind,scale:sc.scale,x:sc.x+ob.laneX*sc.w,y:sc.y,w:sc.w});
+      }
+    }
   }
   // depth sort: far (small scale) first
   sprites.sort((a,b)=>a.scale-b.scale);
-  for(const s of sprites){ if(s.kind==='post') drawPost(s); else drawCarSprite(s); }
+  for(const s of sprites){ if(s.kind==='post') drawPost(s); else if(s.kind==='obst') drawObstacleSprite(s); else drawCarSprite(s); }
 
   drawEuphoria();
   drawFlow();
   drawNearGlow();
+  drawDraftFx();
+  drawDodgeGlow();
   drawCar();
 }
 /* ===== ライバル人格（煽り/応援/ラバーバンド） ===== */
@@ -1130,6 +1182,69 @@ function comboHud(){
 }
 function comboBoost(){ return Math.min(0.12, S.comboTier*0.035); }
 
+/* ===== 関門（CLUTCH ZONE）＝「いつ使うか」を局面化する誘惑 ===== */
+const clutchEl=document.getElementById('clutch'),
+  clutchLbl=document.getElementById('clutchLbl'), clutchTgt=document.getElementById('clutchTgt'),
+  clutchBarI=document.querySelector('#clutchBar i');
+const CLUTCH_REACH=1550;
+function tickClutch(dt){
+  if(S.done) return;
+  if(S.clutchCool>0) S.clutchCool-=dt;
+  if(!S.clutch && S.rank>1 && S.clutchCool<=0 && S.t>4){
+    let near=null,best=1e9;
+    for(const rv of S.rivals){ const g=rv.dist-S.playerDist; if(g>0 && g<best){best=g;near=rv;} }
+    if(near && best<CLUTCH_REACH*1.7){
+      S.clutch={rv:near,t:0,dur:3.6,used:false}; clutchEl.classList.add('show');
+      clutchLbl.textContent='⚑ 関門 — '+near.name+' を抜けるチャンス'; sfxRank(true);
+    }
+  }
+  if(S.clutch){
+    const c=S.clutch; c.t+=dt;
+    const gap=c.rv.dist-S.playerDist, inReach=gap>0 && gap<CLUTCH_REACH;
+    clutchTgt.textContent = inReach?'射程内！ 💉なら抜ける…が直後に必ず代償':'射程外（'+Math.max(0,Math.round(gap*0.42/10))+'m先）';
+    clutchBarI.style.width=Math.max(0,(1-c.t/c.dur)*100)+'%';
+    clutchEl.classList.toggle('hot',inReach);
+    if(!S.effect && gap<=0){ resolveClutch('clean'); }
+    else if(c.t>=c.dur){ resolveClutch(inReach?'survived':'expire'); }
+  }
+}
+function resolveClutch(kind){
+  if(!S.clutch) return; const rv=S.clutch.rv;
+  S.clutch=null; clutchEl.classList.remove('show','hot'); S.clutchCool=5+Math.random()*3;
+  if(kind==='clean'){
+    S.clutchClears++; S.flow=Math.min(1,S.flow+0.22); S.combo+=2.5; S.nearGlow=0.6;
+    showFeel('🏁 CLUTCH CLEAN！素で '+rv.name+' を抜いた','#7dff9a'); sfxGood();
+    logEvent('🏁 関門を素で突破（'+S.clutchClears+'）+FLOW','#7dff9a');
+  } else if(kind==='survived'){
+    S.flow=Math.min(1,S.flow+0.10);
+    showFeel('🧊 関門を耐え抜いた（薬に手を出さず）','#9fe8ff');
+    logEvent('🧊 関門：誘惑に乗らず耐えた','#9fe8ff');
+  }
+}
+/* ===== 崩壊負債（DEBT）＝バーストの代償を可視化・複利化 ===== */
+function bankBurstDebt(stole){
+  S.methHits++;
+  S.debt=Math.min(1, S.debt+0.18+S.tol*0.12); S.debtPeak=Math.max(S.debtPeak,S.debt);
+  S.doom=2.6; S.doomFrom='burst';
+  if(stole){ S.clutchSteals++;
+    showFeel('💉 抜いた！…が、この一瞬に全部を賭けた','#ff6b6b');
+    logEvent('💉 関門を薬で奪取（'+S.clutchSteals+'）→ 負債 +','#ff6b6b'); }
+  else { logEvent('💉 局面外で噴かした → 抜けず、負債だけ残る','#ff6b6b'); }
+}
+function tickDebt(dt){
+  if(S.done) return;
+  if(S.doom>0){ S.doom-=dt;
+    if(S.doom<=0 && !S.effect && S.spin<=0){
+      S.spin=Math.max(S.spin,0.55+S.debt*0.5); S.shake=Math.max(S.shake,8);
+      S.crav=Math.min(1,S.crav+0.18);
+      showFeel('🩸 揺り戻し — 体が言うことをきかない','#ff3b6b'); sfxBad();
+      logEvent('🩸 バーストの代償（遅延スピン）','#ff3b6b');
+    } }
+  if(!S.effect && S.t-S.lastUseT>3){ S.payback+=dt; S.debt=Math.max(0,S.debt-dt*0.02*(1+S.flow)); }
+  else S.payback=0;
+}
+function debtPenalty(){ return S.debt*0.22; }
+
 /* ===== 身体の蝕み（Body Decay / Formication）医学的事実に基づく ===== */
 const bodyHud=document.getElementById('bodyHud');
 const bdTeeth=document.querySelector('#bdTeeth i'), bdWeight=document.querySelector('#bdWeight i'),
@@ -1180,6 +1295,7 @@ function tickClean(dt){
 /* ===== 「今の運転」状態表示（クリックの結果が運転にどう効いてるか） ===== */
 function drivingStatus(){
   if(S.spin>0) return ['💥 スピン！ 立て直せ','#ff5d5d'];
+  if(S.effect && S.hitCool>0.7) return ['💥 ハイで反応が遅れ、被弾','#ff5d5d'];
   if(Math.abs(S.playerX)>1) return ['⚠️ 場外！ レールに戻れ','#ff8a3a'];
   if(S.effect){ const e=S.effect;
     if(e.type==='meth') return e.t<1.4?['💉 急加速中（でも画面だけ）','#ff6b6b']:['💉 失速…効果切れで最低速','#ff6b6b'];
@@ -1188,7 +1304,14 @@ function drivingStatus(){
     if(e.type==='alc') return ['🍺 ハンドルが逆＋勝手に蛇行','#ffb04d'];
     if(e.type==='opi') return ['💊 操作が効かなくなっていく','#9ec1ff'];
   }
+  if(S.clutch){ const g=S.clutch.rv.dist-S.playerDist;
+    return (g>0&&g<CLUTCH_REACH)
+      ? ['⚑ 関門・射程内：今なら抜ける（でも代償）','#ffd34d']
+      : ['⚑ 関門：素で食らいつけ','#9fe8ff']; }
+  if(S.debt>0.25) return ['🩸 崩壊負債で地力ダウン（−'+Math.round(debtPenalty()*100)+'%）','#ff6b8a'];
   if(S.crav>0.55) return ['🥵 渇望でフラつく（離脱症状）','#c08bff'];
+  if(S.draftBurst>0) return ['🌀 スリップストリーム加速中','#b6ff3a'];
+  if(S.draftRv && S.draft>0.04) return ['🌀 風よけ：吸気を溜めてる','#27e1ff'];
   if(S.flow>0.5) return ['🎯 集中ゾーン：素で本来以上に加速','#7dff9a'];
   if(S.speed>maxSpeed*0.7) return ['✅ クリーン走行','#9fe8ff'];
   return ['🚗 加速中…','#cfe'];
@@ -1217,6 +1340,130 @@ function updateContacts(){
     el.style.borderColor = c.gone?'#444':`hsl(${Math.round(c.mood*1.2)},80%,55%)`;
     el.classList.toggle('alert', cur===k || c.pending>=2);
   }
+}
+
+/* ===== ドラフト / スリップストリーム（位置取りのご褒美・素のみ） ===== */
+const draftMeterEl=document.getElementById('draftMeter'),
+  draftBarEl=document.querySelector('#draftMeter .db i');
+function tickDraft(dt){
+  let best=null, bestGap=1e9;
+  if(!S.effect && S.spin<=0){
+    for(const rv of S.rivals){
+      const gap=rv.dist-S.playerDist;
+      if(gap>0 && gap<1700){
+        const dxLane=Math.abs(S.playerX-rv.laneX);
+        if(dxLane<0.42 && gap<bestGap){ bestGap=gap; best=rv; }
+      }
+    }
+  }
+  if(best){
+    const closeK=1-bestGap/1700;
+    S.draft=Math.min(1, S.draft + dt*(0.34+closeK*0.5));
+    S.draftRv=best;
+  } else {
+    if(S.draftRv && S.draft>0.28){
+      S.draftBurst=0.9+S.draft*1.4; S.draftPop=1; S.draftTotal++;
+      S.shake=Math.max(S.shake,3); sfxGood();
+      showFeel('🌀 スリップストリーム解放！ +速度', '#b6ff3a');
+      logEvent('🌀 '+S.draftRv.name+'の風を抜けて加速（'+S.draftTotal+'回目）','#b6ff3a');
+      S.flow=Math.min(1,S.flow+0.06);
+    }
+    S.draft=Math.max(0,S.draft-dt*0.7); S.draftRv=null;
+  }
+  if(S.draftBurst>0) S.draftBurst=Math.max(0,S.draftBurst-dt);
+  if(S.draftPop>0) S.draftPop=Math.max(0,S.draftPop-dt*3);
+}
+function draftBoost(){
+  let b=0;
+  if(S.draftBurst>0) b+=0.16*Math.min(1,S.draftBurst/0.9);
+  if(S.draftRv && S.draft>0.05) b+=0.05*S.draft;
+  return b;
+}
+function draftHud(){
+  const show=!S.effect && (S.draft>0.04 || S.draftBurst>0);
+  draftMeterEl.classList.toggle('on',show);
+  draftMeterEl.classList.toggle('full',S.draft>=1);
+  draftBarEl.style.width=(S.draft*100)+'%';
+}
+function drawDraftFx(){
+  if(S.draftPop<=0 && !(S.draftRv&&S.draft>0.2)) return;
+  const cx=W/2, cy=H*0.46;
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  const a=S.draftPop>0?S.draftPop:(S.draft*0.5), N=18;
+  for(let i=0;i<N;i++){
+    const ox=(i/N-0.5)*W*0.7, len=W*(0.12+0.3*a);
+    ctx.strokeStyle=`rgba(182,255,58,${0.22*a})`; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx+ox,cy-len*0.4); ctx.lineTo(cx+ox*0.5,cy+len); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ===== 路上の障害物（ポットホール/オイル/落下物）— ステアで避ける ===== */
+const OBST_KINDS={
+  hole:{col:'#0a0a0a',spin:0.5, slow:0.55, w:0.30},
+  oil :{col:'#1a0d22',spin:0.9, slow:0.7,  w:0.46},
+  box :{col:'#6b4a1f',spin:0.6, slow:0.5,  w:0.34},
+};
+let obstacles=[];
+function buildObstacles(){
+  obstacles=[];
+  const lanes=[-0.55,-0.18,0.18,0.55], kinds=['hole','oil','box'];
+  for(let i=120;i<segments.length-20;i+=Math.floor(26+Math.random()*30)){
+    obstacles.push({seg:i, laneX:lanes[Math.floor(Math.random()*lanes.length)],
+      kind:kinds[Math.floor(Math.random()*kinds.length)], hit:false});
+  }
+}
+buildObstacles();
+const hitFxEl=document.getElementById('hitFx');
+function tickObstacles(dt){
+  if(S.hitCool>0) S.hitCool=Math.max(0,S.hitCool-dt);
+  if(S.dodgeGlow>0) S.dodgeGlow=Math.max(0,S.dodgeGlow-dt*1.6);
+  const pSeg=Math.floor((S.position/segLen))%segments.length;
+  const widen=S.effect?0.16:0;
+  for(const ob of obstacles){
+    let d=ob.seg-pSeg; if(d<-segments.length/2) d+=segments.length;
+    if(d>=0 && d<=2){
+      const dxLane=Math.abs(S.playerX-ob.laneX);
+      const hitW=OBST_KINDS[ob.kind].w+widen;
+      if(dxLane<hitW){
+        if(!ob.hit && S.hitCool<=0 && S.spin<=0){
+          ob.hit=true; S.hitCool=1.0; S.hits++; S.obstHitSeg=ob.seg;
+          const k=OBST_KINDS[ob.kind];
+          S.spin=Math.max(S.spin,k.spin); S.speed*=k.slow; S.shake=Math.max(S.shake,9);
+          S.combo=0; S.flow=Math.max(0,S.flow-0.3); S.draft=0; S.draftRv=null;
+          hitFxEl.classList.add('on'); setTimeout(()=>hitFxEl.classList.remove('on'),140);
+          sfxCrash();
+          showFeel(S.effect?'💥 反応が遅れて、避けられなかった':'💥 障害物に被弾！','#ff5d5d');
+          logEvent('💥 障害物に被弾'+(S.effect?'（ハイで反応が鈍い）':'')+'（'+S.hits+'回目）','#ff5d5d');
+        }
+      } else if(d===0 && !ob.hit && dxLane>=hitW){
+        ob.hit=true;
+        if(!S.effect){ S.dodges++; S.dodgeGlow=0.5; S.flow=Math.min(1,S.flow+0.05); tone(880,0.08,'triangle',0.12); }
+      }
+    }
+  }
+}
+function drawObstacleSprite(s){
+  const w=Math.max(10,s.scale*roadW*W*0.13), h=w*0.5, cx=s.x, cy=s.y;
+  ctx.save();
+  if(s.okind==='hole'){
+    ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(cx,cy,w*0.5,h*0.6,0,0,7); ctx.fill();
+    ctx.strokeStyle='#3a3f48'; ctx.lineWidth=Math.max(1,w*0.06); ctx.stroke();
+  } else if(s.okind==='oil'){
+    ctx.fillStyle='rgba(20,10,30,0.85)'; ctx.beginPath(); ctx.ellipse(cx,cy,w*0.62,h*0.7,0,0,7); ctx.fill();
+    ctx.fillStyle='rgba(120,60,180,0.35)'; ctx.beginPath(); ctx.ellipse(cx-w*0.1,cy-h*0.1,w*0.3,h*0.3,0,0,7); ctx.fill();
+  } else {
+    ctx.fillStyle=OBST_KINDS[s.okind].col; roundRect(cx-w*0.4,cy-h*1.1,w*0.8,h*1.1,w*0.08); ctx.fill();
+    ctx.fillStyle='#00000055'; ctx.fillRect(cx-w*0.4,cy-h*0.6,w*0.8,h*0.08);
+  }
+  if(!S.effect && w>26){ ctx.fillStyle='#ffd34d'; ctx.font=`900 ${w*0.5}px sans-serif`;
+    ctx.textAlign='center'; ctx.fillText('!',cx,cy-h*1.3); }
+  ctx.restore();
+}
+function drawDodgeGlow(){
+  if(S.dodgeGlow<=0) return;
+  ctx.save(); ctx.globalAlpha=S.dodgeGlow*0.6; ctx.strokeStyle='#7dff9a'; ctx.lineWidth=3;
+  ctx.strokeRect(6,6,W-12,H-12); ctx.restore();
 }
 
 function drawFlow(){
@@ -1380,6 +1627,7 @@ function hud(){
     rivalMarkEls[i].style.left=Math.min(100,S.rivals[i].dist/TARGET*100)+'%';
   elFill.style.inset='0 '+(100-yp)+'% 0 0';
   tolBar.style.width=(S.tol*100)+'%'; cravBar.style.width=(S.crav*100)+'%';
+  document.querySelector('#debtBar i').style.width=(S.debt*100)+'%';
   trustBar.style.width=S.trust+'%'; flowBar.style.width=(S.flow*100)+'%';
   elSubj.style.textShadow=(!S.effect&&S.flow>0.5)
     ? '0 0 20px #7dff9a,0 0 44px #27e1ff'
@@ -1434,6 +1682,7 @@ function hud(){
   if(S.effect&&S.effect.type==='meth'&&S.effect.t<1.6) sc=1+0.16*(1-S.effect.t/1.6); // ラッシュのズーム
   cv.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
   comboHud();
+  draftHud();
   const ds=drivingStatus(); driveStateEl.textContent=ds[0]; driveStateEl.style.color=ds[1];
   updateContacts();
   setCasts();
@@ -1448,6 +1697,7 @@ function finish(){
   afterBanner.classList.remove('show'); S.after=null;
   for(const b of S.bubbles) b.el.remove(); S.bubbles=[];
   bodyHud.classList.add('hidden'); fcv.classList.remove('on'); fctx.clearRect(0,0,W,H);
+  clutchEl.classList.remove('show','hot'); S.clutch=null;
   const youT=S.playerTime||S.t;
   // 最終順位 = ゴール時点で前にいる車の数+1
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
@@ -1581,6 +1831,7 @@ function freshUI(){
   bodyHud.classList.add('hidden'); fcv.classList.remove('on');
   afterBanner.classList.remove('show'); cravePopup.classList.remove('show');
   banner.classList.remove('show'); elCombo.classList.remove('show');
+  clutchEl.classList.remove('show','hot'); buildObstacles(); hitFxEl.classList.remove('on');
 }
 document.getElementById('goBtn').addEventListener('click',()=>{
   audioInit();
