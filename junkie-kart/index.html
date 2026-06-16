@@ -220,6 +220,22 @@
   .helprow b{color:#7dff9a;font-size:13.5px;}
   .helprow .desc{display:block;font-size:11px;opacity:.72;margin-top:1px;}
   .helprow a{color:#7dd9ff;text-decoration:none;font-weight:800;word-break:break-all;}
+  /* 現在の運転状態 */
+  #driveState{margin-top:7px;font-size:13px;font-weight:900;letter-spacing:.02em;
+    padding:4px 13px;border-radius:20px;display:inline-block;color:#cfe;
+    background:rgba(8,5,20,.55);border:1px solid currentColor;text-shadow:0 0 10px currentColor;}
+  /* 連絡先チップ（保留状態） */
+  #contacts{position:absolute;left:50%;top:70px;transform:translateX(-50%);z-index:6;
+    display:flex;gap:6px;pointer-events:none;}
+  .cchip{min-width:62px;background:rgba(8,5,20,.55);backdrop-filter:blur(6px);
+    border:1px solid #ffffff22;border-radius:11px;padding:4px 8px 5px;text-align:center;transition:border-color .3s,box-shadow .3s;}
+  .cchip.alert{box-shadow:0 0 14px #ff5d6c;animation:cblink .8s infinite;}
+  @keyframes cblink{0%,100%{border-color:#ff5d6c}50%{border-color:#ffd34d}}
+  .cchip .cn{font-size:11px;font-weight:800;color:#fff;}
+  .cchip .cs{font-size:9px;font-weight:800;margin-top:1px;}
+  /* イベントログ */
+  #eventLog{position:absolute;left:8px;bottom:150px;z-index:6;pointer-events:none;
+    font-size:10.5px;font-weight:700;line-height:1.55;text-shadow:0 1px 3px #000;max-width:54%;}
 </style>
 </head>
 <body>
@@ -244,6 +260,13 @@
   </div>
 
   <div id="posBadge"><div id="posLbl">順位 POSITION</div><div id="posNum">1</div><div id="posOrd">st</div><div id="posDen">/6</div></div>
+
+  <div id="contacts">
+    <div class="cchip" id="cKoi"><div class="cn">💗 ゆい</div><div class="cs">—</div></div>
+    <div class="cchip" id="cBoss"><div class="cn">🏢 上司</div><div class="cs">—</div></div>
+    <div class="cchip" id="cFam"><div class="cn">👩 家族</div><div class="cs">—</div></div>
+  </div>
+  <div id="eventLog"></div>
 
   <div id="meters">
     <div class="meter">耐性 TOLERANCE<div class="bar" id="tolBar"><i></i></div></div>
@@ -292,6 +315,7 @@
     <div id="subjUnit">KM / H（体感）</div>
     <div id="feel">　</div>
     <div id="realKmh">実速度 0 km/h</div>
+    <div id="driveState">🚗 加速中…</div>
   </div>
 
   <div class="steer" id="steerL"></div>
@@ -461,6 +485,10 @@ function reset(){
      bubbles:[], rubber:0, rivalChatCool:0, sawDrugCool:0,
      bodyDamage:0, teeth:0, weight:0, skin:0, itchT:0, scratchT:0, formicationSeen:false,
      cleanStreak:0, longestClean:0,
+     log:[], contacts:{
+       koi:{name:'ゆい',em:'💗',mood:100,pending:0,gone:false},
+       boss:{name:'上司',em:'🏢',mood:100,pending:0,gone:false},
+       fam:{name:'家族',em:'👩',mood:100,pending:0,gone:false}},
      rivals:RIVALS.map((r,i)=>({name:r.name,ini:r.ini,color:r.color,base:r.base,laneX:r.laneX,
         dist:0,speed:0,fin:0,phase:i*1.7}))};
 }
@@ -540,6 +568,7 @@ function useDrug(type){
   S.used=true; S.drugCount++; S.lastUseT=S.t; S.drugUse[type]=(S.drugUse[type]||0)+1;
   showFeel(d.feel, castColor(type));
   pulseCast(d.cast); sfxDrug(type); rivalsReactDrug();
+  logEvent('💊 '+d.nm+'を使った（'+S.drugCount+'回目）', castColor(type));
 }
 function castColor(t){return t==='meth'?'#ff5d5d':t==='weed'?'#5cff8f':t==='lsd'?'#c46bff':t==='alc'?'#ffb04d':'#9ec1ff';}
 
@@ -621,6 +650,11 @@ function resolveMail(kind){
     if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'無視'});
   }
   S.trust=Math.max(0,Math.min(100,S.trust+dT));
+  const ck=contactKey(d.from);
+  if(ck){ const c=S.contacts[ck];
+    if(dT>0){ c.mood=Math.min(100,c.mood+10); c.pending=0; }
+    else { c.pending++; c.mood=Math.max(0,c.mood-14); if(c.mood<=0) c.gone=true; } }
+  logEvent((dT>0?'✅ ':'💔 ')+d.from+(dT>0?' に返信した':(kind==='reply'?' に失言した':' を無視した')), dT>0?'#7dff9a':'#ff6b8a');
   if(dT>0) sfxGood(); else sfxBad();
   showFeel(msg,col); hideMail();
 }
@@ -647,10 +681,10 @@ function resolveCrave(kind){
   if(kind==='yes'){
     S.relapses++; S.tol=Math.min(1,S.tol+0.1);
     useDrug(['meth','meth','weed'][Math.floor(Math.random()*3)]);
-    showFeel('🔁 また、手を出した', '#ff6bb0');
+    showFeel('🔁 また、手を出した', '#ff6bb0'); logEvent('🔁 渇望に負けてまた使った','#ff6bb0');
   } else if(kind==='no'){
     S.resisted++; S.crav=Math.max(0,S.crav-0.4); S.trust=Math.min(100,S.trust+4);
-    showFeel('🌱 渇望に、耐えた', '#7dff9a'); sfxGood();
+    showFeel('🌱 渇望に、耐えた', '#7dff9a'); sfxGood(); logEvent('🌱 渇望に耐えた（'+S.resisted+'回目）','#7dff9a');
   } else { S.crav=Math.max(0,S.crav-0.15); } // pass（気を逸らした）
 }
 document.getElementById('craveYes').addEventListener('click',()=>resolveCrave('yes'));
@@ -668,9 +702,13 @@ function maybeAftermath(){
   afterBanner.classList.add('show'); sfxBad();
 }
 function resolveAfter(kind){
-  if(!S.after) return; afterBanner.classList.remove('show'); S.after=null;
-  if(kind==='sorry'){ S.trust=Math.min(100,S.trust+5); showFeel('🙇 ちゃんと謝った','#7dff9a'); sfxGood(); }
-  else { S.trust=Math.max(0,S.trust-5); showFeel('…見なかったことにした','#ff9bb0'); sfxBad(); }
+  if(!S.after) return; const from=S.after.from; const ck=contactKey(from);
+  afterBanner.classList.remove('show'); S.after=null;
+  if(kind==='sorry'){ S.trust=Math.min(100,S.trust+5);
+    if(ck){const c=S.contacts[ck];c.mood=Math.min(100,c.mood+12);c.pending=Math.max(0,c.pending-1);}
+    showFeel('🙇 ちゃんと謝った','#7dff9a'); sfxGood(); logEvent('🙇 '+from+' に謝った','#7dff9a'); }
+  else { S.trust=Math.max(0,S.trust-5); if(ck)S.contacts[ck].mood=Math.max(0,S.contacts[ck].mood-6);
+    showFeel('…見なかったことにした','#ff9bb0'); sfxBad(); logEvent('🙈 '+from+' を放置した','#ff9bb0'); }
 }
 document.getElementById('afterSorry').addEventListener('click',()=>resolveAfter('sorry'));
 document.getElementById('afterIgnore').addEventListener('click',()=>resolveAfter('ignore'));
@@ -815,10 +853,10 @@ function update(dt){
     }
     if(e.t>=e.dur){
       if(e.type==='opi'){ // 入力ゼロまで墜ちたら オーバードーズ
-        S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash();
+        S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash(); logEvent('💀 オーバードーズで停止','#ff3b3b');
       }
       if(e.type==='lsd'){ // 空の近道は幻覚。元の位置に引き戻される
-        S.snapback=0.8; S.shake=12; showFeel('🌈 近道は幻だった…元の位置に', '#c46bff'); sfxCrash();
+        S.snapback=0.8; S.shake=12; showFeel('🌈 近道は幻だった…元の位置に', '#c46bff'); sfxCrash(); logEvent('🌈 空の近道は幻覚。1mも進んでなかった','#c46bff');
       }
       S.effect=null;
     }
@@ -865,7 +903,7 @@ function update(dt){
     } else { // キメてる：行ける感。でも戻れないと「落ちる」
       S.fall+=dt;
       if(S.fall>1.5){ S.spin=1.2; S.shake=12; S.playerX=S.playerX>0?0.8:-0.8; S.fall=0;
-        showFeel('🕳 レール外れて墜落', '#ff5d5d'); sfxCrash(); }
+        showFeel('🕳 レール外れて墜落', '#ff5d5d'); sfxCrash(); logEvent('🕳 レール外れて墜落（場外には道が無い）','#ff5d5d'); }
     }
   } else S.fall=Math.max(0,S.fall-dt*2);
   S.playerX=Math.max(-2,Math.min(2,S.playerX));
@@ -897,7 +935,8 @@ function update(dt){
   if(S.rank!==S.prevRank){
     S.rankDir=S.rank<S.prevRank?1:-1; S.rankFlash=0.9; sfxRank(S.rankDir>0); S.prevRank=S.rank;
     {let near=null,best=1e9; for(const rv of S.rivals){const g=Math.abs(rv.dist-S.playerDist); if(g<best){best=g;near=rv;}}
-     if(near) rivalSay(near, S.rankDir>0?'passed':'pass');}
+     if(near){ rivalSay(near, S.rankDir>0?'passed':'pass');
+       logEvent((S.rankDir>0?'🏎 ':'🐌 ')+near.name+(S.rankDir>0?' を抜いた':' に抜かれた')+' → '+S.rank+'位', S.rankDir>0?'#7dff9a':'#ff6b8a'); }}
   } else S.rankFlash=Math.max(0,S.rankFlash-dt);
 
   if(S.playerDist>=TARGET){ S.playerTime=S.t; finish(); }
@@ -1047,7 +1086,7 @@ function checkNearMiss(rv, dz){
       if(now-last>1.0){
         S.nearCool[rv.ini]=now; S.nearTotal++;
         S.flow=Math.min(1,S.flow+0.10); S.nearGlow=0.55; S.shake=Math.max(S.shake,2.5);
-        showFeel('⚡ ニアミス！ +FLOW', rv.color); sfxGood();
+        showFeel('⚡ ニアミス！ +FLOW', rv.color); sfxGood(); logEvent('⚡ '+rv.name+'とニアミス +FLOW',rv.color);
       }
     }
   }
@@ -1136,6 +1175,48 @@ function drawFormication(){
 function tickClean(dt){
   if(S.done) return;
   if(S.effect){ S.cleanStreak=0; } else { S.cleanStreak+=dt; S.longestClean=Math.max(S.longestClean,S.cleanStreak); }
+}
+
+/* ===== 「今の運転」状態表示（クリックの結果が運転にどう効いてるか） ===== */
+function drivingStatus(){
+  if(S.spin>0) return ['💥 スピン！ 立て直せ','#ff5d5d'];
+  if(Math.abs(S.playerX)>1) return ['⚠️ 場外！ レールに戻れ','#ff8a3a'];
+  if(S.effect){ const e=S.effect;
+    if(e.type==='meth') return e.t<1.4?['💉 急加速中（でも画面だけ）','#ff6b6b']:['💉 失速…効果切れで最低速','#ff6b6b'];
+    if(e.type==='weed') return ['🌿 操作が 0.34秒 遅れて効く','#5cff8f'];
+    if(e.type==='lsd') return ['🌈 幻の近道（実際は止まってる）','#c46bff'];
+    if(e.type==='alc') return ['🍺 ハンドルが逆＋勝手に蛇行','#ffb04d'];
+    if(e.type==='opi') return ['💊 操作が効かなくなっていく','#9ec1ff'];
+  }
+  if(S.crav>0.55) return ['🥵 渇望でフラつく（離脱症状）','#c08bff'];
+  if(S.flow>0.5) return ['🎯 集中ゾーン：素で本来以上に加速','#7dff9a'];
+  if(S.speed>maxSpeed*0.7) return ['✅ クリーン走行','#9fe8ff'];
+  return ['🚗 加速中…','#cfe'];
+}
+
+/* ===== イベントログ ===== */
+const eventLogEl=document.getElementById('eventLog');
+function logEvent(text,col){
+  S.log.unshift({text,col:col||'#cfe'}); if(S.log.length>5) S.log.pop();
+  eventLogEl.innerHTML=S.log.map((e,i)=>`<div style="opacity:${(1-i*0.18).toFixed(2)};color:${e.col}">${e.text}</div>`).join('');
+}
+
+/* ===== 連絡先（保留状態の可視化） ===== */
+function contactKey(from){ if(from.indexOf('ゆい')>=0)return'koi'; if(from.indexOf('上司')>=0)return'boss'; if(from==='母')return'fam'; return null; }
+const cEls={koi:document.getElementById('cKoi'),boss:document.getElementById('cBoss'),fam:document.getElementById('cFam')};
+function updateContacts(){
+  const cur=S.mail?contactKey(S.mail.data.from):null;
+  for(const k in S.contacts){
+    const c=S.contacts[k], el=cEls[k], s=el.querySelector('.cs');
+    let txt,col;
+    if(c.gone){ txt='去った'; col='#777'; }
+    else if(cur===k){ txt='📨 着信中！'; col='#ffd34d'; }
+    else if(c.pending>0){ txt='返信保留 ×'+c.pending; col=c.pending>=2?'#ff5d6c':'#ffd34d'; }
+    else { txt='良好'; col='#7dff9a'; }
+    s.textContent=txt; s.style.color=col;
+    el.style.borderColor = c.gone?'#444':`hsl(${Math.round(c.mood*1.2)},80%,55%)`;
+    el.classList.toggle('alert', cur===k || c.pending>=2);
+  }
 }
 
 function drawFlow(){
@@ -1280,7 +1361,8 @@ const elSubj=document.getElementById('subjKmh'),elReal=document.getElementById('
   posBadge=document.getElementById('posBadge'),posNum=document.getElementById('posNum'),
   posOrd=document.getElementById('posOrd'),posDen=document.getElementById('posDen'),
   tolBar=tol(),cravBar=crav(),trustBar=document.querySelector('#trustBar i'),
-  flowBar=document.querySelector('#flowBar i'),muteBtn=document.getElementById('muteBtn');
+  flowBar=document.querySelector('#flowBar i'),muteBtn=document.getElementById('muteBtn'),
+  driveStateEl=document.getElementById('driveState');
 posDen.textContent='/'+(RIVALS.length+1);
 muteBtn.addEventListener('click',()=>{ muted=!muted; muteBtn.textContent=muted?'🔇':'🔊'; });
 function tol(){return document.querySelector('#tolBar i');}
@@ -1352,6 +1434,8 @@ function hud(){
   if(S.effect&&S.effect.type==='meth'&&S.effect.t<1.6) sc=1+0.16*(1-S.effect.t/1.6); // ラッシュのズーム
   cv.style.transform=`translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${sc.toFixed(3)})`;
   comboHud();
+  const ds=drivingStatus(); driveStateEl.textContent=ds[0]; driveStateEl.style.color=ds[1];
+  updateContacts();
   setCasts();
   engineUpdate();
 }
@@ -1492,15 +1576,21 @@ function frame(ts){
 requestAnimationFrame(frame);
 
 /* ===== buttons ===== */
+function freshUI(){
+  eventLogEl.innerHTML=''; bubbleHost.innerHTML='';
+  bodyHud.classList.add('hidden'); fcv.classList.remove('on');
+  afterBanner.classList.remove('show'); cravePopup.classList.remove('show');
+  banner.classList.remove('show'); elCombo.classList.remove('show');
+}
 document.getElementById('goBtn').addEventListener('click',()=>{
   audioInit();
   document.getElementById('start').classList.add('hidden');
-  reset(); playing=true; last=0;
+  reset(); freshUI(); playing=true; last=0;
 });
 document.getElementById('againBtn').addEventListener('click',()=>{
   audioInit();
   document.getElementById('result').classList.add('hidden');
-  reset(); playing=true; last=0;
+  reset(); freshUI(); playing=true; last=0;
 });
 })();
 </script>
