@@ -558,6 +558,7 @@ function poly(x1,y1,x2,y2,x3,y3,x4,y4,c){
 }
 
 /* ===== game state ===== */
+const SNAP_DUR=1.3; // 薬切れ→現実に引き戻されるまでの時間（体感順位が一気に転落）
 const maxSpeed=4350, accel=2500, TARGET=156000;
 const RIVALS=[
   {name:'アオイ', ini:'青', color:'#27e1ff', base:3300, laneX:-0.58},
@@ -579,6 +580,9 @@ function reset(){
      flow:0, peakTol:0, fb:0, fbText:'', lastUseT:-99, lastDrug:null, healT:0, heartT:0,
      cravEvent:null, craveCool:0, relapses:0, resisted:0,
      bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
+     visDist:0, snap:0, snapFrom:0, snapLost:0,
+     shownRank:RIVALS.length+1, prevShownRank:RIVALS.length+1, visPeakRank:RIVALS.length+1,
+     shownFlash:0, shownDir:0,
      drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0,coke:0},
      item:null, roulette:null, itemsGrabbed:0,
      nearGlow:0, nearCool:{}, nearTotal:0, combo:0, comboTier:0, comboBreakT:0,
