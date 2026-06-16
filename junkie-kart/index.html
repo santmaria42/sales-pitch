@@ -61,8 +61,7 @@
     color:#bfefff;font-weight:800;background:#1a0730;padding:1px 6px;border-radius:6px;}
 
   /* ===== 体感スピードメーター (THE LIE) — マリオカート式・右下 ===== */
-  #speedoMK{position:absolute;right:12px;bottom:78px;z-index:6;pointer-events:none;text-align:right;
-    text-shadow:0 2px 6px #000a;}
+  #speedoMK{display:none;}
   #speedoMK .splbl{font-size:9px;letter-spacing:.24em;font-weight:800;color:#bfefff;opacity:.85;}
   #speedoMK .sprow{display:flex;align-items:baseline;justify-content:flex-end;gap:5px;line-height:.82;}
   #subjKmh{font-size:62px;font-weight:900;font-style:italic;letter-spacing:-2px;
@@ -74,7 +73,7 @@
     text-align:center;z-index:5;pointer-events:none;width:min(92%,520px);}
   #feel{font-size:12px;font-weight:800;height:16px;letter-spacing:.08em;
     text-shadow:0 0 10px currentColor;}
-  #cpHud{margin-top:5px;font-size:11px;font-weight:800;color:#cfe;}
+  #cpHud{display:none;}
   #cpHud.warn{color:#ff5d6c;animation:cpblink .7s infinite;}
   @keyframes cpblink{0%,100%{opacity:1}50%{opacity:.45}}
   #cpFlash{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.7);
@@ -126,9 +125,8 @@
   @keyframes useReady{0%,100%{box-shadow:0 0 16px #ffd34d77}50%{box-shadow:0 0 28px #ffd34dcc}}
   #useBtn:active{transform:translateX(-50%) scale(.95);}
 
-  /* steer pads */
-  .steer{position:absolute;bottom:64px;width:34%;height:46%;z-index:6;opacity:0;}
-  #steerL{left:0}#steerR{right:0}
+  /* steer pads（左右操作は撤去したため非表示） */
+  .steer{display:none;}
 
   /* tolerance / craving */
   #meters{position:absolute;right:10px;top:160px;width:120px;z-index:6;pointer-events:none;font-size:9px;font-weight:800;letter-spacing:.12em;}
@@ -336,7 +334,7 @@
 
   <!-- 正直バー -->
   <div id="truth">
-    <div id="truthLabel"><span>実際の順位 <b>／ 嘘をつかない指標</b></span><span id="clock">0.0s</span></div>
+    <div id="truthLabel"><span>実際の順位 <b>／ 嘘をつかない指標</b></span><span id="clock" style="display:none">0.0s</span></div>
     <div id="track">
       <div id="trackFill"></div>
       <div id="rivalMarks"></div>
@@ -358,7 +356,7 @@
     <div class="meter" style="display:none">耐性 TOLERANCE<div class="bar" id="tolBar"><i></i></div></div>
     <div class="meter">渇望 CRAVING<div class="bar" id="cravBar"><i></i></div></div>
     <div class="meter" style="display:none">人間関係 LIFE<div class="bar" id="trustBar"><i></i></div></div>
-    <div class="meter">集中 FLOW（素）<div class="bar" id="flowBar"><i></i></div></div>
+    <div class="meter" style="display:none">集中 FLOW（素）<div class="bar" id="flowBar"><i></i></div></div>
     <div class="meter">崩壊負債 DEBT<div class="bar" id="debtBar"><i></i></div></div>
   </div>
   <button id="muteBtn">🔊</button>
@@ -428,13 +426,13 @@
     <h1>JUNKIE KART</h1>
     <div class="tag">キマってるのは、お前の画面だけ。</div>
     <div class="how">
-      <b>← →</b>（または画面左右タップ）でハンドル。アクセルは自動。<br>
-      コース上の<b>？アイテムブロック</b>を拾うと、右上で<b>ルーレット</b>が回り中身が決まる。<br>
-      <b>下のボタン</b>（または右上ボックスをタップ／<b>Space</b>）で“アイテム”を使える。<br><br>
+      運転もアクセルもハンドルも<b>全部自動</b>。お前がやることは、ただ一つ。<br>
+      コースの<b>？アイテムブロック</b>を通過すると右上で<b>ルーレット</b>が回り、中身（薬）が決まる。<br>
+      <b>使うか、使わないか</b>──<b>下のボタン</b>（または右上ボックス／<b>Space</b>）だけ。<br><br>
       使うと画面は最高に<b>速く・気持ちよく</b>感じる。<br>
       でも上の<b>正直バー</b>を見ろ。前に進んでるのは…<br>
       何も使わない<b>「素」のお前（白）</b>だ。<br>
-      レールの外（場外）はキメた時だけ行ける。その先に道は無い。
+      アイテムは<b>めったに出ない</b>。1個を、いつ切るか。
     </div>
     <button class="btn" id="goBtn">スタート</button>
     <div class="small">※ これは薬物の主観と現実のズレを体験する啓発デモです</div>
@@ -588,7 +586,7 @@ function reset(){
      rank:RIVALS.length+1, prevRank:RIVALS.length+1, rankFlash:0, rankDir:0,
      trust:100, mail:null, nextMailAt:5, seqIdx:0, lost:[], collapsed:false,
      flow:0, peakTol:0, fb:0, fbText:'', lastUseT:-99, lastDrug:null, healT:0, heartT:0,
-     cravEvent:null, craveCool:0, relapses:0, resisted:0,
+     cravEvent:null, craveCool:0, afterCool:0, relapses:0, resisted:0,
      bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
      visDist:0, snap:0, snapFrom:0, snapLost:0,
      shownRank:RIVALS.length+1, prevShownRank:RIVALS.length+1, visPeakRank:RIVALS.length+1,
@@ -766,7 +764,7 @@ const rivalMarkEls=[];
 /* ui feel flash */
 const flash=document.getElementById('flash');
 let feelTimer=0;
-function showFeel(txt,col){flash.textContent=txt;flash.style.color=col;flash.style.opacity=1;feelTimer=1.4;}
+function showFeel(txt,col,dur){flash.textContent=txt;flash.style.color=col;flash.style.opacity=1;feelTimer=dur||2.8;}
 
 /* ===== 着信メール（現実が壊れていくレイヤー） ===== */
 /* real=しらふで見える本当の文 / para=覚醒剤の被害妄想で歪む文。imp=重要度 */
@@ -892,13 +890,14 @@ document.getElementById('craveNo').addEventListener('click',()=>resolveCrave('no
 /* ===== 事後通知（シラフに戻って自分のしたことを知る） ===== */
 const afterBanner=document.getElementById('afterBanner');
 function maybeAftermath(){
-  if(S.effect||S.after||S.mail||S.cravEvent||S.done||!S.afterQ.length) return;
-  const a=S.afterQ.shift(); S.after=a;
-  document.getElementById('afterTo').textContent=a.em+' '+a.from;
-  document.getElementById('afterFrom').textContent=a.from;
-  document.getElementById('afterSent').textContent='「'+a.sent+'」';
-  document.getElementById('afterReply').textContent='「'+a.reply+'」';
-  afterBanner.classList.add('show'); sfxBad();
+  // シラフに戻って自分のしたことを知る。判断（謝る/無視）は撤去し、結果を自動で突きつけるだけにする。
+  if(S.effect||S.mail||S.done||!S.afterQ.length || S.afterCool>0) return;
+  const a=S.afterQ.shift();
+  for(let i=S.story.length-1;i>=0;i--){ if(S.story[i].from===a.from && S.story[i].amends===null){ S.story[i].amends=false; break; } }
+  S.afterCool=2.4; // 立て続けに出さない
+  showFeel('🫥 シラフに戻った…'+a.from+' に何を送ったか、思い出した','#ff9bb0');
+  logEvent('🫥 '+a.from+' への返信「'+a.sent+'」→ 返ってきたのは「'+a.reply+'」', '#ff9bb0');
+  sfxBad();
 }
 function resolveAfter(kind){
   if(!S.after) return; const from=S.after.from; const ck=contactKey(from);
@@ -971,23 +970,10 @@ document.getElementById('shareBtn').addEventListener('click',shareResult);
 
 /* ===== input ===== */
 let keyL=false,keyR=false, playing=false;
+// 左右ステアは撤去。プレイヤーの操作は「アイテムを使うか」だけ（マリオカート式）。
 document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowLeft'||e.key==='a')keyL=true;
-  if(e.key==='ArrowRight'||e.key==='d')keyR=true;
   if(e.key===' '||e.key==='Enter'||e.key==='Spacebar'){ e.preventDefault(); useItem(); }
 });
-document.addEventListener('keyup',e=>{
-  if(e.key==='ArrowLeft'||e.key==='a')keyL=false;
-  if(e.key==='ArrowRight'||e.key==='d')keyR=false;
-});
-const sL=document.getElementById('steerL'),sR=document.getElementById('steerR');
-function bindHold(el,set){
-  el.addEventListener('pointerdown',e=>{e.preventDefault();set(true);});
-  el.addEventListener('pointerup',e=>{e.preventDefault();set(false);});
-  el.addEventListener('pointerleave',()=>set(false));
-  el.addEventListener('pointercancel',()=>set(false));
-}
-bindHold(sL,v=>keyL=v); bindHold(sR,v=>keyR=v);
 const useBtn=document.getElementById('useBtn'), itemBoxEl=document.getElementById('itemBox'),
   itemIconEl=document.getElementById('itemIcon');
 useBtn.addEventListener('click',useItem);
@@ -1028,15 +1014,10 @@ function update(dt){
     if(S.trust<capT) S.trust=Math.min(capT,S.trust+dt*0.8); }
   // 渇望のドクン（心音）
   if(S.crav>0.5 && !S.effect){ S.heartT-=dt; if(S.heartT<=0){ heartbeat(); S.heartT=1.1-S.crav*0.4; } }
-  // 渇望の誘惑イベント（もう一回キメる⇄耐える）
+  // 渇望ポップアップ（もう一回キメる⇄耐える）は撤去。
+  // 渇望は「アイテムを使うか我慢か」に統合され、心音と画面のざわつきで圧をかけるだけにする。
   if(S.craveCool>0) S.craveCool-=dt;
-  if(!S.effect && !S.cravEvent && S.crav>0.68 && S.craveCool<=0){
-    S.cravEvent={t:0}; cravePopup.classList.add('show'); heartbeat();
-    const dn=S.lastDrug&&DRUGS[S.lastDrug];
-    document.getElementById('craveTitle').textContent=dn?(dn.em+' '+dn.nm+'が、欲しい…'):'🧠 ヤクが、欲しい…';
-    document.getElementById('craveYes').textContent=dn?('もう一回 '+dn.nm):'もう一回キメる';
-  }
-  if(S.cravEvent){ S.cravEvent.t+=dt; if(S.cravEvent.t>6) resolveCrave('pass'); }
+  if(S.afterCool>0) S.afterCool-=dt;
   maybeAftermath();
   if(S.snapback>0) S.snapback-=dt;
 
@@ -1091,16 +1072,16 @@ function update(dt){
       const lost=Math.max(0,S.rank-felt);          // 現実で何台に抜き返されたか
       S.snapLost=lost;
       if(lost>0){
-        showCpFlash('💊 効果が切れた','「'+felt+'位」のはずが…'+lost+'台に抜き返され '+S.rank+'位','#ff5d6c');
-        showFeel('⬇ '+endNm+'が切れた…現実は '+S.rank+'位','#ff5d6c');
+        showCpFlash('💊 効果が切れた','「'+felt+'位」のはずが…'+lost+'台に抜き返され '+S.rank+'位','#ff5d6c',6.5);
+        showFeel('⬇ '+endNm+'が切れた…現実は '+S.rank+'位','#ff5d6c',4);
         logEvent('💊 '+endNm+'が切れた。体感'+felt+'位→現実'+S.rank+'位（'+lost+'台に抜き返された）','#ff5d6c');
       } else {
-        showCpFlash('💊 効果が切れた','飛ばしてた気が、1mも前に出てなかった','#ffd34d');
-        showFeel('⬇ '+endNm+'が切れた…元の位置のまま','#ffd34d');
+        showCpFlash('💊 効果が切れた','飛ばしてた気が、1mも前に出てなかった','#ffd34d',6.5);
+        showFeel('⬇ '+endNm+'が切れた…元の位置のまま','#ffd34d',4);
         logEvent('💊 '+endNm+'が切れた。体感だけ速かった（順位は'+S.rank+'位のまま）','#ffd34d');
       }
-      if(S.rushDodges+S.rushHits>0)
-        logEvent('🌀 ラッシュ: 避けた'+S.rushDodges+'／激突'+S.rushHits+'回 — あれだけ忙しくて、進んだのはほぼゼロ','#c46bff');
+      if(S.rushDodges>0)
+        logEvent('🌈 あれだけ「速い！」と感じても（'+S.rushDodges+'回）— 現実は1mも前に出ていない','#c46bff');
       S.rushDodges=0; S.rushHits=0; S.rushHaz.length=0;
     }
   } else {
@@ -1114,16 +1095,8 @@ function update(dt){
   if(!S.effect) finalCap += draftBoost(); // ドラフト解放/風よけブースト（素のみ）
   finalCap = Math.max(0, finalCap - debtPenalty()); // 崩壊負債：使うほど素の地力が削れる
 
-  // ---- steering (with lag buffer for weed) ----
-  let rawSteer=(keyR?1:0)-(keyL?1:0);
-  S.steerBuf.push({t:S.t,v:rawSteer});
-  if(S.steerBuf.length>120) S.steerBuf.shift();
-  let useSteer=rawSteer;
-  if(lag>0){
-    for(let i=S.steerBuf.length-1;i>=0;i--){ if(S.t-S.steerBuf[i].t>=lag){useSteer=S.steerBuf[i].v;break;} }
-  }
-  if(invert) useSteer=-useSteer;
-  useSteer*=authority;
+  // ---- steering 撤去：プレイヤーは横操作しない。車は自動でレーンを保つ ----
+  let useSteer=0;
 
   // ---- speed ----
   const target=maxSpeed*finalCap;
@@ -1132,11 +1105,13 @@ function update(dt){
   else S.speed=Math.max(target,S.speed-accel*1.4*dt);
 
   const spd=S.speed/maxSpeed;
-  // steering & centrifugal
+  // steering & centrifugal（残すのは演出のみ：薬のゆらぎ＋カーブの遠心力で軽く流れる）
   S.playerX += useSteer*dt*2.3*Math.max(0.25,spd);
   S.playerX += Math.sin(S.t*5.5)*wobble*dt;
   const base=findSeg(S.position);
   S.playerX -= base.curve*0.0016*spd*spd*(dt*60);
+  // オートパイロット：横操作が無いので、車は自動でレーン中央へ戻り続ける（場外には落ちない）
+  S.playerX += -S.playerX*Math.min(1,dt*3.2);
 
   // ---- offroad / レール外れ ----
   const off=Math.abs(S.playerX)>1;
@@ -1347,6 +1322,7 @@ const bubbleHost=(function(){
   document.getElementById('stage').appendChild(h); return h;
 })();
 function rivalSay(rv,cat){
+  return; // 他の車のつぶやきは出さない
   const tmp=RIVAL_TEMPER[rv.name]||'quiet';
   const arr=(RIVAL_LINES[tmp]||{})[cat]; if(!arr||!arr.length) return;
   const txt=arr[Math.floor(Math.random()*arr.length)];
@@ -1446,16 +1422,8 @@ const clutchEl=document.getElementById('clutch'),
 const CLUTCH_REACH=1550;
 function tickClutch(dt){
   if(S.done) return;
-  if(S.clutchCool>0) S.clutchCool-=dt;
-  if(!S.clutch && S.rank>1 && S.clutchCool<=0 && S.t>4){
-    let near=null,best=1e9;
-    for(const rv of S.rivals){ const g=rv.dist-S.playerDist; if(g>0 && g<best){best=g;near=rv;} }
-    if(near && best<CLUTCH_REACH*1.7){
-      S.clutch={rv:near,t:0,dur:3.6,used:false}; clutchEl.classList.add('show');
-      clutchLbl.textContent='⚑ 関門 — '+near.name+' を抜けるチャンス'; sfxRank(true);
-    }
-  }
-  if(S.clutch){
+  // クラッチ関門は撤去（ステア操作前提のため）。S.clutch は常に null のまま。
+  if(false && S.clutch){
     const c=S.clutch; c.t+=dt;
     const gap=c.rv.dist-S.playerDist, inReach=gap>0 && gap<CLUTCH_REACH;
     clutchTgt.textContent = inReach?'射程内！ 💉なら抜ける…が直後に必ず代償':'射程外（'+Math.max(0,Math.round(gap*0.42/10))+'m先）';
@@ -1569,9 +1537,7 @@ function drivingStatus(){
       : ['⚑ 関門：素で食らいつけ','#9fe8ff']; }
   if(S.debt>0.25) return ['🩸 崩壊負債で地力ダウン（−'+Math.round(debtPenalty()*100)+'%）','#ff6b8a'];
   if(S.crav>0.55) return ['🥵 渇望でフラつく（離脱症状）','#c08bff'];
-  if(S.draftBurst>0) return ['🌀 スリップストリーム加速中','#b6ff3a'];
-  if(S.draftRv && S.draft>0.04) return ['🌀 風よけ：吸気を溜めてる','#27e1ff'];
-  if(S.flow>0.5) return ['🎯 集中ゾーン：素で本来以上に加速','#7dff9a'];
+  // 集中ゾーン／スリップストリームの表示は撤去（内部効果は残す）
   if(S.speed>maxSpeed*0.7) return ['✅ クリーン走行','#9fe8ff'];
   return ['🚗 加速中…','#cfe'];
 }
@@ -1665,12 +1631,8 @@ const OBST_KINDS={
 };
 let obstacles=[];
 function buildObstacles(){
+  // 障害物は撤去（横操作が無く避けられない＝当たり判定が理不尽になるため）
   obstacles=[];
-  const lanes=[-0.55,-0.18,0.18,0.55], kinds=['hole','oil','box'];
-  for(let i=120;i<segments.length-20;i+=Math.floor(26+Math.random()*30)){
-    obstacles.push({seg:i, laneX:lanes[Math.floor(Math.random()*lanes.length)],
-      kind:kinds[Math.floor(Math.random()*kinds.length)], hit:false});
-  }
 }
 buildObstacles();
 
@@ -1679,7 +1641,8 @@ let itemBoxes=[];
 function buildItemBoxes(){
   itemBoxes=[];
   const lanes=[-0.42,0,0.42];
-  for(let i=70;i<segments.length-16;i+=Math.floor(30+Math.random()*18)){
+  // 出現頻度を従来の約1/5に（150〜240セグ毎）。希少にして「温存か即キメか」の駆け引きを作る
+  for(let i=70;i<segments.length-16;i+=Math.floor(150+Math.random()*90)){
     itemBoxes.push({seg:i, laneX:lanes[Math.floor(Math.random()*lanes.length)], taken:false, respawn:0});
   }
 }
@@ -1691,11 +1654,9 @@ function tickItems(dt){
     if(b.taken){ if(b.respawn && S.t>=b.respawn){ b.taken=false; b.respawn=0; } continue; }
     let d=b.seg-pSeg; if(d<-segments.length/2) d+=segments.length;
     if(d>=0 && d<=2){
-      const dxLane=Math.abs(S.playerX-b.laneX);
-      if(dxLane<0.42 && Math.abs(S.playerX)<=1){
-        b.taken=true; b.respawn=S.t+4.5;
-        grabItem();
-      }
+      // 横操作が無いので、？ブロックは通過＝自動ストック（マリオカート式）
+      b.taken=true; b.respawn=S.t+6;
+      grabItem();
     }
   }
 }
@@ -1736,14 +1697,19 @@ function tickObstacles(dt){
       const hitW=OBST_KINDS[ob.kind].w+widen;
       if(dxLane<hitW){
         if(!ob.hit && S.hitCool<=0 && S.spin<=0){
-          ob.hit=true; S.hitCool=1.0; S.hits++; S.obstHitSeg=ob.seg;
-          const k=OBST_KINDS[ob.kind];
-          S.spin=Math.max(S.spin,k.spin); S.speed*=k.slow; S.shake=Math.max(S.shake,9);
-          S.combo=0; S.flow=Math.max(0,S.flow-0.3); S.draft=0; S.draftRv=null;
-          hitFxEl.classList.add('on'); setTimeout(()=>hitFxEl.classList.remove('on'),140);
-          sfxCrash();
-          showFeel(S.effect?'💥 反応が遅れて、避けられなかった':'💥 障害物に被弾！','#ff5d5d');
-          logEvent('💥 障害物に被弾'+(S.effect?'（ハイで反応が鈍い）':'')+'（'+S.hits+'回目）','#ff5d5d');
+          if(S.effect){
+            // キメてる間はぶつからない＝障害物もすり抜けて爽快感だけ。代償は切れたあとに。
+            ob.hit=true;
+          } else {
+            ob.hit=true; S.hitCool=1.0; S.hits++; S.obstHitSeg=ob.seg;
+            const k=OBST_KINDS[ob.kind];
+            S.spin=Math.max(S.spin,k.spin); S.speed*=k.slow; S.shake=Math.max(S.shake,9);
+            S.combo=0; S.flow=Math.max(0,S.flow-0.3); S.draft=0; S.draftRv=null;
+            hitFxEl.classList.add('on'); setTimeout(()=>hitFxEl.classList.remove('on'),140);
+            sfxCrash();
+            showFeel('💥 障害物に被弾！','#ff5d5d');
+            logEvent('💥 障害物に被弾（'+S.hits+'回目）','#ff5d5d');
+          }
         }
       } else if(d===0 && !ob.hit && dxLane>=hitW){
         ob.hit=true;
@@ -1903,10 +1869,8 @@ function tickRush(dt){
   for(const h of S.rushHaz){
     h.z-=approach*dt;
     if(!h.hit && h.z<0.16 && h.z>-0.06){
-      if(Math.abs(S.playerX-h.lane)<0.26){             // 同レーン＝激突
-        h.hit='crash'; S.rushHits++; S.shake=Math.max(S.shake,9);
-        S.spin=Math.max(S.spin,0.3); S.speed*=0.72; sfxCrash();
-      } else { h.hit='dodge'; S.rushDodges++; tone(880,0.05,'triangle',0.08); }
+      // キメてる間はぶつからない＝景色も車も気持ちよく後ろへ流れるだけ（爽快感）。ツケは切れたあとに。
+      h.hit='dodge'; S.rushDodges++; tone(620+Math.random()*420,0.04,'triangle',0.05);
     }
   }
   if(S.rushHaz.length>40 || S.rushHaz.some(h=>h.z<-0.1))
@@ -1922,25 +1886,24 @@ function drawRush(){
     const x=cx + h.lane*(W*0.42)*(0.28+0.72*p);
     const w=Math.max(6, W*0.085*(0.18+p*p*1.5));
     ctx2.save();
-    ctx2.globalAlpha = h.hit==='dodge'?0.25:Math.min(1,0.35+p);
-    const danger = (!h.hit && h.z<0.4 && Math.abs(S.playerX-h.lane)<0.26); // 当たりそう＝赤点滅
+    ctx2.globalAlpha = h.hit==='dodge'?0.22:Math.min(1,0.3+p);  // 通り過ぎたものはふっと薄れて消える
     if(h.kind==='car'){
-      ctx2.fillStyle = h.hit==='crash'?'#ff2d2d':(danger&&Math.sin(S.t*20)>0?'#ff5d6c':'#ffd34d');
+      ctx2.fillStyle = '#ffd34d';
       ctx2.fillRect(x-w/2,y-w*0.78,w,w*0.78);
       ctx2.fillStyle='#fff'; ctx2.fillRect(x-w*0.34,y-w*0.66,w*0.68,w*0.2);
     } else {
-      ctx2.fillStyle = h.hit==='crash'?'#ff2d2d':(danger&&Math.sin(S.t*20)>0?'#ff5d6c':'#ff8a3a');
+      ctx2.fillStyle = '#ff8a3a';
       ctx2.beginPath(); ctx2.moveTo(x,y-w*0.85); ctx2.lineTo(x-w*0.55,y); ctx2.lineTo(x+w*0.55,y); ctx2.closePath(); ctx2.fill();
       ctx2.fillStyle='#fff'; ctx2.fillRect(x-w*0.3,y-w*0.45,w*0.6,w*0.12);
     }
     ctx2.restore();
   }
-  // プロンプト＋カウント（忙しさの見える化）
+  // 爽快感の見える化（速い！という気分だけ）
   ctx2.save();
-  ctx2.globalAlpha=0.55+0.45*Math.abs(Math.sin(S.t*9));
-  ctx2.fillStyle='#fff'; ctx2.textAlign='center';
+  ctx2.globalAlpha=0.5+0.4*Math.abs(Math.sin(S.t*6));
+  ctx2.fillStyle='#bfefff'; ctx2.textAlign='center';
   ctx2.font='900 '+Math.round(Math.max(14,W*0.038))+'px sans-serif';
-  ctx2.fillText('⚠ 避けろ！  避けた '+S.rushDodges+' ／ 激突 '+S.rushHits, cx, horizon-12);
+  ctx2.fillText('🌈 最高に速い…！', cx, horizon-12);
   ctx2.restore();
 }
 function drawCar(){
@@ -2035,9 +1998,7 @@ function hud(){
   const M=v=>Math.round(v/maxSpeed*320*0.42); // dist -> "m" feel
   elSubj.textContent=k(S.subj);
   elReal.textContent='実速度 '+k(S.speed)+' km/h';
-  const tl=Math.max(0,S.timeLeft);
-  elClock.textContent='⏱ '+tl.toFixed(1)+'s';
-  elClock.style.color = tl<5?'#ff5d6c':tl<9?'#ffd34d':'#27e1ff';
+  // 関門タイマー（時計）は撤去
   const yp=Math.min(100,S.playerDist/TARGET*100);
   mYou.style.left=yp+'%';
   for(let i=0;i<S.rivals.length;i++)
@@ -2045,7 +2006,8 @@ function hud(){
   elFill.style.inset='0 '+(100-yp)+'% 0 0';
   // メーターは「関係ある時だけ」出す（素で走ってる間はHUDをすっきり）
   cravBar.style.width=(S.crav*100)+'%'; cravBar.parentElement.parentElement.style.display=S.crav>0.02?'':'none';
-  flowBar.style.width=(S.flow*100)+'%'; flowBar.parentElement.parentElement.style.display=S.flow>0.02?'':'none';
+  // 集中ゾーン(FLOW)のメーターは撤去。内部のflow加速は残すが表示はしない。
+  flowBar.parentElement.parentElement.style.display='none';
   const _dI=document.querySelector('#debtBar i'); _dI.style.width=(S.debt*100)+'%';
   _dI.parentElement.parentElement.style.display=S.debt>0.02?'':'none';
   tolBar.style.width=(S.tol*100)+'%'; trustBar.style.width=S.trust+'%';
@@ -2093,11 +2055,14 @@ function hud(){
     itemIconEl.textContent=d.em;
     itemBoxEl.classList.add('ready');
     itemBoxEl.style.setProperty('--ic', castColor(S.item));
-    useBtn.classList.add('ready'); useBtn.textContent=d.em+' '+d.nm+' を使う';
+    useBtn.classList.add('ready');
+    // 渇望が高いほど、所持アイテムが「誘惑」してくる（ポップアップの代わり）
+    if(S.crav>0.6 && !S.effect){ useBtn.textContent='いま '+d.em+' を切る？（渇望MAX）'; }
+    else { useBtn.textContent=d.em+' '+d.nm+' を使う'; }
   } else {
     itemIconEl.textContent='';
     itemBoxEl.classList.add('empty');
-    useBtn.classList.remove('ready'); useBtn.textContent='アイテム無し（？ブロックを拾え）';
+    useBtn.classList.remove('ready'); useBtn.textContent='？ブロックを通過するまで待て';
   }
   // canvas filters：ぼかしは控えめ。嘘は“順位”で見せる。色味だけ薬で変える。
   let blur=Math.min(1.8,(S.subj/maxSpeed)*0.9), sat=1, hue=0, bri=1;
@@ -2161,35 +2126,15 @@ const CHECKPOINTS=[
 const cpHudEl=document.getElementById('cpHud'),
   cpFlashEl=document.getElementById('cpFlash'),
   cpFlashBig=document.getElementById('cpFlashBig'), cpFlashExt=document.getElementById('cpFlashExt');
-function showCpFlash(big,ext,col){ cpFlashBig.textContent=big; cpFlashBig.style.color=col;
-  cpFlashExt.textContent=ext||''; cpFlashExt.style.color=col; cpFlashEl.classList.add('show'); S.cpFlash=1.6; }
+function showCpFlash(big,ext,col,dur){ cpFlashBig.textContent=big; cpFlashBig.style.color=col;
+  cpFlashExt.textContent=ext||''; cpFlashExt.style.color=col; cpFlashEl.classList.add('show'); S.cpFlash=dur||1.6; }
 function tickCheckpoints(dt){
+  // 関門（チェックポイント）の概念は撤去。制限時間・通過判定・タイムアップ敗北はすべて無し。
+  // ここでは薬切れ等の中央フラッシュ表示タイマーだけを進める。
   if(S.done) return;
-  S.timeLeft-=dt;
   if(S.cpFlash>0){ S.cpFlash-=dt; if(S.cpFlash<=0) cpFlashEl.classList.remove('show'); }
-  const cp=CHECKPOINTS[S.cpIdx];
-  if(cp && S.playerDist>=cp.at*TARGET){
-    S.timeLeft+=cp.give;
-    const okPos=S.rank<=cp.goalPos;
-    showCpFlash('✅ '+cp.nm+' 通過！','+'+cp.give+'秒 延長'+(okPos?'　🎯目標達成':''), okPos?'#7dff9a':'#ffd34d');
-    if(okPos) S.score+=500;
-    sfxRank(true); arp([523,784,1047],0.06,'square',0.16);
-    logEvent('🚩 '+cp.nm+'通過（'+S.rank+'位）→ +'+cp.give+'秒', okPos?'#7dff9a':'#ffd34d');
-    S.cpIdx++;
-  }
-  if(S.timeLeft<=0 && !S.done){ S.timeLeft=0; S.cpResult='timeup';
-    showCpFlash('⏱ TIME UP','関門に間に合わなかった','#ff5d6c'); sfxCrash();
-    logEvent('⏱ 時間切れ。現実に置いていかれた','#ff5d6c'); S.playerTime=S.t; finish(); }
 }
-function cpHud(){
-  if(S.done) return;
-  const cp=CHECKPOINTS[S.cpIdx], M=v=>Math.round(v/maxSpeed*320*0.42);
-  if(cp){ const goalOk=S.rank<=cp.goalPos;
-    cpHudEl.innerHTML='🚩 '+cp.nm+'まで '+M(Math.max(0,cp.at*TARGET-S.playerDist))+'m ・ 目標'+cp.goalPos+'位以内（今'+S.rank+'位'+(goalOk?' ✅':' ⚠️')+'）';
-    cpHudEl.classList.toggle('warn', S.timeLeft<5 || !goalOk);
-  } else { cpHudEl.innerHTML='🏁 ゴールまで '+M(Math.max(0,TARGET-S.playerDist))+'m';
-    cpHudEl.classList.toggle('warn', S.timeLeft<5); }
-}
+function cpHud(){ /* 関門HUDは撤去 */ }
 const SCORE_BASE=3000, TIME_PAR=42;
 const RANK_COL={S:'#d8ff9a',A:'#27e1ff',B:'#ffd34d',C:'#ffb04d',D:'#ff8a6a',E:'#ff6b8a'};
 function finalScore(pos,field,youT,timeup){
@@ -2373,7 +2318,7 @@ function freshUI(){
   banner.classList.remove('show'); elCombo.classList.remove('show');
   clutchEl.classList.remove('show','hot'); buildObstacles(); buildItemBoxes(); hitFxEl.classList.remove('on');
   itemBoxEl.classList.remove('spin','ready'); itemBoxEl.classList.add('empty'); itemIconEl.textContent='';
-  useBtn.classList.remove('ready'); useBtn.textContent='アイテム無し（？ブロックを拾え）';
+  useBtn.classList.remove('ready'); useBtn.textContent='？ブロックを通過するまで待て';
 }
 document.getElementById('goBtn').addEventListener('click',()=>{
   audioInit();
