@@ -118,6 +118,22 @@
     font-weight:800;font-size:13px;cursor:pointer;}
   #mailReply{background:linear-gradient(90deg,#27e1ff,#7dff9a);color:#06121a;}
   #mailIgnore{background:#2a2238;color:#cbd;}
+  /* シラフに戻った後の「事後」通知 */
+  #afterBanner{position:absolute;left:50%;top:118px;width:min(440px,90%);z-index:11;
+    opacity:0;transform:translateX(-50%) translateY(-18px);pointer-events:none;
+    transition:opacity .3s,transform .3s;}
+  #afterBanner.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+  .afterCard{background:rgba(20,8,10,.94);backdrop-filter:blur(10px);
+    border:1px solid #ff6b8a66;border-radius:16px;padding:12px 14px;box-shadow:0 12px 44px #000c;}
+  .afterHd{font-size:12px;font-weight:900;color:#ffb84d;letter-spacing:.05em;margin-bottom:8px;}
+  .afterRow{font-size:13px;line-height:1.5;margin:4px 0;}
+  .afterRow .me{color:#ff8aa6;font-weight:800;}
+  .afterRow .them{color:#d9e3ff;font-weight:700;}
+  .afterRow .lbl{font-size:10px;opacity:.6;}
+  .afterBtns{display:flex;gap:8px;margin-top:11px;}
+  .afterBtns button{flex:1;border:none;border-radius:10px;padding:11px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;}
+  #afterSorry{background:linear-gradient(90deg,#27e1ff,#7dff9a);color:#06121a;}
+  #afterIgnore{background:#2a2238;color:#cbd;}
   /* ===== 渇望イベント ===== */
   #cravePopup{position:absolute;left:50%;top:46%;width:min(380px,88%);z-index:12;
     opacity:0;transform:translate(-50%,-50%) scale(.88);pointer-events:none;
@@ -143,8 +159,11 @@
 
   /* overlays: start / result */
   .screen{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;padding:24px;
+    align-items:center;justify-content:center;text-align:center;padding:24px;overflow-y:auto;
     background:radial-gradient(120% 120% at 50% 30%,#1a0730,#040109 70%);}
+  #resJunkie{background:linear-gradient(135deg,#241047,#0c0518);border:1px solid #c46bff66;}
+  #resJunkieRank{color:#d9a6ff;}
+  .juse{margin-top:8px;font-size:13px;line-height:1.9;color:#e7d6ff;}
   .hidden{display:none!important;}
   h1{font-size:clamp(30px,8vw,62px);margin:0;line-height:.95;font-weight:900;font-style:italic;
     background:linear-gradient(90deg,#27e1ff,#ff3ea5,#ffd34d);-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -211,6 +230,14 @@
     <div class="mailBtns"><button id="mailReply">返信する</button><button id="mailIgnore">無視する</button></div>
   </div></div>
 
+  <!-- シラフに戻った後の事後通知 -->
+  <div id="afterBanner"><div class="afterCard">
+    <div class="afterHd">⚠️ シラフに戻った…さっき自分がしたこと</div>
+    <div class="afterRow"><span class="lbl">あなた → <span id="afterTo"></span>：</span><br><span class="me" id="afterSent"></span></div>
+    <div class="afterRow"><span class="lbl"><span id="afterFrom"></span> からの返信：</span><br><span class="them" id="afterReply"></span></div>
+    <div class="afterBtns"><button id="afterSorry">謝る</button><button id="afterIgnore">見なかったことにする</button></div>
+  </div></div>
+
   <div id="flash"></div>
 
   <!-- 渇望イベント -->
@@ -273,6 +300,11 @@
       <div class="cap">💔 失ったもの（人間関係）</div>
       <div class="big" id="resLifeHead"></div>
       <div class="sub" id="resLifeBody"></div>
+    </div>
+    <div class="resCard" id="resJunkie">
+      <div class="cap">🃏 ジャンキーランキング（不名誉）</div>
+      <div class="big" id="resJunkieRank"></div>
+      <div class="juse" id="resJunkieUse"></div>
     </div>
     <div id="resMsg"></div>
     <div class="small" id="bestNote"></div>
@@ -365,6 +397,8 @@ function reset(){
      trust:100, mail:null, nextMailAt:5, seqIdx:0, lost:[], collapsed:false,
      flow:0, peakTol:0, fb:0, fbText:'', lastUseT:-99, healT:0, heartT:0,
      cravEvent:null, craveCool:0, relapses:0, resisted:0,
+     bandPhase:0, wasHigh:false, after:null, afterQ:[], skyClimb:0, snapback:0,
+     drugUse:{meth:0,weed:0,lsd:0,alc:0,opi:0},
      rivals:RIVALS.map((r,i)=>({name:r.name,ini:r.ini,color:r.color,base:r.base,laneX:r.laneX,
         dist:0,speed:0,fin:0,phase:i*1.7}))};
 }
@@ -441,7 +475,7 @@ function useDrug(type){
   S.effect={type,t:0,dur:d.dur*(1-S.tol*0.35)}; // 耐性が上がると効きが短い
   S.tol=Math.min(1,S.tol+d.tolAdd);
   S.crav=Math.max(0,S.crav-0.5); // 一時的に渇望が消える
-  S.used=true; S.drugCount++; S.lastUseT=S.t;
+  S.used=true; S.drugCount++; S.lastUseT=S.t; S.drugUse[type]=(S.drugUse[type]||0)+1;
   showFeel(d.feel, castColor(type));
   pulseCast(d.cast); sfxDrug(type);
 }
@@ -484,15 +518,16 @@ function showFeel(txt,col){flash.textContent=txt;flash.style.color=col;flash.sty
 /* ===== 着信メール（現実が壊れていくレイヤー） ===== */
 /* real=しらふで見える本当の文 / para=覚醒剤の被害妄想で歪む文。imp=重要度 */
 const MAILSEQ=[
-  {from:'上司 田中',  em:'🏢', imp:2, real:'明日10時の定例、資料お願いね。期待してるよ', para:'お前、会議で全員に笑われてるぞ'},
-  {from:'母',        em:'👩', imp:2, real:'ちゃんとご飯食べてる？無理しないでね', para:'お前なんか産むんじゃなかった'},
-  {from:'取引先',    em:'📑', imp:2, real:'お見積もりの件、ご連絡お待ちしております', para:'詐欺師が。訴えてやるからな'},
-  {from:'恋人 ゆい',  em:'💗', imp:3, real:'今日は帰ってくる？ごはん作って待ってるね', para:'どうせ他の奴といるんだろ。バレてんだよ'},
-  {from:'上司 田中',  em:'🏢', imp:3, real:'昨日の無断欠勤、大丈夫…？体調心配してる', para:'クビだ。お前の居場所はもう無い'},
-  {from:'母',        em:'👩', imp:3, real:'声だけでも聞かせて。お願いだから', para:'警察にお前のこと全部話したから'},
-  {from:'相談窓口',   em:'🆘', imp:1, real:'【依存症相談】いつでも話せます。一人で抱えないで', para:'監視窓口：お前の居場所は掴んでいる'},
-  {from:'恋人 ゆい',  em:'💔', imp:3, real:'ごめん。もう待てない。荷物まとめて出ていくね', para:'ざまあみろ。せいせいした、二度と関わるな'},
+  {from:'上司 田中',  em:'🏢', imp:2, real:'明日10時の定例、資料お願いね。期待してるよ', para:'お前、会議で全員に笑われてるぞ', ire:'…さっきのメッセージ、見ました。明日、話があります。'},
+  {from:'母',        em:'👩', imp:2, real:'ちゃんとご飯食べてる？無理しないでね', para:'お前なんか産むんじゃなかった', ire:'…どうして、そんなこと言うの。お母さん、悲しい。'},
+  {from:'取引先',    em:'📑', imp:2, real:'お見積もりの件、ご連絡お待ちしております', para:'詐欺師が。訴えてやるからな', ire:'承知しました。今回の件は白紙に戻させてください。'},
+  {from:'恋人 ゆい',  em:'💗', imp:3, real:'今日は帰ってくる？ごはん作って待ってるね', para:'どうせ他の奴といるんだろ。バレてんだよ', ire:'…本気で言ってる？こんな人だったっけ。'},
+  {from:'上司 田中',  em:'🏢', imp:3, real:'昨日の無断欠勤、大丈夫…？体調心配してる', para:'クビだ。お前の居場所はもう無い', ire:'この対応は看過できません。人事に報告します。'},
+  {from:'母',        em:'👩', imp:3, real:'声だけでも聞かせて。お願いだから', para:'警察にお前のこと全部話したから', ire:'…もういい。電話、切るね。'},
+  {from:'相談窓口',   em:'🆘', imp:1, real:'【依存症相談】いつでも話せます。一人で抱えないで', para:'監視窓口：お前の居場所は掴んでいる', ire:'いつでも、ここにいます。無理しないで。'},
+  {from:'恋人 ゆい',  em:'💔', imp:3, real:'ごめん。もう待てない。荷物まとめて出ていくね', para:'ざまあみろ。せいせいした、二度と関わるな', ire:'今までありがとう。さようなら。'},
 ];
+const LASHLINES=['黙れ','うるせえ、ほっとけ','お前には関係ない','二度と連絡するな','消えろ'];
 const banner=document.getElementById('mailBanner'),
   mailEm=document.getElementById('mailEm'), mailFrom=document.getElementById('mailFrom'),
   mailText=document.getElementById('mailText'), mailNote=document.getElementById('mailNote'),
@@ -510,13 +545,17 @@ function resolveMail(kind){
   if(kind==='reply'){
     if(!high){ dT=d.imp*3; msg='✅ ちゃんと向き合って返信した'; col='#7dff9a'; }
     else if(S.effect.type==='meth'||S.effect.type==='lsd'){
-      dT=-d.imp*4; msg='😡 キレて暴言を送りつけた'; col='#ff5d5d';
-      if(d.imp>=2) S.lost.push({from:d.from,real:d.real,why:'暴言'}); }
+      const sent=LASHLINES[Math.floor(Math.random()*LASHLINES.length)];
+      dT=-d.imp*4; msg='😡 「'+sent+'」と送りつけた'; col='#ff5d5d';
+      S.lost.push({from:d.from,real:d.real,why:'暴言'});
+      S.afterQ.push({from:d.from,em:d.em,sent:sent,reply:d.ire}); }
     else { dT=-d.imp*2; msg='🥴 ろれつの回らない返信を送った'; col='#ffb04d';
+      S.afterQ.push({from:d.from,em:d.em,sent:'…（意味不明な文字列）',reply:d.ire});
       if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'意味不明な返信'}); }
   } else { // ignore / expire
     if(!high){ dT=-d.imp*3; msg='…既読をつけず無視した'; col='#ff9bb0'; }
-    else { dT=-d.imp*2.5; msg=(S.effect.type==='weed')?'😶「…あとでいいや」':'😶 既読もつかない'; col='#ff9bb0'; }
+    else { dT=-d.imp*2.5; msg=(S.effect.type==='weed')?'😶「…あとでいいや」':'😶 既読もつかない'; col='#ff9bb0';
+      if(d.imp>=2) S.afterQ.push({from:d.from,em:d.em,sent:'（既読スルー）',reply:d.ire}); }
     if(d.imp>=3) S.lost.push({from:d.from,real:d.real,why:'無視'});
   }
   S.trust=Math.max(0,Math.min(100,S.trust+dT));
@@ -554,6 +593,25 @@ function resolveCrave(kind){
 }
 document.getElementById('craveYes').addEventListener('click',()=>resolveCrave('yes'));
 document.getElementById('craveNo').addEventListener('click',()=>resolveCrave('no'));
+
+/* ===== 事後通知（シラフに戻って自分のしたことを知る） ===== */
+const afterBanner=document.getElementById('afterBanner');
+function maybeAftermath(){
+  if(S.effect||S.after||S.mail||S.cravEvent||S.done||!S.afterQ.length) return;
+  const a=S.afterQ.shift(); S.after=a;
+  document.getElementById('afterTo').textContent=a.em+' '+a.from;
+  document.getElementById('afterFrom').textContent=a.from;
+  document.getElementById('afterSent').textContent='「'+a.sent+'」';
+  document.getElementById('afterReply').textContent='「'+a.reply+'」';
+  afterBanner.classList.add('show'); sfxBad();
+}
+function resolveAfter(kind){
+  if(!S.after) return; afterBanner.classList.remove('show'); S.after=null;
+  if(kind==='sorry'){ S.trust=Math.min(100,S.trust+5); showFeel('🙇 ちゃんと謝った','#7dff9a'); sfxGood(); }
+  else { S.trust=Math.max(0,S.trust-5); showFeel('…見なかったことにした','#ff9bb0'); sfxBad(); }
+}
+document.getElementById('afterSorry').addEventListener('click',()=>resolveAfter('sorry'));
+document.getElementById('afterIgnore').addEventListener('click',()=>resolveAfter('ignore'));
 
 /* ===== 結果シェア画像 ===== */
 const GAME_URL='santmaria420.github.io/sales-pitch/junkie-kart';
@@ -668,6 +726,8 @@ function update(dt){
     S.cravEvent={t:0}; cravePopup.classList.add('show'); heartbeat();
   }
   if(S.cravEvent){ S.cravEvent.t+=dt; if(S.cravEvent.t>6) resolveCrave('pass'); }
+  maybeAftermath();
+  if(S.snapback>0) S.snapback-=dt;
 
   // ---- effect resolve -> speed cap & subjective multiplier ----
   let cap=1.0, subjMul, guard=true, invert=false, lag=0, authority=1, wobble=0;
@@ -683,7 +743,7 @@ function update(dt){
       case 'weed':
         cap=0.70; subjMul=1.28; lag=0.34; break;
       case 'lsd':
-        cap=0.86; subjMul=1.5; guard=false; break; // ガードレール消滅
+        cap=0.30; subjMul=1.7; guard=false; break; // 空の近道に行った気で実進行はほぼ停止
       case 'alc':
         cap=0.88; subjMul=1.4; invert=true; wobble=0.22; break;
       case 'opi':
@@ -693,6 +753,9 @@ function update(dt){
     if(e.t>=e.dur){
       if(e.type==='opi'){ // 入力ゼロまで墜ちたら オーバードーズ
         S.spin=1.1; S.shake=10; showFeel('💀 オーバードーズ', '#ff3b3b'); sfxCrash();
+      }
+      if(e.type==='lsd'){ // 空の近道は幻覚。元の位置に引き戻される
+        S.snapback=0.8; S.shake=12; showFeel('🌈 近道は幻だった…元の位置に', '#c46bff'); sfxCrash();
       }
       S.effect=null;
     }
@@ -750,6 +813,9 @@ function update(dt){
   // ---- advance ----
   S.position+=S.speed*dt; if(S.position>=trackLen) S.position-=trackLen;
   S.playerDist+=S.speed*dt;
+  // 路面の縞を「体感速度」で余分に流す（実距離は増えない＝嘘の疾走感）
+  S.bandPhase += Math.max(0,(S.subj-S.speed))/segLen*dt*1.6;
+  if(S.bandPhase>1e7) S.bandPhase-=1e7;
 
   // ---- rivals (普通に走り切る車) ----
   for(const rv of S.rivals){
@@ -807,6 +873,7 @@ function render(){
 
   // road
   const sprites=[];
+  const climb = lsd ? Math.min(2.8, S.effect.t*0.55) : 0; // 空へ昇る虹の近道
   let x=0, dx=-(base.curve*basePct), maxy=H;
   for(let n=0;n<drawDist;n++){
     const seg=segments[(base.index+n)%segments.length];
@@ -815,6 +882,7 @@ function render(){
     project(seg.p1, S.playerX*roadW - x, playerY, camZ);
     project(seg.p2, S.playerX*roadW - x - dx, playerY, camZ);
     x+=dx; dx+=seg.curve;
+    if(climb){ seg.p1.screen.y-=Math.min(H*0.62,climb*n*1.5); seg.p2.screen.y-=Math.min(H*0.62,climb*(n+1)*1.5); }
     if(seg.p1.camera.z<=camDepth || seg.p2.screen.y>=maxy) continue;
     drawSeg(seg,lsd,n); maxy=seg.p2.screen.y;
     const sc=seg.p1.screen;
@@ -921,29 +989,30 @@ function drawCarSprite(s){
 }
 function drawSeg(seg,lsd,n){
   const p1=seg.p1.screen,p2=seg.p2.screen;
+  const lit=(Math.floor(seg.index+S.bandPhase)%2+2)%2; // 体感速度で縞が流れる
   let grass,rumble,road,lane;
   const hue=(n*9+S.t*120)%360;
   if(lsd){
     grass=`hsl(${(hue+200)%360},70%,22%)`;
     rumble=`hsl(${hue},95%,60%)`;
-    road=seg.light?`hsl(${(hue+40)%360},60%,30%)`:`hsl(${(hue+60)%360},55%,24%)`;
+    road=lit?`hsl(${(hue+40)%360},60%,30%)`:`hsl(${(hue+60)%360},55%,24%)`;
     lane=`hsl(${(hue+180)%360},95%,75%)`;
   } else if(S.effect&&S.effect.type==='meth'){
-    grass=seg.light?'#3a0010':'#2a000c'; rumble=seg.light?'#ff2d2d':'#fff'; road=seg.light?'#241016':'#1d0c12'; lane='#ffd0d0';
+    grass=lit?'#3a0010':'#2a000c'; rumble=lit?'#ff2d2d':'#fff'; road=lit?'#241016':'#1d0c12'; lane='#ffd0d0';
   } else if(S.effect&&S.effect.type==='weed'){
-    grass=seg.light?'#0c3a1f':'#0a2e19'; rumble=seg.light?'#9bff6a':'#dfffcf'; road=seg.light?'#16271c':'#122016'; lane='#cfffbf';
+    grass=lit?'#0c3a1f':'#0a2e19'; rumble=lit?'#9bff6a':'#dfffcf'; road=lit?'#16271c':'#122016'; lane='#cfffbf';
   } else if(S.effect&&S.effect.type==='opi'){
-    grass=seg.light?'#0a0c14':'#080a10'; rumble=seg.light?'#3a4258':'#2a3145'; road=seg.light?'#10121b':'#0c0e15'; lane='#3a4258';
+    grass=lit?'#0a0c14':'#080a10'; rumble=lit?'#3a4258':'#2a3145'; road=lit?'#10121b':'#0c0e15'; lane='#3a4258';
   } else if(S.effect&&S.effect.type==='alc'){
-    grass=seg.light?'#2c1a05':'#241405'; rumble=seg.light?'#ffb04d':'#fff'; road=seg.light?'#231a12':'#1d150e'; lane='#ffe3b0';
+    grass=lit?'#2c1a05':'#241405'; rumble=lit?'#ffb04d':'#fff'; road=lit?'#231a12':'#1d150e'; lane='#ffe3b0';
   } else {
-    grass=seg.light?'#1f8a3a':'#1a7d34'; rumble=seg.light?'#e23a3a':'#ffffff'; road=seg.light?'#3a3f48':'#34383f'; lane='#ffffff';
+    grass=lit?'#1f8a3a':'#1a7d34'; rumble=lit?'#e23a3a':'#ffffff'; road=lit?'#3a3f48':'#34383f'; lane='#ffffff';
   }
   ctx.fillStyle=grass; ctx.fillRect(0,p2.y,W,p1.y-p2.y+1);
   poly(p1.x-p1.w*1.18,p1.y,p1.x-p1.w,p1.y,p2.x-p2.w,p2.y,p2.x-p2.w*1.18,p2.y,rumble);
   poly(p1.x+p1.w,p1.y,p1.x+p1.w*1.18,p1.y,p2.x+p2.w*1.18,p2.y,p2.x+p2.w,p2.y,rumble);
   poly(p1.x-p1.w,p1.y,p1.x+p1.w,p1.y,p2.x+p2.w,p2.y,p2.x-p2.w,p2.y,road);
-  if(seg.light){
+  if(lit){
     const lw1=p1.w*0.04,lw2=p2.w*0.04;
     poly(p1.x-lw1,p1.y,p1.x+lw1,p1.y,p2.x+lw2,p2.y,p2.x-lw2,p2.y,lane);
   }
@@ -1061,6 +1130,7 @@ function finish(){
   if(S.done) return; S.done=true; playing=false;
   banner.classList.remove('show'); S.mail=null;
   cravePopup.classList.remove('show'); S.cravEvent=null;
+  afterBanner.classList.remove('show'); S.after=null;
   const youT=S.playerTime||S.t;
   // 最終順位 = ゴール時点で前にいる車の数+1
   let ahead=0; for(const rv of S.rivals) if(rv.dist>S.playerDist) ahead++;
@@ -1125,6 +1195,23 @@ function finish(){
   document.getElementById('resMsg').innerHTML=msg;
   lastResult={ subjRank: S.used?'1位！最高だった':(pos+'位'), realRank: pos+'位 / '+field+'台',
     won:won, life:life, drugCount:S.drugCount, punch: msg.replace(/<br>/g,' ').replace(/<[^>]+>/g,'') };
+
+  // ---- ジャンキーランキング（不名誉） ----
+  const n=S.drugCount;
+  const jrank = n===0?'クリーン（薬物ゼロ）': n<=2?'チップ（かじっただけ）': n<=5?'常用者': n<=9?'ジャンキー':'廃人';
+  const DN={meth:'💉覚醒剤',weed:'🌿大麻',lsd:'🌈LSD',alc:'🍺酒',opi:'💊オピオイド'};
+  let jrankShow=jrank, jbonus='';
+  // ギリギリ生還：大量に使って、それでもLIFEを残して完走（皮肉な"勝ち"）
+  if(n>=8 && life>0){ jbonus=' 🃏 ギリギリ生還'; }
+  document.getElementById('resJunkieRank').textContent='ジャンキー度：'+jrankShow+jbonus;
+  const uses=Object.keys(S.drugUse).filter(k=>S.drugUse[k]>0).sort((a,b)=>S.drugUse[b]-S.drugUse[a])
+    .map(k=>DN[k]+' ×'+S.drugUse[k]);
+  let jmax=0; try{ jmax=parseInt(localStorage.getItem('jk_maxdrugs')||'0',10)||0; if(n>jmax){jmax=n;localStorage.setItem('jk_maxdrugs',String(n));} }catch(e){}
+  document.getElementById('resJunkieUse').innerHTML=
+    (uses.length?'使った薬物：'+uses.join('　'):'今回は何も使わなかった')+
+    '<br><span style="opacity:.65">合計 '+n+' 回　/　自己最多記録 '+jmax+' 回</span>'+
+    (n>=8?'<br><span style="color:#ff9bb0">…これだけ使って体感1位。現実は'+pos+'位。割に合うか？</span>':'');
+  document.getElementById('resJunkie').style.display = S.used?'block':'none';
 
   // ベストタイム（クリーン完走のみ）
   let best=NaN, isNew=false;
