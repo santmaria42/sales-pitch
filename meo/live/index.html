@@ -80,6 +80,20 @@ body{
 .btn-open .n{background:rgba(255,255,255,.25);color:#fff;}
 .btn-open:disabled{opacity:.4;box-shadow:none;}
 .legalbar{font-size:11px;color:#8A8070;text-align:center;line-height:1.7;margin-top:2px;}
+.greet{font-size:14.5px;color:#5a5346;line-height:1.6;background:#fff;border:1px solid #E8E2D6;border-radius:12px;padding:11px 14px;}
+.choosehead{text-align:center;font-size:14px;font-weight:800;color:#26221C;margin-top:2px;}
+.choices{display:flex;gap:11px;}
+.choice{flex:1 1 0;min-width:0;background:#fff;border:1.5px solid var(--teal);border-radius:14px;padding:15px 8px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;}
+.choice:active{transform:scale(.97);}
+.choice .ci{font-size:22px;color:var(--teal);line-height:1;}
+.choice b{font-size:14.5px;color:var(--imt);font-weight:800;}
+.choice small{font-size:11px;color:#8A8070;}
+/* ---------- feedback (店長に直接) ---------- */
+.feedback{background:var(--paper);padding:18px;padding-top:max(24px,env(safe-area-inset-top));gap:13px;}
+.fbhead{font-size:17px;font-weight:800;color:#26221C;}
+.fbsub{font-size:12.5px;color:#8A8070;margin-top:-6px;}
+.btn-go2{background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(13,148,136,.3);}
+.btn-back{background:none;border:none;color:#8A8070;font-size:13px;cursor:pointer;font-family:inherit;}
 
 /* ---------- done ---------- */
 .done{background:linear-gradient(165deg,#0E1116,#10231f);color:var(--text);align-items:center;justify-content:center;text-align:center;padding:34px 28px;}
@@ -197,23 +211,33 @@ body{
 
   <!-- DRAFT -->
   <div class="scr draft" id="scr-draft">
-    <h2><span class="badge" id="draft-badge">下書き</span>クチコミの下書きができました</h2>
-    <div class="starline">あなたの評価 <span class="s" id="draft-stars"></span></div>
+    <div class="greet" id="draft-greet"></div>
+    <div class="starline">あなたの評価 <span class="s" id="draft-stars"></span> <span class="badge" id="draft-badge" style="margin-left:auto">下書き</span></div>
     <textarea class="draftbox" id="draftbox" aria-label="クチコミ下書き"></textarea>
-    <div class="hint">✏️ あなたの言葉に自由に直せます。直すほど“あなたらしい”クチコミになります。</div>
+    <div class="hint">✏️ あなたの言葉に自由に直せます。</div>
     <button class="btn-re" id="btn-re">🔁 別の言い回しにする</button>
-    <div class="steps">
-      <button class="bigbtn btn-copy" id="btn-copy"><span class="n">1</span><span id="copy-label">下書きをコピー</span></button>
-      <button class="bigbtn btn-open" id="btn-open" disabled><span class="n">2</span>Googleでクチコミを書く（貼り付け）</button>
+    <div class="choosehead">この気持ち、どちらに残しますか？</div>
+    <div class="choices">
+      <button class="choice" id="ch-google"><span class="ci">★</span><b>Googleに投稿</b><small>みんなに公開</small></button>
+      <button class="choice" id="ch-direct"><span class="ci">✉</span><b>店長に直接</b><small>お店だけに（任意）</small></button>
     </div>
-    <div class="legalbar">Googleの画面で本文を長押し →「ペースト」で貼り付け → 投稿。<br>※当店からの謝礼・特典は一切ありません。</div>
+    <div class="legalbar">☆の数は自由・特典はありません。選ぶのはあなたです。</div>
+  </div>
+
+  <!-- FEEDBACK (店長に直接) -->
+  <div class="scr feedback" id="scr-feedback">
+    <div class="fbhead">店長に直接おつたえします</div>
+    <div class="fbsub">いただいた内容は店長だけが確認します。公開はされません。</div>
+    <textarea class="draftbox" id="fbbox" aria-label="店長へのメッセージ"></textarea>
+    <button class="btn-go2" id="fb-send">この内容を送る</button>
+    <button class="btn-back" id="fb-back">← もどる</button>
   </div>
 
   <!-- DONE -->
   <div class="scr done" id="scr-done">
     <div class="ok">✓</div>
-    <h2>ありがとうございました！</h2>
-    <p>あなたの一言が、お店の大きな力になります。またのご来店をお待ちしています。</p>
+    <h2 id="done-title">ありがとうございました！</h2>
+    <p id="done-sub">あなたの一言が、お店の大きな力になります。またのご来店をお待ちしています。</p>
     <button class="again" id="btn-again">最初に戻る</button>
   </div>
 
@@ -387,7 +411,7 @@ body{
       "家族と":["週末に家族と伺いました。","家族で訪問しました。","家族と一緒にお昼に利用。"],
       "友人と":["友人と伺いました。","友達に誘われて訪問。","友人とのごはんで利用しました。"],
       "仕事の合間に":["仕事の合間にサッと利用。","お昼休みに伺いました。","外回りの途中で立ち寄りました。"] };
-    var praise={5:["想像以上で大満足でした。","期待を大きく超える一杯でした。","文句なしの美味しさでした。"],
+    var praise={5:["想像以上で大満足でした。","期待を大きく超える美味しさでした。","文句なしの美味しさでした。"],
       4:["とても美味しかったです。","しっかり満足できました。","安定の美味しさで満足です。"],
       3:["美味しくいただきました。","普通に良かったです。"],2:["味は悪くないですが好みは分かれるかも。"],1:["正直、今日は期待とは少し違いました。"]};
     var pl={ "味が好み":["味が好みで、最後まで美味しくいただきました。","しっかり好みの味でした。"],
@@ -426,11 +450,17 @@ body{
     }).then(function(r){ if(!r.ok) throw new Error("api "+r.status); return r.json(); })
       .then(function(j){ var t=(j.content&&j.content[0]&&j.content[0].text||"").trim(); if(!t) throw new Error("empty"); return t; });
   }
+  function greetFor(s){
+    if(s<=2) return "残念な思いをさせてしまったみたいで…正直なご感想を下書きにしました🙏";
+    if(s===3) return "ありがとうございます。正直なご感想を下書きにしました。";
+    if(s===4) return "ありがとうございます！下書きにしました。";
+    return "最高だったみたいですね😍 ことばにしてみました。";
+  }
   function genAndShow(){
     var badge=document.getElementById("draft-badge");
     show("scr-draft");
     document.getElementById("draft-stars").textContent="★".repeat(state.stars)+"☆".repeat(5-state.stars);
-    resetButtons();
+    document.getElementById("draft-greet").textContent=greetFor(state.stars);
     aiDraft().then(function(t){ badge.textContent="AI生成"; typeDraft(t); })
       .catch(function(){ badge.textContent="下書き"; typeDraft(tmplDraft()); });
   }
@@ -440,7 +470,6 @@ body{
     if(typeTimer) clearInterval(typeTimer);
     var i=0; typeTimer=setInterval(function(){ i+=3; box.value=text.slice(0,i);
       if(i>=text.length){ clearInterval(typeTimer); typeTimer=null; box.value=text; } },22);
-    resetButtons();
   }
   function regen(){
     var badge=document.getElementById("draft-badge");
@@ -450,29 +479,25 @@ body{
   }
   document.getElementById("btn-re").addEventListener("click", regen);
 
-  function resetButtons(){
-    var c=document.getElementById("btn-copy"), o=document.getElementById("btn-open");
-    c.classList.remove("done"); document.getElementById("copy-label").textContent="下書きをコピー";
-    o.disabled=true;
-  }
-  document.getElementById("btn-copy").addEventListener("click", function(){
+  function setDone(t,s){ document.getElementById("done-title").textContent=t; document.getElementById("done-sub").textContent=s; }
+
+  /* 選択肢は★に関わらず全員同じ。選ぶのは本人(=ゲーティングしない) */
+  document.getElementById("ch-google").addEventListener("click", function(){
     var text=document.getElementById("draftbox").value;
-    copyText(text).then(function(ok){
-      document.getElementById("btn-open").disabled=false; // 失敗しても次へ進めてデッドエンドにしない
-      if(ok){
-        document.getElementById("btn-copy").classList.add("done");
-        document.getElementById("copy-label").textContent="コピーしました ✓";
-        toast("コピーしました。次にGoogleで貼り付けます");
-      } else {
-        document.getElementById("copy-label").textContent="本文を長押しでコピー";
-        toast("自動コピー不可。本文を長押し→コピーしてください");
-      }
-    });
-  });
-  document.getElementById("btn-open").addEventListener("click", function(){
+    copyText(text).then(function(ok){ toast(ok?"コピーしました。Googleで長押し→ペースト→投稿":"本文を長押しでコピー→Googleで貼り付け"); });
     var w=window.open(CONFIG.reviewUrl, "_blank");
     if(!w){ location.href=CONFIG.reviewUrl; }
-    setTimeout(function(){ show("scr-done"); }, 1200);
+    setTimeout(function(){ setDone("投稿ありがとうございました！","あなたの一言が、お店の大きな力になります。またのご来店をお待ちしています。"); show("scr-done"); }, 1200);
+  });
+  document.getElementById("ch-direct").addEventListener("click", function(){
+    document.getElementById("fbbox").value=document.getElementById("draftbox").value;
+    show("scr-feedback");
+  });
+  document.getElementById("fb-back").addEventListener("click", function(){ show("scr-draft"); });
+  document.getElementById("fb-send").addEventListener("click", function(){
+    /* TODO: 送信先(LINE Notify / メール / フォーム)に連携。現状はデモのため受領のみ */
+    setDone("店長におつたえしました🙏","いただいたご意見は店長が確認し、改善に活かします。本日はありがとうございました。");
+    show("scr-done");
   });
   document.getElementById("btn-again").addEventListener("click", function(){ show("scr-pop"); });
 
