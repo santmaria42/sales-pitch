@@ -402,7 +402,7 @@ body{
     parts.push(pick(openers[state.scene]||openers["ひとりで"]));
     if(state.dish && state.dish!=="その他") parts.push(state.dish+"をいただきました。");
     parts.push(pick(praise[s]));
-    state.points.slice(0,3).forEach(function(p){ if(pl[p]) parts.push(pick(pl[p])); else parts.push(p+"が良かったです。"); });
+    state.points.slice(0,3).forEach(function(p){ if(pl[p]) parts.push(pick(pl[p])); else parts.push(p+"も良かったです。"); });
     parts.push(pick(closers[s]));
     return parts.join("");
   }
