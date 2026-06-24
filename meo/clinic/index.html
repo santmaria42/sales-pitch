@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>クチコミAIアシスタント（医療・クリニック版）</title>
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --ink:#0E1116; --surface:#151B23; --surface2:#1C2430; --line:#2A3442;
+  --gold:#C9A227; --gold-hi:#E8C547; --teal:#0D9488; --teal-hi:#2DD4BF;
+  --text:#F2EFE6; --muted:#9AA4B2; --danger:#E25C5C;
+  --paper:#FAF7F0; --imt:#26221C;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--ink); color:var(--text);
+  font-family:"Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;
+  line-height:1.7; overflow-x:hidden;
+}
+.app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;position:relative;background:var(--paper);color:var(--imt);}
+.scr{display:none;flex-direction:column;flex:1;min-height:100dvh;}
+.scr.on{display:flex;}
+
+/* ---------- POP ---------- */
+.pop{background:linear-gradient(165deg,#1b1410 0%,#0E1116 70%);color:var(--text);align-items:center;justify-content:center;text-align:center;padding:40px 26px;}
+.pop .shop{font-size:12px;letter-spacing:.3em;color:var(--gold-hi);margin-bottom:10px;}
+.pop h1{font-size:25px;font-weight:800;line-height:1.45;margin-bottom:10px;}
+.pop .sub{font-size:13px;color:var(--muted);margin-bottom:30px;max-width:300px;}
+.startbtn{background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;border:none;border-radius:999px;padding:16px 38px;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 10px 30px rgba(13,148,136,.4);}
+.startbtn:active{transform:scale(.97);}
+.pop .legal{margin-top:26px;font-size:11px;color:#6f7986;line-height:1.7;max-width:300px;}
+
+/* ---------- chat ---------- */
+.chathead{flex:none;background:#fff;border-bottom:1px solid #E8E2D6;padding:14px 16px;display:flex;align-items:center;gap:10px;padding-top:max(14px,env(safe-area-inset-top));}
+.chathead .ava{width:36px;height:36px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--teal),var(--teal-hi));display:flex;align-items:center;justify-content:center;font-size:18px;}
+.chathead .nm{font-size:14px;font-weight:700;}
+.chathead .st{font-size:10.5px;color:#0D9488;display:flex;align-items:center;gap:4px;}
+.chathead .st::before{content:"";width:6px;height:6px;border-radius:50%;background:#0D9488;}
+.chat{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:11px;background:var(--paper);}
+.msg{max-width:84%;padding:10px 14px;border-radius:16px;font-size:14.5px;line-height:1.6;animation:pop .25s cubic-bezier(.34,1.4,.64,1);}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97);}to{opacity:1;transform:none;}}
+.msg.bot{background:#fff;border:1px solid #E8E2D6;align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.user{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.typing{display:inline-flex;gap:4px;padding:4px 2px;}
+.typing i{width:7px;height:7px;border-radius:50%;background:#B9AE9C;animation:tp 1s infinite;}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.inputzone{flex:none;background:#fff;border-top:1px solid #E8E2D6;padding:14px;padding-bottom:max(16px,env(safe-area-inset-bottom));min-height:80px;}
+.chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;}
+.chip{border:1.5px solid var(--teal);color:var(--teal);background:#fff;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;}
+.chip:active{transform:scale(.95);}
+.chip.sel{background:var(--teal);color:#fff;}
+.stars{display:flex;gap:8px;justify-content:center;}
+.stars button{font-size:34px;background:none;border:none;cursor:pointer;color:#D8D0C0;transition:transform .12s,color .12s;padding:2px;}
+.stars button.lit{color:#F5B301;}
+.stars button:active{transform:scale(1.2);}
+.gobtn{display:block;margin:12px auto 0;background:var(--teal);color:#fff;border:none;border-radius:999px;padding:11px 30px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+.gobtn:disabled{opacity:.35;}
+
+/* ---------- draft ---------- */
+.draft{background:var(--paper);padding:18px;padding-top:max(20px,env(safe-area-inset-top));gap:13px;}
+.draft h2{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.draft h2 .badge{font-size:10px;background:var(--teal);color:#fff;border-radius:999px;padding:3px 10px;letter-spacing:.06em;}
+.starline{display:flex;align-items:center;gap:6px;font-size:14px;color:#6B6354;}
+.starline .s{color:#F5B301;font-size:17px;letter-spacing:2px;}
+.draftbox{width:100%;flex:1;min-height:170px;resize:none;border:1.5px solid #DDD5C4;border-radius:14px;padding:15px;font-size:15px;line-height:1.8;font-family:inherit;background:#fff;color:var(--imt);}
+.draftbox:focus{outline:2px solid var(--teal);border-color:transparent;}
+.hint{font-size:12px;color:#8A8070;}
+.btn-re{background:#fff;border:1.5px solid #C9BFA8;color:#6B6354;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;}
+.steps{display:flex;flex-direction:column;gap:10px;margin-top:2px;}
+.bigbtn{display:flex;align-items:center;gap:12px;border:none;border-radius:14px;padding:15px 18px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;text-align:left;width:100%;}
+.bigbtn .n{width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;}
+.btn-copy{background:#fff;color:var(--imt);border:1.5px solid var(--teal);}
+.btn-copy .n{background:var(--teal);color:#fff;}
+.btn-copy.done{background:var(--teal);color:#fff;}
+.btn-copy.done .n{background:#fff;color:var(--teal);}
+.btn-open{background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;box-shadow:0 8px 22px rgba(13,148,136,.35);}
+.btn-open .n{background:rgba(255,255,255,.25);color:#fff;}
+.btn-open:disabled{opacity:.4;box-shadow:none;}
+.legalbar{font-size:11px;color:#8A8070;text-align:center;line-height:1.7;margin-top:2px;}
+.greet{font-size:14.5px;color:#5a5346;line-height:1.6;background:#fff;border:1px solid #E8E2D6;border-radius:12px;padding:11px 14px;}
+.choosehead{text-align:center;font-size:14px;font-weight:800;color:#26221C;margin-top:2px;}
+.choices{display:flex;gap:11px;}
+.choice{flex:1 1 0;min-width:0;background:#fff;border:1.5px solid var(--teal);border-radius:14px;padding:15px 8px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;}
+.choice:active{transform:scale(.97);}
+.choice .ci{font-size:22px;color:var(--teal);line-height:1;}
+.choice b{font-size:14.5px;color:var(--imt);font-weight:800;}
+.choice small{font-size:11px;color:#8A8070;}
+/* ---------- feedback (店長に直接) ---------- */
+.feedback{background:var(--paper);padding:18px;padding-top:max(24px,env(safe-area-inset-top));gap:13px;}
+.fbhead{font-size:17px;font-weight:800;color:#26221C;}
+.fbsub{font-size:12.5px;color:#8A8070;margin-top:-6px;}
+.btn-go2{background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(13,148,136,.3);}
+.btn-back{background:none;border:none;color:#8A8070;font-size:13px;cursor:pointer;font-family:inherit;}
+
+/* ---------- done ---------- */
+.done{background:linear-gradient(165deg,#0E1116,#10231f);color:var(--text);align-items:center;justify-content:center;text-align:center;padding:34px 28px;}
+.done .ok{width:78px;height:78px;border-radius:50%;background:var(--teal);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;animation:pop .4s cubic-bezier(.34,1.5,.64,1);}
+.done h2{font-size:21px;font-weight:800;margin-bottom:10px;}
+.done p{font-size:13px;color:var(--muted);margin-bottom:6px;max-width:320px;}
+.done .again{margin-top:22px;background:none;border:1.5px solid var(--line);color:var(--muted);border-radius:999px;padding:10px 26px;font-size:13px;cursor:pointer;font-family:inherit;}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(12px);background:#26221C;color:#fff;font-size:13px;border-radius:999px;padding:11px 20px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:50;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ---------- setup ---------- */
+.setup{background:#0E1116;color:var(--text);padding:24px 18px 60px;gap:14px;display:none;flex-direction:column;}
+.setup.on{display:flex;}
+.setup h1{font-size:20px;font-weight:800;}
+.setup .lead{font-size:12.5px;color:var(--muted);margin-top:-6px;}
+.fld{display:flex;flex-direction:column;gap:5px;}
+.fld label{font-size:12px;font-weight:700;color:var(--gold-hi);}
+.fld .desc{font-size:11px;color:var(--muted);}
+.fld input,.fld textarea,.fld select{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--text);font-size:14px;font-family:inherit;}
+.fld input:focus,.fld textarea:focus{outline:1.5px solid var(--teal);border-color:transparent;}
+.setup .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:13px;}
+.setup .mk{background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;}
+.outwrap{display:none;flex-direction:column;gap:12px;align-items:center;text-align:center;}
+.outwrap.on{display:flex;}
+.outwrap img{width:230px;height:230px;background:#fff;border-radius:14px;padding:10px;}
+.urlbox{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:12px;color:var(--teal-hi);word-break:break-all;}
+.cpbtn{background:#fff;color:#0E1116;border:none;border-radius:10px;padding:11px 22px;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+.adv{font-size:12px;color:var(--muted);}
+.adv summary{cursor:pointer;color:var(--gold-hi);font-weight:700;}
+.setup a{color:var(--teal-hi);}
+.needsetup{padding:34px 26px;text-align:center;color:var(--text);background:#0E1116;align-items:center;justify-content:center;gap:14px;}
+.needsetup h2{font-size:18px;font-weight:800;}
+.needsetup p{font-size:13px;color:var(--muted);}
+.needsetup a{display:inline-block;margin-top:8px;background:var(--teal);color:#fff;text-decoration:none;border-radius:999px;padding:11px 24px;font-weight:700;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- SETUP (operator) -->
+  <div class="setup" id="scr-setup">
+    <h1>店舗セットアップ</h1>
+    <div class="lead">この店専用のQR/リンクを作ります。お客様のスマホはアプリ不要で開けます。</div>
+    <div class="card">
+      <div class="fld">
+        <label>① 店名</label>
+        <input id="su-name" placeholder="例：中華そば 天辺月">
+      </div>
+      <div class="fld">
+        <label>② Googleクチコミ投稿リンク <span style="color:#E25C5C">必須</span></label>
+        <div class="desc">Googleビジネスプロフィール →「クチコミ」→「クチコミを増やす / リンクを共有」で取得できる <b>https://g.page/r/…/review</b> を貼り付け。<br>placeId（ChIJ…）でもOK。</div>
+        <input id="su-url" placeholder="https://g.page/r/XXXX/review  または  ChIJ...">
+      </div>
+      <div class="fld">
+        <label>③ 主なメニュー（任意・カンマ区切り）</label>
+        <input id="su-menu" placeholder="中華そば, ワンタン麺, つけ麺, チャーシュー増し">
+      </div>
+      <div class="fld">
+        <label>④ 狙いたいキーワード（任意・カンマ区切り）</label>
+        <div class="desc">クチコミ本文に自然に入ると検索で有利。例：個室, 飲み放題, 子連れ</div>
+        <input id="su-kw" placeholder="あっさり, 行列, 一人">
+      </div>
+      <details class="adv">
+        <summary>AIで下書き生成（任意・上級）</summary>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:11px;">
+          <div class="desc">未設定なら、お客様の回答を組み立てる内蔵エンジンで下書きします（無料・キー不要）。本物のAI文章にしたい場合のみ、Anthropic APIキーを入れてください。<b>このキーはこの端末のブラウザにのみ保存</b>されます。お客様のスマホで本物のAIを使うには別途サーバー（次ステップ）が必要です。</div>
+          <div class="fld"><label>Anthropic APIキー</label><input id="su-key" placeholder="sk-ant-..." autocomplete="off"></div>
+          <div class="fld"><label>モデル</label>
+            <select id="su-model">
+              <option value="claude-haiku-4-5-20251001">claude-haiku-4-5（速い・安い）</option>
+              <option value="claude-sonnet-4-6">claude-sonnet-4-6（高品質）</option>
+            </select>
+          </div>
+        </div>
+      </details>
+      <button class="mk" id="su-make">この店のQR・リンクを作る</button>
+    </div>
+    <div class="outwrap" id="su-out">
+      <div style="font-size:13px;color:var(--muted)">▼ 卓上POPに印刷するQR</div>
+      <img id="su-qr" alt="QR">
+      <div style="font-size:12.5px;color:var(--gold-hi);font-weight:700">お客様用URL</div>
+      <div class="urlbox" id="su-urlout"></div>
+      <button class="cpbtn" id="su-cp">URLをコピー</button>
+      <a id="su-open" href="#" target="_blank" style="font-size:13px;color:var(--teal-hi)">→ お客様画面をプレビュー</a>
+    </div>
+  </div>
+
+  <!-- needs setup -->
+  <div class="scr needsetup" id="scr-need">
+    <h2>このリンクはまだ設定されていません</h2>
+    <p>店舗のGoogleクチコミ投稿リンクを設定すると、お客様用QRが発行されます。</p>
+    <a href="?setup=1">店舗セットアップを開く</a>
+  </div>
+
+  <!-- POP -->
+  <div class="scr pop" id="scr-pop">
+    <div class="shop" id="pop-shop">医院</div>
+    <h1>受診後の30秒で<br>医院を応援しませんか？</h1>
+    <div class="sub">AIがお手伝いするので、文字入力はほぼゼロ。受付・院内・対応など、ご来院の感想を聞かせてください。</div>
+    <button class="startbtn" id="pop-start">はじめる（30秒）</button>
+    <div class="legal">※治療の内容や効果ではなく、受付・院内・スタッフ対応などの感想をうかがいます（医療広告の決まりに配慮）。<br>☆の数は自由・特典はありません。ご本人のGoogleアカウントで投稿されます。</div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="scr" id="scr-chat" style="background:var(--paper);">
+    <div class="chathead">
+      <div class="ava">🏥</div>
+      <div><div class="nm" id="chat-shop">AIアシスタント</div><div class="st">オンライン</div></div>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="inputzone" id="inputzone"></div>
+  </div>
+
+  <!-- DRAFT -->
+  <div class="scr draft" id="scr-draft">
+    <div class="greet" id="draft-greet"></div>
+    <div class="starline">あなたの評価 <span class="s" id="draft-stars"></span> <span class="badge" id="draft-badge" style="margin-left:auto">下書き</span></div>
+    <textarea class="draftbox" id="draftbox" aria-label="クチコミ下書き"></textarea>
+    <div class="hint">✏️ あなたの言葉に自由に直せます。</div>
+    <button class="btn-re" id="btn-re">🔁 別の言い回しにする</button>
+    <div class="choosehead">この気持ち、どちらに残しますか？</div>
+    <div class="choices">
+      <button class="choice" id="ch-google"><span class="ci">★</span><b>Googleに投稿</b><small>みんなに公開</small></button>
+      <button class="choice" id="ch-direct"><span class="ci">✉</span><b>医院に直接</b><small>院内だけに（任意）</small></button>
+    </div>
+    <div class="legalbar">☆の数は自由・特典はありません。選ぶのはあなたです。</div>
+  </div>
+
+  <!-- FEEDBACK (医院に直接) -->
+  <div class="scr feedback" id="scr-feedback">
+    <div class="fbhead">医院に直接おつたえします</div>
+    <div class="fbsub">いただいた内容は院内のスタッフだけが確認します。公開はされません。</div>
+    <textarea class="draftbox" id="fbbox" aria-label="医院へのメッセージ"></textarea>
+    <button class="btn-go2" id="fb-send">この内容を送る</button>
+    <button class="btn-back" id="fb-back">← もどる</button>
+  </div>
+
+  <!-- DONE -->
+  <div class="scr done" id="scr-done">
+    <div class="ok">✓</div>
+    <h2 id="done-title">ありがとうございました！</h2>
+    <p id="done-sub">あなたの一言が、お店の大きな力になります。またのご来店をお待ちしています。</p>
+    <button class="again" id="btn-again">最初に戻る</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var qs = new URLSearchParams(location.search);
+
+  /* ---------------- config from URL ---------------- */
+  function normReviewUrl(raw){
+    if(!raw) return "";
+    raw = raw.trim();
+    if(/^https?:\/\//i.test(raw)) return raw;                 // full link (g.page/r/.../review, writereview, maps)
+    if(/^ChIJ[A-Za-z0-9_-]{10,}$/.test(raw))                  // ChIJ Place ID only (hex 0x..:0x.. は writereview で404になるため不可)
+      return "https://search.google.com/local/writereview?placeid=" + encodeURIComponent(raw);
+    return raw;                                               // それ以外はフルURLをそのまま貼ってもらう
+  }
+  var CONFIG = {
+    name: qs.get("n") || "",
+    reviewUrl: normReviewUrl(qs.get("u") || qs.get("p") || ""),
+    menu: (qs.get("m")||"").split(",").map(function(s){return s.trim();}).filter(Boolean),
+    keywords: (qs.get("k")||"").split(",").map(function(s){return s.trim();}).filter(Boolean),
+  };
+  if(!CONFIG.menu.length) CONFIG.menu = ["お料理","ドリンク","本日のおすすめ"];
+
+  function show(id){
+    var els = document.querySelectorAll(".scr,.setup");
+    for(var i=0;i<els.length;i++) els[i].classList.remove("on");
+    document.getElementById(id).classList.add("on");
+    window.scrollTo(0,0);
+  }
+  function toast(t){
+    var el = document.getElementById("toast");
+    el.textContent = t; el.classList.add("show");
+    setTimeout(function(){ el.classList.remove("show"); }, 1800);
+  }
+  function copyText(text){
+    return new Promise(function(res){
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){res(true);}, function(){ res(fallback()); });
+      } else { res(fallback()); }
+      function fallback(){
+        try{
+          var ta=document.createElement("textarea"); ta.value=text;
+          ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+          ta.focus(); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok;
+        }catch(e){ return false; }
+      }
+    });
+  }
+
+  /* ================= SETUP MODE ================= */
+  if(qs.has("setup")){
+    document.getElementById("scr-setup").classList.add("on");
+    var aiSaved = JSON.parse(localStorage.getItem("meo_ai")||"null");
+    if(aiSaved){ document.getElementById("su-key").value = aiSaved.key||""; if(aiSaved.model) document.getElementById("su-model").value=aiSaved.model; }
+    document.getElementById("su-make").addEventListener("click", function(){
+      var name = document.getElementById("su-name").value.trim();
+      var url  = document.getElementById("su-url").value.trim();
+      var menu = document.getElementById("su-menu").value.trim();
+      var kw   = document.getElementById("su-kw").value.trim();
+      var key  = document.getElementById("su-key").value.trim();
+      var model= document.getElementById("su-model").value;
+      if(!url){ toast("Googleクチコミリンクを入れてください"); return; }
+      if(key){ localStorage.setItem("meo_ai", JSON.stringify({on:true,key:key,model:model})); }
+      else { localStorage.removeItem("meo_ai"); }
+      var base = location.origin + location.pathname;
+      var p = new URLSearchParams();
+      p.set("u", normReviewUrl(url));
+      if(name) p.set("n", name);
+      if(menu) p.set("m", menu);
+      if(kw)   p.set("k", kw);
+      var custUrl = base + "?" + p.toString();
+      document.getElementById("su-urlout").textContent = custUrl;
+      document.getElementById("su-qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=460x460&margin=0&data=" + encodeURIComponent(custUrl);
+      document.getElementById("su-open").href = custUrl;
+      document.getElementById("su-out").classList.add("on");
+      document.getElementById("su-cp").onclick = function(){ copyText(custUrl).then(function(ok){ toast(ok?"URLをコピーしました":"コピーできませんでした"); }); };
+      document.getElementById("su-out").scrollIntoView({behavior:"smooth"});
+    });
+    return;
+  }
+
+  /* ================= CUSTOMER MODE ================= */
+  if(!CONFIG.reviewUrl){ show("scr-need"); return; }
+
+  var shopName = CONFIG.name || "当院";
+  document.getElementById("pop-shop").textContent = shopName;
+  document.getElementById("chat-shop").textContent = shopName + " AIアシスタント";
+
+  var chat = document.getElementById("chat"), inputzone = document.getElementById("inputzone");
+  var state = { stars:0, dish:"", scene:"", points:[] };
+
+  function botMsg(text, cb){
+    var t=document.createElement("div"); t.className="msg bot";
+    t.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';
+    chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
+    setTimeout(function(){ t.innerHTML=text; chat.scrollTop=chat.scrollHeight; if(cb)cb(); }, 650);
+  }
+  function userMsg(text){
+    var t=document.createElement("div"); t.className="msg user"; t.textContent=text;
+    chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
+  }
+  function clearInput(){ inputzone.innerHTML=""; }
+
+  document.getElementById("pop-start").addEventListener("click", startChat);
+  function startChat(){
+    show("scr-chat"); chat.innerHTML=""; clearInput();
+    state={ stars:0, dish:"", scene:"", points:[] };
+    botMsg("ご来院ありがとうございます！🏥<br>30秒だけ、受付・院内などのご感想を聞かせてください。", function(){
+      botMsg("まず、今日のご来院はいかがでしたか？（星でどうぞ）", askStars);
+    });
+  }
+  function askStars(){
+    var z=document.createElement("div"); z.className="stars";
+    for(var i=1;i<=5;i++){(function(n){
+      var b=document.createElement("button"); b.textContent="★"; b.setAttribute("aria-label",n+"つ星");
+      b.addEventListener("click", function(){
+        light(n); state.stars=n;
+        setTimeout(function(){ userMsg("★".repeat(n)); clearInput();
+          botMsg("ありがとうございます！どなたの受診でしたか？", askScene); },220);
+      });
+      z.appendChild(b);
+    })(i);}
+    function light(n){ var bs=z.querySelectorAll("button"); for(var i=0;i<bs.length;i++) bs[i].classList.toggle("lit", i<n); }
+    clearInput(); inputzone.appendChild(z);
+  }
+  function askDish(){
+    var opts = CONFIG.menu.slice(0,4); opts.push("その他");
+    chipInput(opts, false, function(v){ state.dish=v; botMsg("いいですね！どなたとのご来店でしたか？", askScene); });
+  }
+  function askScene(){
+    chipInput(["ご自身","お子さん","ご家族","付き添いで"], false, function(v){ state.scene=v; botMsg("最後に、よかった点を教えてください（いくつでも）", askPoints); });
+  }
+  function askPoints(){
+    var base=["受付がスムーズ","待ち時間が少ない","説明が分かりやすい","院内がきれい","スタッフが親切","通いやすい"];
+    var pts = CONFIG.keywords.slice(0,3).concat(base);
+    var seen={}, uniq=[]; pts.forEach(function(p){ if(!seen[p]){seen[p]=1;uniq.push(p);} });
+    chipInput(uniq.slice(0,7), true, function(vals){
+      state.points=vals;
+      botMsg("ありがとうございます！あなたの言葉から下書きを作っています…✍️", function(){ setTimeout(genAndShow, 500); });
+    });
+  }
+  function chipInput(options, multi, done){
+    clearInput();
+    var wrap=document.createElement("div"); wrap.className="chips"; var sel=[];
+    options.forEach(function(op){
+      var c=document.createElement("button"); c.className="chip"; c.textContent=op;
+      c.addEventListener("click", function(){
+        if(multi){ c.classList.toggle("sel"); var i=sel.indexOf(op); if(i>=0)sel.splice(i,1); else sel.push(op); go.disabled=sel.length===0; }
+        else { userMsg(op); clearInput(); done(op); }
+      });
+      wrap.appendChild(c);
+    });
+    inputzone.appendChild(wrap);
+    if(multi){
+      var go=document.createElement("button"); go.className="gobtn"; go.textContent="これで決定"; go.disabled=true;
+      go.addEventListener("click", function(){ userMsg(sel.join("、")); clearInput(); done(sel.slice()); });
+      inputzone.appendChild(go);
+    }
+  }
+
+  /* ---------------- draft generation ---------------- */
+  function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function tmplDraft(){
+    var s=Math.max(1,Math.min(5,state.stars));
+    var openers={ "ご自身":["定期的に通っています。","予約して受診しました。","こちらの医院を利用しています。"],
+      "お子さん":["子どもを連れて受診しました。","子どもの付き添いで伺いました。","家族で子どもを連れて行きました。"],
+      "ご家族":["家族と一緒に受診しました。","家族の付き添いで伺いました。"],
+      "付き添いで":["付き添いで伺いました。","家族の付き添いで利用しました。"] };
+    var praise={5:["とても通いやすい医院です。","安心して任せられる医院でした。","スタッフの皆さんの対応が素晴らしかったです。"],
+      4:["落ち着いて受診できました。","対応が丁寧で安心しました。","気持ちよく受診できました。"],
+      3:["問題なく受診できました。","特に不便はありませんでした。"],2:["対応は悪くないですが、改善の余地もあるかもしれません。"],1:["正直、今回は少し残念に感じました。"]};
+    var pl={ "受付がスムーズ":["受付や予約がスムーズでした。","予約から受診までスムーズで助かりました。"],
+      "待ち時間が少ない":["待ち時間が少なくて助かりました。","ほとんど待たずに案内してもらえました。"],
+      "説明が分かりやすい":["説明が分かりやすく、安心できました。","丁寧に説明してもらえて納得できました。"],
+      "院内がきれい":["院内が清潔で気持ちよく過ごせました。","待合室もきれいで居心地が良かったです。"],
+      "スタッフが親切":["スタッフの方が親切で安心しました。","受付の方の対応が温かかったです。"],
+      "通いやすい":["通いやすい場所で続けられそうです。","アクセスが良く通いやすいです。"] };
+    var closers={5:["また通わせていただきます。","安心しておすすめできる医院です。"],
+      4:["またお願いしたいと思います。","通い続けたい医院です。"],3:["また機会があれば伺います。"],2:["次回に期待します。"],1:["改善に期待します。"]};
+    var parts=[];
+    parts.push(pick(openers[state.scene]||openers["ご自身"]));
+    parts.push(pick(praise[s]));
+    state.points.slice(0,3).forEach(function(p){ if(pl[p]) parts.push(pick(pl[p])); else parts.push(p+"も良かったです。"); });
+    parts.push(pick(closers[s]));
+    return parts.join("");
+  }
+  function aiPrompt(){
+    return "あなたは、ある医院（クリニック）に通う患者本人です。以下のメモだけを根拠に、Googleマップに投稿する自然な日本語のクチコミを1つ書いてください。\n"
+      +"重要な条件: 治療の内容・診断・効果・症状（治った/効いた 等）には一切触れない。受付・予約・待ち時間・説明の分かりやすさ・院内の清潔さ・スタッフの対応・通いやすさなど『接遇と環境』だけを書く。本人が書いた口語の一段落・3〜4文・80〜130字程度。誇張や事実の捏造はしない。絵文字・ハッシュタグ・医院名の連呼はしない。毎回少し言い回しを変える。\n\n"
+      +"【医院名】"+shopName+"\n【評価】★"+state.stars+"/5\n【受診者】"+(state.scene||"未回答")
+      +"\n【よかった点】"+(state.points.join("、")||"未回答")
+      +(CONFIG.keywords.length?"\n【できれば自然に触れてほしい語】"+CONFIG.keywords.join("、"):"")
+      +"\n\nクチコミ本文だけを出力してください。";
+  }
+  function aiDraft(){
+    var ai=JSON.parse(localStorage.getItem("meo_ai")||"null");
+    if(!ai||!ai.on||!ai.key) return Promise.reject("no-key");
+    return fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{ "content-type":"application/json","x-api-key":ai.key,
+        "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true" },
+      body:JSON.stringify({ model:ai.model||"claude-haiku-4-5-20251001", max_tokens:400,
+        messages:[{role:"user",content:aiPrompt()}] })
+    }).then(function(r){ if(!r.ok) throw new Error("api "+r.status); return r.json(); })
+      .then(function(j){ var t=(j.content&&j.content[0]&&j.content[0].text||"").trim(); if(!t) throw new Error("empty"); return t; });
+  }
+  function greetFor(s){
+    if(s<=2) return "残念な思いをさせてしまったみたいで…正直なご感想を下書きにしました🙏";
+    if(s===3) return "ありがとうございます。正直なご感想を下書きにしました。";
+    if(s===4) return "ありがとうございます！下書きにしました。";
+    return "最高だったみたいですね😍 ことばにしてみました。";
+  }
+  function genAndShow(){
+    var badge=document.getElementById("draft-badge");
+    show("scr-draft");
+    document.getElementById("draft-stars").textContent="★".repeat(state.stars)+"☆".repeat(5-state.stars);
+    document.getElementById("draft-greet").textContent=greetFor(state.stars);
+    aiDraft().then(function(t){ badge.textContent="AI生成"; typeDraft(t); })
+      .catch(function(){ badge.textContent="下書き"; typeDraft(tmplDraft()); });
+  }
+  var typeTimer=null;
+  function typeDraft(text){
+    var box=document.getElementById("draftbox"); box.value="";
+    if(typeTimer) clearInterval(typeTimer);
+    var i=0; typeTimer=setInterval(function(){ i+=3; box.value=text.slice(0,i);
+      if(i>=text.length){ clearInterval(typeTimer); typeTimer=null; box.value=text; } },22);
+  }
+  function regen(){
+    var badge=document.getElementById("draft-badge");
+    var box=document.getElementById("draftbox"); box.value="…";
+    aiDraft().then(function(t){ badge.textContent="AI生成"; typeDraft(t); })
+      .catch(function(){ badge.textContent="下書き"; typeDraft(tmplDraft()); });
+  }
+  document.getElementById("btn-re").addEventListener("click", regen);
+
+  function setDone(t,s){ document.getElementById("done-title").textContent=t; document.getElementById("done-sub").textContent=s; }
+
+  /* 選択肢は★に関わらず全員同じ。選ぶのは本人(=ゲーティングしない) */
+  document.getElementById("ch-google").addEventListener("click", function(){
+    var text=document.getElementById("draftbox").value;
+    copyText(text).then(function(ok){ toast(ok?"コピーしました。Googleで長押し→ペースト→投稿":"本文を長押しでコピー→Googleで貼り付け"); });
+    var w=window.open(CONFIG.reviewUrl, "_blank");
+    if(!w){ location.href=CONFIG.reviewUrl; }
+    setTimeout(function(){ setDone("投稿ありがとうございました！","あなたの一言が、医院の大きな力になります。お大事になさってください。"); show("scr-done"); }, 1200);
+  });
+  document.getElementById("ch-direct").addEventListener("click", function(){
+    document.getElementById("fbbox").value=document.getElementById("draftbox").value;
+    show("scr-feedback");
+  });
+  document.getElementById("fb-back").addEventListener("click", function(){ show("scr-draft"); });
+  document.getElementById("fb-send").addEventListener("click", function(){
+    /* TODO: 送信先(LINE Notify / メール / フォーム)に連携。現状はデモのため受領のみ */
+    setDone("医院におつたえしました🙏","いただいたご意見は院内で確認し、改善に活かします。お大事になさってください。");
+    show("scr-done");
+  });
+  document.getElementById("btn-again").addEventListener("click", function(){ show("scr-pop"); });
+
+  show("scr-pop");
+})();
+</script>
+</body>
+</html>
