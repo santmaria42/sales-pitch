@@ -260,8 +260,8 @@ body{
   }
   var CONFIG = {
     name: qs.get("n") || "韓国料理 TEJI TOKYO 新宿本店",
-    // 暫定: 公式の g.page/r/.../review リンク入手後は ?u= で差し替え可。現状はTEJI TOKYO本店のGoogleマップへ。
-    reviewUrl: normReviewUrl(qs.get("u") || qs.get("p") || "https://maps.app.goo.gl/dNbEmAoVaWczmzkeA"),
+    // TEJI TOKYO 新宿本店の公式Googleクチコミ投稿リンク(オーナー取得の g.page/r/.../review。ChIJl7qY9tiMGGARGxqsumPJruE に解決)。?u= で他店に差し替え可。
+    reviewUrl: normReviewUrl(qs.get("u") || qs.get("p") || "https://g.page/r/CRsarLpjya7hEBE/review"),
     menu: (qs.get("m")||"").split(",").map(function(s){return s.trim();}).filter(Boolean),
     keywords: (qs.get("k")||"").split(",").map(function(s){return s.trim();}).filter(Boolean),
   };
