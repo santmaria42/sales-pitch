@@ -88,6 +88,21 @@ body{
 .choice .ci{font-size:22px;color:var(--teal);line-height:1;}
 .choice b{font-size:14.5px;color:var(--imt);font-weight:800;}
 .choice small{font-size:11px;color:#8A8070;}
+/* ---------- post instructions (貼り付け手順) ---------- */
+.post{background:var(--paper);padding:20px 18px;padding-top:max(24px,env(safe-area-inset-top));gap:13px;}
+.post .copied-badge{align-self:center;background:var(--teal);color:#fff;font-size:12.5px;font-weight:800;border-radius:999px;padding:7px 18px;display:flex;align-items:center;gap:6px;}
+.post h2{font-size:20px;font-weight:800;text-align:center;color:#26221C;}
+.post .postsub{font-size:12.5px;color:#8A8070;text-align:center;margin-top:-5px;line-height:1.6;}
+.post .copiedtext{background:#fff;border:1px dashed #C9BFA8;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.7;color:#5a5346;max-height:108px;overflow:auto;}
+.poststeps{list-style:none;display:flex;flex-direction:column;gap:10px;margin:4px 0 2px;}
+.poststeps li{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #E8E2D6;border-radius:14px;padding:13px 14px;}
+.poststeps .sn{width:27px;height:27px;border-radius:50%;flex:none;background:var(--teal);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.poststeps b{font-size:14.5px;color:#26221C;font-weight:800;display:block;line-height:1.5;}
+.poststeps small{font-size:11.5px;color:#8A8070;}
+.btn-open2{background:linear-gradient(135deg,var(--teal),#0aa395);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(13,148,136,.35);width:100%;}
+.btn-open2:active{transform:scale(.98);}
+.btn-recopy{background:#fff;border:1.5px solid #C9BFA8;color:#6B6354;border-radius:12px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;}
+.btn-done2{background:none;border:none;color:#8A8070;font-size:13.5px;cursor:pointer;font-family:inherit;text-decoration:underline;align-self:center;padding:4px;}
 /* ---------- feedback (店長に直接) ---------- */
 .feedback{background:var(--paper);padding:18px;padding-top:max(24px,env(safe-area-inset-top));gap:13px;}
 .fbhead{font-size:17px;font-weight:800;color:#26221C;}
@@ -222,6 +237,23 @@ body{
       <button class="choice" id="ch-direct"><span class="ci">✉</span><b>店長に直接</b><small>お店だけに（任意）</small></button>
     </div>
     <div class="legalbar">☆の数は自由・特典はありません。選ぶのはあなたです。</div>
+  </div>
+
+  <!-- POST INSTRUCTIONS (Googleで貼り付ける手順) -->
+  <div class="scr post" id="scr-post">
+    <div class="copied-badge">✓ 下書きをコピーしました</div>
+    <h2>あとは貼り付けて投稿するだけ</h2>
+    <div class="postsub">下の3ステップで完了です。文章の入力はもう必要ありません。</div>
+    <div class="copiedtext" id="post-text"></div>
+    <ol class="poststeps">
+      <li><span class="sn">1</span><div><b>「Googleのクチコミ画面を開く」を押す</b><small>クチコミの入力欄が表示されます</small></div></li>
+      <li><span class="sn">2</span><div><b>入力欄を長押し →「ペースト / 貼り付け」</b><small>コピーした文章がそのまま入ります</small></div></li>
+      <li><span class="sn">3</span><div><b>星を選んで「投稿」をタップ</b><small>これで完了です🎉</small></div></li>
+    </ol>
+    <button class="btn-open2" id="post-open">Googleのクチコミ画面を開く →</button>
+    <button class="btn-recopy" id="post-recopy">⎘ もう一度コピーする</button>
+    <button class="btn-done2" id="post-done">投稿できました</button>
+    <div class="legalbar">うまく入らない時は、上の文章を長押しでコピーしてから貼り付けてください。</div>
   </div>
 
   <!-- FEEDBACK (店長に直接) -->
@@ -483,13 +515,29 @@ body{
 
   function setDone(t,s){ document.getElementById("done-title").textContent=t; document.getElementById("done-sub").textContent=s; }
 
-  /* 選択肢は★に関わらず全員同じ。選ぶのは本人(=ゲーティングしない) */
-  document.getElementById("ch-google").addEventListener("click", function(){
-    var text=document.getElementById("draftbox").value;
-    copyText(text).then(function(ok){ toast(ok?"コピーしました。Googleで長押し→ペースト→投稿":"本文を長押しでコピー→Googleで貼り付け"); });
+  function openReview(){
     var w=window.open(CONFIG.reviewUrl, "_blank");
     if(!w){ location.href=CONFIG.reviewUrl; }
-    setTimeout(function(){ setDone("投稿ありがとうございました！","あなたの一言が、お店の大きな力になります。またのご来店をお待ちしています。"); show("scr-done"); }, 1200);
+  }
+  /* 選択肢は★に関わらず全員同じ。選ぶのは本人(=ゲーティングしない) */
+  /* Googleに投稿 → いきなり飛ばさず、先に「貼り付け手順」を見せる */
+  document.getElementById("ch-google").addEventListener("click", function(){
+    var text=document.getElementById("draftbox").value;
+    copyText(text).then(function(ok){ toast(ok?"下書きをコピーしました":"うまくコピーできません。次の画面の文章を長押しでコピーしてください"); });
+    document.getElementById("post-text").textContent=text;
+    show("scr-post");
+  });
+  document.getElementById("post-open").addEventListener("click", function(){
+    /* 直前にもう一度コピー(クリップボードを最新に)してからGoogleを開く。同一ジェスチャ内で実行 */
+    copyText(document.getElementById("draftbox").value);
+    openReview();
+  });
+  document.getElementById("post-recopy").addEventListener("click", function(){
+    copyText(document.getElementById("draftbox").value).then(function(ok){ toast(ok?"もう一度コピーしました":"コピーできませんでした"); });
+  });
+  document.getElementById("post-done").addEventListener("click", function(){
+    setDone("投稿ありがとうございました！","あなたの一言が、お店の大きな力になります。またのご来店をお待ちしています。");
+    show("scr-done");
   });
   document.getElementById("ch-direct").addEventListener("click", function(){
     document.getElementById("fbbox").value=document.getElementById("draftbox").value;
