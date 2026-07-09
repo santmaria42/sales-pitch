@@ -7,55 +7,82 @@
 <title>Terry &amp; Fred — 日本の旅 Travel Book</title>
 <style>
   :root {
-    --washi: #F1ECDF;
-    --washi-deep: #E9E2D0;
-    --sumi: #2B2620;
-    --sumi-soft: #6A6154;
-    --shu: #A63A2B;
-    --ai: #39506E;
-    --koke: #5F6B4A;
-    --kin: #9A7B3C;
-    --rule: #D5CCB8;
+    --cloth: #4A5164;
+    --cloth-deep: #3E4456;
+    --paper: #EFE7D2;
+    --sumi: #2C2620;
+    --sumi-soft: #6E6353;
+    --shu: #A8402F;
+    --ai: #3A506E;
+    --koke: #5C684A;
+    --kin: #97783B;
+    --rule: #CFC5AB;
+    --dim: none;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --washi: #1B2028;
-      --washi-deep: #151A21;
-      --sumi: #E6E0D2;
-      --sumi-soft: #A29A88;
-      --shu: #D9705E;
-      --ai: #92A9C9;
-      --koke: #A3B183;
-      --kin: #C9A96A;
-      --rule: #333B47;
-    }
+    :root { --cloth: #13161E; --cloth-deep: #0D1016; --dim: brightness(0.82) saturate(0.96); }
   }
-  :root[data-theme="light"] {
-    --washi: #F1ECDF; --washi-deep: #E9E2D0; --sumi: #2B2620; --sumi-soft: #6A6154;
-    --shu: #A63A2B; --ai: #39506E; --koke: #5F6B4A; --kin: #9A7B3C; --rule: #D5CCB8;
-  }
-  :root[data-theme="dark"] {
-    --washi: #1B2028; --washi-deep: #151A21; --sumi: #E6E0D2; --sumi-soft: #A29A88;
-    --shu: #D9705E; --ai: #92A9C9; --koke: #A3B183; --kin: #C9A96A; --rule: #333B47;
-  }
-  html { background: var(--washi); }
+  :root[data-theme="light"] { --cloth: #4A5164; --cloth-deep: #3E4456; --dim: none; }
+  :root[data-theme="dark"]  { --cloth: #13161E; --cloth-deep: #0D1016; --dim: brightness(0.82) saturate(0.96); }
+
+  html { background: var(--cloth); }
   body {
     margin: 0;
     color: var(--sumi);
     font-family: "Hiragino Mincho ProN", "Yu Mincho", "Hoefler Text", Georgia, serif;
     line-height: 1.75;
     font-size: 16px;
+    /* indigo cloth: faint weave */
     background:
-      radial-gradient(ellipse 1200px 500px at 50% -100px, color-mix(in srgb, var(--washi-deep) 60%, transparent), transparent),
-      var(--washi);
+      repeating-linear-gradient(0deg,  transparent 0 2px, rgba(255,255,255,0.016) 2px 3px),
+      repeating-linear-gradient(90deg, transparent 0 2px, rgba(0,0,0,0.05) 2px 3px),
+      radial-gradient(ellipse 1400px 800px at 50% -200px, var(--cloth), var(--cloth-deep)),
+      var(--cloth-deep);
   }
-  /* paper grain */
-  body::before {
-    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    opacity: 0.5;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.47 0 0 0 0 0.4 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* ============ the sheet of washi ============ */
+  .paper-obj {
+    max-width: 800px;
+    margin: 54px auto 64px;
+    padding: 0 12px;
+    filter: var(--dim);
   }
-  .book { position: relative; z-index: 1; max-width: 740px; margin: 0 auto; padding: 0 26px 100px; }
+  .sheet {
+    position: relative;
+    background: var(--paper);
+    box-shadow:
+      0 2px 4px rgba(10, 12, 20, 0.35),
+      0 22px 60px rgba(10, 12, 20, 0.45),
+      inset 0 0 90px rgba(140, 120, 80, 0.13);
+    padding: 74px clamp(24px, 6vw, 66px) 84px;
+  }
+  /* deckle (torn) edges, top and bottom */
+  .deckle { display: block; width: 100%; height: 22px; }
+  .deckle svg { display: block; width: 100%; height: 22px; }
+  .deckle path { fill: var(--paper); }
+  .deckle.top    { filter: drop-shadow(0 -1px 2px rgba(10,12,20,0.3)); }
+  .deckle.bottom { filter: drop-shadow(0 3px 4px rgba(10,12,20,0.35)); }
+
+  /* washi fibre texture: four stacked noise layers, multiplied into the paper */
+  .sheet::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    mix-blend-mode: multiply;
+    background-image:
+      /* long horizontal fibres */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.007 0.28' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.52 0 0 0 0 0.47 0 0 0 0 0.36 0 0 0 0.55 -0.22'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23h)'/%3E%3C/svg%3E"),
+      /* long vertical fibres */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='v'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.26 0.006' numOctaves='3' seed='31'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0.4 -0.16'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23v)'/%3E%3C/svg%3E"),
+      /* pulp mottling — uneven sheet density */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='560'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013' numOctaves='4' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.46 0 0 0 0 0.37 0 0 0 0.3 -0.1'/%3E%3C/filter%3E%3Crect width='560' height='560' filter='url(%23m)'/%3E%3C/svg%3E"),
+      /* fine grain */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.42 0 0 0 0 0.35 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+  /* stray fibre flecks, like chiri in handmade paper */
+  .sheet::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg fill='none' stroke='%23917f5c' stroke-width='0.8' stroke-linecap='round' opacity='0.5'%3E%3Cpath d='M83 61c9-3 17 2 24-1'/%3E%3Cpath d='M311 142c-6 5-4 12-11 14'/%3E%3Cpath d='M521 88c8 1 12 8 21 7'/%3E%3Cpath d='M154 338c4-7 13-6 16-13'/%3E%3Cpath d='M430 391c10 2 14-5 23-3'/%3E%3Cpath d='M624 296c-3 8-12 8-14 16'/%3E%3Cpath d='M77 512c11-1 14 6 24 4'/%3E%3Cpath d='M287 611c5-6 14-4 18-11'/%3E%3Cpath d='M539 559c-8 4-8 12-17 13'/%3E%3Cpath d='M660 640c7-4 15 0 20-6'/%3E%3Cpath d='M215 233c7 3 15-2 20 3'/%3E%3Cpath d='M375 30c-5 5-13 3-16 10'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .inner { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
 
   .rlabel {
     font-size: 0.68rem; letter-spacing: 0.34em; text-transform: uppercase;
@@ -63,23 +90,27 @@
     font-family: "Avenir Next", "Optima", sans-serif; font-weight: 600;
   }
 
-  /* ---------- Cover ---------- */
-  .cover { position: relative; text-align: center; padding: 96px 0 70px; }
+  /* ============ cover ============ */
+  .cover { position: relative; text-align: center; padding: 20px 0 66px; }
   .cover .tate {
-    writing-mode: vertical-rl; margin: 0 auto;
+    writing-mode: vertical-rl; margin: 26px auto 0;
     font-size: clamp(2.2rem, 6vw, 3rem); letter-spacing: 0.34em;
     font-weight: 500; height: 9.2em; color: var(--sumi);
   }
   .cover .en-title { margin: 30px 0 4px; font-size: 1.28rem; letter-spacing: 0.12em; }
   .cover .dates { color: var(--sumi-soft); font-size: 0.95rem; letter-spacing: 0.1em; margin-bottom: 34px; }
   .hanko {
-    position: absolute; right: max(6px, 4vw); top: 110px;
-    width: 62px; height: 62px; border-radius: 8px;
-    background: var(--shu); color: var(--washi);
+    position: absolute; right: max(0px, 2vw); top: 46px;
+    width: 62px; height: 62px; border-radius: 7px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,235,225,0.22), transparent 55%),
+      var(--shu);
+    color: var(--paper);
     display: flex; align-items: center; justify-content: center;
     writing-mode: vertical-rl; font-size: 1.25rem; letter-spacing: 0.2em; font-weight: 600;
     transform: rotate(3deg);
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--washi) 25%, transparent);
+    box-shadow: inset 0 0 0 2px rgba(239,231,210,0.28), inset 0 0 10px rgba(90,20,10,0.45);
+    mix-blend-mode: multiply;
   }
   .cover .journey {
     display: inline-flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center;
@@ -88,29 +119,41 @@
   .cover .journey span { letter-spacing: 0.14em; font-size: 0.98rem; }
   .cover .journey .sep { color: var(--shu); font-size: 0.7rem; }
 
-  /* ---------- Chapter (city) ---------- */
+  /* ============ chapters — tanzaku strips ============ */
   .chapter { margin-top: 92px; }
-  .ch-head { display: flex; align-items: center; gap: 22px; margin-bottom: 44px; }
-  .ch-head .kanji {
+  .ch-head { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 40px; }
+  .tanzaku {
     writing-mode: vertical-rl;
-    font-size: 2rem; letter-spacing: 0.28em; font-weight: 500;
-    color: var(--sumi); border-right: 3px solid var(--accent, var(--shu));
-    padding-right: 16px; min-height: 3.4em;
+    font-size: 1.9rem; letter-spacing: 0.3em; font-weight: 500;
+    color: var(--sumi);
+    background: var(--accent-wash, #E2B7A5);
+    padding: 26px 13px 30px;
+    /* torn strip silhouette */
+    clip-path: polygon(6% 0%, 55% 2%, 96% 0%, 100% 9%, 94% 22%, 99% 37%, 93% 52%, 100% 68%, 95% 84%, 99% 95%, 88% 100%, 42% 97%, 8% 100%, 0% 92%, 5% 78%, 0% 61%, 6% 45%, 1% 28%, 5% 12%);
+    box-shadow: 1px 2px 3px rgba(60, 48, 28, 0.25);
+    transform: rotate(-0.8deg);
+    flex-shrink: 0;
   }
-  .ch-head .ch-meta h2 {
-    margin: 0 0 4px; font-weight: 500; font-size: 1.7rem; letter-spacing: 0.06em;
-  }
-  .ch-head .ch-meta .stay { color: var(--sumi-soft); font-size: 0.94rem; }
-  .ch-head .ch-meta .stay b { color: var(--sumi); font-weight: 600; }
+  .ch-meta { padding-top: 8px; }
+  .ch-meta h2 { margin: 0 0 4px; font-weight: 500; font-size: 1.7rem; letter-spacing: 0.06em; }
+  .ch-meta .stay { color: var(--sumi-soft); font-size: 0.94rem; }
+  .ch-meta .stay b { color: var(--sumi); font-weight: 600; }
 
-  /* ---------- Day entries ---------- */
-  .day { display: grid; grid-template-columns: 96px 1fr; gap: 26px; padding: 34px 0; border-top: 1px solid var(--rule); }
+  /* ============ day entries ============ */
+  .day { display: grid; grid-template-columns: 96px 1fr; gap: 26px; padding: 34px 0 30px; position: relative; }
+  /* brush-stroke divider */
+  .day::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 9px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='620' height='9' preserveAspectRatio='none' viewBox='0 0 620 9'%3E%3Cpath d='M4 5.2 C 70 3.4, 130 6.4, 205 4.6 S 340 3.2, 415 5.4 S 545 4.2, 616 4.8' fill='none' stroke='%232c2620' stroke-width='1.5' stroke-linecap='round' opacity='0.34'/%3E%3Cpath d='M10 6.6 C 90 5.2, 170 7.2, 265 5.8 S 430 5, 520 6.4' fill='none' stroke='%232c2620' stroke-width='0.7' stroke-linecap='round' opacity='0.16'/%3E%3C/svg%3E") center / 100% 9px no-repeat;
+  }
+  .chapter .day:first-of-type::before { display: none; }
   .daymark { text-align: center; }
   .daymark .maru {
-    width: 58px; height: 58px; margin: 0 auto 8px; border-radius: 50%;
+    width: 58px; height: 58px; margin: 0 auto 8px; border-radius: 50% 48% 51% 49% / 49% 51% 47% 52%;
     border: 1.5px solid var(--accent, var(--shu));
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.35rem; color: var(--accent, var(--shu));
+    font-size: 1.3rem; color: var(--accent, var(--shu));
+    transform: rotate(-1deg);
   }
   .daymark .date { font-size: 0.74rem; color: var(--sumi-soft); letter-spacing: 0.08em; line-height: 1.6; }
   .day h3 { margin: 2px 0 14px; font-weight: 500; font-size: 1.3rem; letter-spacing: 0.05em; text-wrap: balance; }
@@ -126,20 +169,11 @@
   .ev .w .nt { display: block; font-size: 0.85rem; color: var(--sumi-soft); margin-top: 1px; }
   .ev .w b { font-weight: 600; }
 
-  /* stay card */
-  .yado {
-    margin-top: 20px; padding: 14px 20px;
-    border: 1px solid var(--rule); border-left: 3px solid var(--accent, var(--shu));
-    background: color-mix(in srgb, var(--washi-deep) 55%, transparent);
-    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; font-size: 0.92rem;
-  }
-  .yado .k { color: var(--accent, var(--shu)); letter-spacing: 0.3em; font-size: 0.8rem; }
-
-  /* ---------- kotoba (notes) ---------- */
-  .kotoba { margin-top: 96px; border: 1px solid var(--rule); padding: 36px 40px; position: relative; background: color-mix(in srgb, var(--washi-deep) 45%, transparent); }
+  /* ============ notes ============ */
+  .kotoba { margin-top: 96px; border: 1px solid var(--rule); padding: 36px 40px; position: relative; background: rgba(120, 100, 60, 0.05); }
   .kotoba::before {
     content: "心得"; position: absolute; top: -16px; left: 28px;
-    background: var(--washi); padding: 0 12px;
+    background: var(--paper); padding: 0 12px;
     letter-spacing: 0.3em; color: var(--shu); font-size: 1.05rem;
   }
   .kotoba ul { margin: 0; padding-left: 1.2em; display: grid; gap: 12px; font-size: 0.95rem; }
@@ -148,225 +182,242 @@
 
   .owari { text-align: center; margin-top: 80px; }
   .owari .maru-shu {
-    width: 54px; height: 54px; margin: 0 auto 14px; border-radius: 50%;
-    background: var(--shu); color: var(--washi);
+    width: 54px; height: 54px; margin: 0 auto 14px;
+    border-radius: 50% 47% 52% 48% / 48% 52% 46% 53%;
+    background: radial-gradient(circle at 32% 28%, rgba(255,235,225,0.2), transparent 55%), var(--shu);
+    color: var(--paper); mix-blend-mode: multiply;
     display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    transform: rotate(-2deg);
+    box-shadow: inset 0 0 8px rgba(90,20,10,0.4);
   }
   .owari .msg { color: var(--sumi-soft); font-size: 0.9rem; letter-spacing: 0.16em; }
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
+    .paper-obj { margin: 22px auto 34px; padding: 0 8px; }
+    .sheet { padding: 40px 20px 56px; }
     .day { grid-template-columns: 1fr; gap: 10px; }
     .daymark { display: flex; align-items: center; gap: 14px; text-align: left; }
-    .daymark .maru { margin: 0; width: 46px; height: 46px; font-size: 1.1rem; }
+    .daymark .maru { margin: 0; width: 46px; height: 46px; font-size: 1.05rem; }
     .ev { grid-template-columns: 70px 1fr; }
-    .hanko { top: 84px; width: 52px; height: 52px; font-size: 1.05rem; }
+    .hanko { top: 16px; width: 52px; height: 52px; font-size: 1.05rem; }
+    .ch-head { gap: 16px; }
+    .tanzaku { font-size: 1.5rem; padding: 20px 10px 24px; }
   }
   @media print {
-    body::before { display: none; }
+    html, body { background: #fff; }
+    .paper-obj { filter: none; margin: 0 auto; }
+    .sheet { box-shadow: none; }
+    .deckle { display: none; }
     .day { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 
-<div class="book">
+<div class="paper-obj">
+  <div class="deckle top" aria-hidden="true"><svg viewBox="0 0 800 22" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 22 L0 8.6 L25.0 2.2 L39.6 8.6 L70.9 2.8 L80.6 4.0 L90.3 3.8 L112.9 4.0 L142.1 2.1 L168.6 5.1 L201.5 9.4 L231.7 7.4 L259.0 6.8 L277.4 7.0 L301.9 9.8 L328.5 2.4 L344.7 2.7 L356.3 4.5 L374.4 5.3 L390.0 10.4 L414.3 3.5 L427.4 5.4 L452.4 7.0 L482.4 9.0 L492.2 4.8 L506.5 10.5 L523.4 7.9 L555.2 6.1 L570.4 7.1 L594.0 10.1 L608.5 11.0 L619.8 8.9 L648.6 11.3 L682.5 6.8 L713.0 2.1 L739.0 6.8 L764.1 3.0 L784.4 10.6 L800.0 6.5 L800 9.8 L800 22 Z"/></svg></div>
+  <div class="sheet">
+    <div class="inner">
 
-  <header class="cover">
-    <div class="hanko" aria-hidden="true">旅印</div>
-    <div class="rlabel">A Journey Through Japan</div>
-    <h1 class="tate">日本の旅</h1>
-    <p class="en-title">Terry &amp; Fred</p>
-    <p class="dates">September 26 — October 8, 2026 · thirteen days</p>
-    <div class="journey">
-      <span>東京 Tokyo</span><span class="sep">◆</span>
-      <span>箱根 Hakone</span><span class="sep">◆</span>
-      <span>京都 Kyoto</span><span class="sep">◆</span>
-      <span>直島 Naoshima</span>
+      <header class="cover">
+        <div class="hanko" aria-hidden="true">旅印</div>
+        <div class="rlabel">A Journey Through Japan</div>
+        <h1 class="tate">日本の旅</h1>
+        <p class="en-title">Terry &amp; Fred</p>
+        <p class="dates">September 26 — October 8, 2026 · thirteen days</p>
+        <div class="journey">
+          <span>東京 Tokyo</span><span class="sep">◆</span>
+          <span>箱根 Hakone</span><span class="sep">◆</span>
+          <span>京都 Kyoto</span><span class="sep">◆</span>
+          <span>直島 Naoshima</span>
+        </div>
+      </header>
+
+      <!-- ========== TOKYO ========== -->
+      <section class="chapter" style="--accent: var(--ai); --accent-wash: #BFCBE0">
+        <div class="ch-head">
+          <div class="tanzaku">東京</div>
+          <div class="ch-meta">
+            <h2>Tokyo</h2>
+            <div class="stay">Five nights · <b>Bulgari Hotel Tokyo</b></div>
+          </div>
+        </div>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">一</div><div class="date">Sat<br>Sep 26</div></div>
+          <div>
+            <h3><span class="yomi">Tōchaku · Arrival</span>Arrival in Tokyo</h3>
+            <div class="ev"><div class="t">3:20 PM</div><div class="w"><b>Arrive at Haneda Airport</b> — flight JL11<span class="nt">Met at the arrival lobby with porter service; private transfer to the hotel.</span></div></div>
+            <div class="ev"><div class="t">4:30 PM</div><div class="w"><b>Check in</b> at the Bulgari Hotel Tokyo</div></div>
+            <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b><span class="nt">Venue details follow with the final confirmation.</span></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">二</div><div class="date">Sun<br>Sep 27</div></div>
+          <div>
+            <h3><span class="yomi">Shitamachi · Old Tokyo</span>Traditional Tokyo</h3>
+            <div class="ev"><div class="t">9:00 AM</div><div class="w"><b>Tokyo Highlights Half-Day Tour — Traditional Tokyo</b><span class="nt">Private guide from the hotel lobby; luxury minivan at your side, 9 AM–2 PM.</span></div></div>
+            <div class="ev"><div class="t">2:00 PM</div><div class="w">Afternoon at leisure</div></div>
+            <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">三</div><div class="date">Mon<br>Sep 28</div></div>
+          <div>
+            <h3><span class="yomi">Ichiba to Sake · Market &amp; Sake</span>Toyosu Market &amp; the Way of Sake</h3>
+            <div class="ev"><div class="t">7:00 AM</div><div class="w"><b>Toyosu Insider Tour &amp; sushi breakfast</b><span class="nt">The market at its liveliest hour; guide and transport included.</span></div></div>
+            <div class="ev"><div class="t">10:30 AM</div><div class="w">Free time for shopping and wandering<span class="nt">English-speaking driver and minivan at your disposal until 6:30 PM.</span></div></div>
+            <div class="ev"><div class="t">3:00 PM</div><div class="w"><b>Sake tasting with a sake sommelier</b> — until 5:30 PM<span class="nt">A guided tasting through Japan's brewing craft; whisky can join the lineup.</span></div></div>
+            <div class="ev"><div class="t">Evening</div><div class="w">Dinner reservation — timing to be confirmed</div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">四</div><div class="date">Tue<br>Sep 29</div></div>
+          <div>
+            <h3><span class="yomi">Yūyū · At Leisure</span>A Free Day &amp; teamLab Borderless</h3>
+            <div class="ev"><div class="t">10:00 AM</div><div class="w">Day at leisure<span class="nt">Private minivan at your disposal, 10 AM–10 PM.</span></div></div>
+            <div class="ev"><div class="t">Flexible</div><div class="w"><b>teamLab Borderless</b><span class="nt">Flexible passes — enter whenever the mood takes you.</span></div></div>
+            <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner at Nagatacho Ohka</b><span class="nt">Dress code: smart casual — no sandals or shorts.</span></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">五</div><div class="date">Wed<br>Sep 30</div></div>
+          <div>
+            <h3><span class="yomi">Yoru no Tōkyō · Tokyo by Night</span>Leisure &amp; Roppongi After Dark</h3>
+            <div class="ev"><div class="t">Day</div><div class="w">At leisure</div></div>
+            <div class="ev"><div class="t">Evening</div><div class="w">Dinner reservation — timing to be confirmed</div></div>
+            <div class="ev"><div class="t">9:00 PM</div><div class="w"><b>Roppongi bar-hopping with your guide</b> — four hours<span class="nt">Food and drinks included; Tokyo's night side, door to door.</span></div></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ========== HAKONE ========== -->
+      <section class="chapter" style="--accent: var(--koke); --accent-wash: #C9CFA6">
+        <div class="ch-head">
+          <div class="tanzaku">箱根</div>
+          <div class="ch-meta">
+            <h2>Hakone</h2>
+            <div class="stay">Two nights · <b>Espacio Hakone Geihinkan</b></div>
+          </div>
+        </div>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">六</div><div class="date">Thu<br>Oct 1</div></div>
+          <div>
+            <h3><span class="yomi">Yama e · To the Mountains</span>Into Hakone — Rest &amp; Wellness</h3>
+            <div class="ev"><div class="t">9:00 AM</div><div class="w"><b>Depart Tokyo by private minivan</b> — about three hours</div></div>
+            <div class="ev"><div class="t">12:00 PM</div><div class="w"><b>Early check-in</b> at Espacio Hakone Geihinkan</div></div>
+            <div class="ev"><div class="t">Afternoon</div><div class="w"><b>Relaxation &amp; wellness afternoon</b><span class="nt">Spa treatments reserved ahead; the menu is arranged with the hotel.</span></div></div>
+            <div class="ev"><div class="t">Evening</div><div class="w">Dinner on property</div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">七</div><div class="date">Fri<br>Oct 2</div></div>
+          <div>
+            <h3><span class="yomi">Ashinoko · Lake Ashi</span>Hakone, the Full Day</h3>
+            <div class="ev"><div class="t">10:00 AM</div><div class="w"><b>Full-day Hakone tour with your private guide</b> — until 5:00 PM<span class="nt">Lake Ashi by pirate ship (first-class cabin), the ropeway over Ōwakudani's volcanic valley, and the old Hakone Checkpoint.</span></div></div>
+            <div class="ev"><div class="t">7:00 PM</div><div class="w">Dinner on property</div></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ========== KYOTO ========== -->
+      <section class="chapter" style="--accent: var(--shu); --accent-wash: #E2B7A5">
+        <div class="ch-head">
+          <div class="tanzaku">京都</div>
+          <div class="ch-meta">
+            <h2>Kyoto</h2>
+            <div class="stay">Five nights · <b>The Shinmonzen</b> — by way of Osaka</div>
+          </div>
+        </div>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">八</div><div class="date">Sat<br>Oct 3</div></div>
+          <div>
+            <h3><span class="yomi">Ōsaka · Japan's Kitchen</span>Osaka, En Route to Kyoto</h3>
+            <div class="ev"><div class="t">7:30 AM</div><div class="w">Check out; transfer to Odawara Station</div></div>
+            <div class="ev"><div class="t">8:11 AM</div><div class="w"><b>Shinkansen to Osaka</b> — first class, luggage space reserved</div></div>
+            <div class="ev"><div class="t">10:30 AM</div><div class="w"><b>Osaka Food &amp; Highlights Tour</b> — until 4:30 PM<span class="nt">Met at the station; your guide, car and driver stay with you for the day.</span></div></div>
+            <div class="ev"><div class="t">5:30 PM</div><div class="w"><b>Drive to Kyoto</b> (about one hour); check in at The Shinmonzen<span class="nt">Dinner at leisure.</span></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">九</div><div class="date">Sun<br>Oct 4</div></div>
+          <div>
+            <h3><span class="yomi">Miyako · The Old Capital</span>Kyoto Highlights &amp; the Hotel's Art</h3>
+            <div class="ev"><div class="t">9:00 AM</div><div class="w"><b>Kyoto Highlights Half-Day Tour</b> — until 1:00 PM<span class="nt">Private guide from the lobby; minivan for the morning.</span></div></div>
+            <div class="ev"><div class="t">Afternoon</div><div class="w"><b>The Shinmonzen art tour</b><span class="nt">Arranged with the hotel's concierge.</span></div></div>
+            <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">十</div><div class="date">Mon<br>Oct 5</div></div>
+          <div>
+            <h3><span class="yomi">Zen to Cha · Zen &amp; Tea</span>Stillness at a Historic Temple</h3>
+            <div class="ev"><div class="t">Morning</div><div class="w">At leisure</div></div>
+            <div class="ev"><div class="t">2:00 PM</div><div class="w"><b>Private Zen temple tour &amp; seated meditation with tea ceremony</b> — until 5:00 PM<span class="nt">Pick-up and drop-off included.</span></div></div>
+            <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b></div></div>
+          </div>
+        </article>
+
+        <article class="day" style="--accent: var(--ai)">
+          <div class="daymark"><div class="maru">十一</div><div class="date">Tue<br>Oct 6</div></div>
+          <div>
+            <h3><span class="yomi">Naoshima · The Art Island</span>Naoshima, with Kurashiki En Route</h3>
+            <div class="ev"><div class="t">8:26 AM</div><div class="w"><b>Shinkansen Kyoto → Okayama</b> — arrive 9:25 AM<span class="nt">First class; car between hotel and station.</span></div></div>
+            <div class="ev"><div class="t">Morning</div><div class="w"><b>A short walk through Kurashiki</b><span class="nt">Canals, willows and white-walled storehouses of the Bikan quarter.</span></div></div>
+            <div class="ev"><div class="t">11:55 AM</div><div class="w"><b>Ferry, Uno Port → Naoshima</b> — twenty minutes across the Seto Inland Sea</div></div>
+            <div class="ev"><div class="t">Day</div><div class="w"><b>The island's icons, privately guided</b><span class="nt">The Chichu Art Museum — Monet, Turrell, De Maria in galleries sunk into the hill — the Benesse House Museum, and Kusama's pumpkins along the shore. Private car throughout.</span></div></div>
+            <div class="ev"><div class="t">5:35 PM</div><div class="w">Ferry back to Uno; drive to Okayama</div></div>
+            <div class="ev"><div class="t">6:58 PM</div><div class="w"><b>Shinkansen to Kyoto</b> — arrive 7:58 PM; at the hotel by about 8:30 PM<span class="nt">Dinner at leisure.</span></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">十二</div><div class="date">Wed<br>Oct 7</div></div>
+          <div>
+            <h3><span class="yomi">Hanamachi · The Flower District</span>A Free Day &amp; a Geisha Evening</h3>
+            <div class="ev"><div class="t">Day</div><div class="w">At leisure — one last unhurried day in Kyoto</div></div>
+            <div class="ev"><div class="t">6:00 PM</div><div class="w"><b>Night geisha house performance with dinner</b> — until 9:00 PM<span class="nt">A private evening of dance, music and conversation; dinner in the style you prefer — sushi, kaiseki or Italian.</span></div></div>
+          </div>
+        </article>
+
+        <article class="day">
+          <div class="daymark"><div class="maru">十三</div><div class="date">Thu<br>Oct 8</div></div>
+          <div>
+            <h3><span class="yomi">Shuppatsu · Departure</span>Homeward, via Seoul</h3>
+            <div class="ev"><div class="t">7:00 AM</div><div class="w"><b>Private transfer to Kansai International Airport</b> — about ninety minutes, porter service arranged</div></div>
+            <div class="ev"><div class="t">10:35 AM</div><div class="w"><b>Depart on flight KE035</b><span class="nt">行ってらっしゃい — until the next journey.</span></div></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ========== NOTES ========== -->
+      <aside class="kotoba">
+        <ul>
+          <li><b>Dining</b> — Terry's meat-free preference is noted on every reservation and experience.</li>
+          <li><b>Support</b> — Real-time remote travel support accompanies the whole journey; your team is one message away at any hour.</li>
+          <li><b>Guides &amp; cars</b> — Guides meet you in the hotel lobby unless noted; private vehicles wait for the hours listed.</li>
+          <li><b>Rail</b> — Every shinkansen segment is first class, with luggage space reserved.</li>
+          <li><b>Reservations</b> — Remaining dinner venues and timings follow in the final confirmation.</li>
+        </ul>
+      </aside>
+
+      <footer class="owari">
+        <div class="maru-shu">結</div>
+        <div class="msg">Prepared for Terry &amp; Fred — September 2026</div>
+      </footer>
+
     </div>
-  </header>
-
-  <!-- ========== TOKYO ========== -->
-  <section class="chapter" style="--accent: var(--ai)">
-    <div class="ch-head">
-      <div class="kanji">東京</div>
-      <div class="ch-meta">
-        <h2>Tokyo</h2>
-        <div class="stay">Five nights · <b>Bulgari Hotel Tokyo</b></div>
-      </div>
-    </div>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">一</div><div class="date">Sat<br>Sep 26</div></div>
-      <div>
-        <h3><span class="yomi">Tōchaku · Arrival</span>Arrival in Tokyo</h3>
-        <div class="ev"><div class="t">3:20 PM</div><div class="w"><b>Arrive at Haneda Airport</b> — flight JL11<span class="nt">Met at the arrival lobby with porter service; private transfer to the hotel.</span></div></div>
-        <div class="ev"><div class="t">4:30 PM</div><div class="w"><b>Check in</b> at the Bulgari Hotel Tokyo</div></div>
-        <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b><span class="nt">Venue details follow with the final confirmation.</span></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">二</div><div class="date">Sun<br>Sep 27</div></div>
-      <div>
-        <h3><span class="yomi">Shitamachi · Old Tokyo</span>Traditional Tokyo</h3>
-        <div class="ev"><div class="t">9:00 AM</div><div class="w"><b>Tokyo Highlights Half-Day Tour — Traditional Tokyo</b><span class="nt">Private guide from the hotel lobby; luxury minivan at your side, 9 AM–2 PM.</span></div></div>
-        <div class="ev"><div class="t">2:00 PM</div><div class="w">Afternoon at leisure</div></div>
-        <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">三</div><div class="date">Mon<br>Sep 28</div></div>
-      <div>
-        <h3><span class="yomi">Ichiba to Sake · Market &amp; Sake</span>Toyosu Market &amp; the Way of Sake</h3>
-        <div class="ev"><div class="t">7:00 AM</div><div class="w"><b>Toyosu Insider Tour &amp; sushi breakfast</b><span class="nt">The market at its liveliest hour; guide and transport included.</span></div></div>
-        <div class="ev"><div class="t">10:30 AM</div><div class="w">Free time for shopping and wandering<span class="nt">English-speaking driver and minivan at your disposal until 6:30 PM.</span></div></div>
-        <div class="ev"><div class="t">3:00 PM</div><div class="w"><b>Sake tasting with a sake sommelier</b> — until 5:30 PM<span class="nt">A guided tasting through Japan's brewing craft; whisky can join the lineup.</span></div></div>
-        <div class="ev"><div class="t">Evening</div><div class="w">Dinner reservation — timing to be confirmed</div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">四</div><div class="date">Tue<br>Sep 29</div></div>
-      <div>
-        <h3><span class="yomi">Yūyū · At Leisure</span>A Free Day &amp; teamLab Borderless</h3>
-        <div class="ev"><div class="t">10:00 AM</div><div class="w">Day at leisure<span class="nt">Private minivan at your disposal, 10 AM–10 PM.</span></div></div>
-        <div class="ev"><div class="t">Flexible</div><div class="w"><b>teamLab Borderless</b><span class="nt">Flexible passes — enter whenever the mood takes you.</span></div></div>
-        <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner at Nagatacho Ohka</b><span class="nt">Dress code: smart casual — no sandals or shorts.</span></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">五</div><div class="date">Wed<br>Sep 30</div></div>
-      <div>
-        <h3><span class="yomi">Yoru no Tōkyō · Tokyo by Night</span>Leisure &amp; Roppongi After Dark</h3>
-        <div class="ev"><div class="t">Day</div><div class="w">At leisure</div></div>
-        <div class="ev"><div class="t">Evening</div><div class="w">Dinner reservation — timing to be confirmed</div></div>
-        <div class="ev"><div class="t">9:00 PM</div><div class="w"><b>Roppongi bar-hopping with your guide</b> — four hours<span class="nt">Food and drinks included; Tokyo's night side, door to door.</span></div></div>
-      </div>
-    </article>
-  </section>
-
-  <!-- ========== HAKONE ========== -->
-  <section class="chapter" style="--accent: var(--koke)">
-    <div class="ch-head">
-      <div class="kanji">箱根</div>
-      <div class="ch-meta">
-        <h2>Hakone</h2>
-        <div class="stay">Two nights · <b>Espacio Hakone Geihinkan</b></div>
-      </div>
-    </div>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">六</div><div class="date">Thu<br>Oct 1</div></div>
-      <div>
-        <h3><span class="yomi">Yama e · To the Mountains</span>Into Hakone — Rest &amp; Wellness</h3>
-        <div class="ev"><div class="t">9:00 AM</div><div class="w"><b>Depart Tokyo by private minivan</b> — about three hours</div></div>
-        <div class="ev"><div class="t">12:00 PM</div><div class="w"><b>Early check-in</b> at Espacio Hakone Geihinkan</div></div>
-        <div class="ev"><div class="t">Afternoon</div><div class="w"><b>Relaxation &amp; wellness afternoon</b><span class="nt">Spa treatments reserved ahead; the menu is arranged with the hotel.</span></div></div>
-        <div class="ev"><div class="t">Evening</div><div class="w">Dinner on property</div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">七</div><div class="date">Fri<br>Oct 2</div></div>
-      <div>
-        <h3><span class="yomi">Ashinoko · Lake Ashi</span>Hakone, the Full Day</h3>
-        <div class="ev"><div class="t">10:00 AM</div><div class="w"><b>Full-day Hakone tour with your private guide</b> — until 5:00 PM<span class="nt">Lake Ashi by pirate ship (first-class cabin), the ropeway over Ōwakudani's volcanic valley, and the old Hakone Checkpoint.</span></div></div>
-        <div class="ev"><div class="t">7:00 PM</div><div class="w">Dinner on property</div></div>
-      </div>
-    </article>
-  </section>
-
-  <!-- ========== KYOTO ========== -->
-  <section class="chapter" style="--accent: var(--shu)">
-    <div class="ch-head">
-      <div class="kanji">京都</div>
-      <div class="ch-meta">
-        <h2>Kyoto</h2>
-        <div class="stay">Five nights · <b>The Shinmonzen</b> — by way of Osaka</div>
-      </div>
-    </div>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">八</div><div class="date">Sat<br>Oct 3</div></div>
-      <div>
-        <h3><span class="yomi">Ōsaka · Japan's Kitchen</span>Osaka, En Route to Kyoto</h3>
-        <div class="ev"><div class="t">7:30 AM</div><div class="w">Check out; transfer to Odawara Station</div></div>
-        <div class="ev"><div class="t">8:11 AM</div><div class="w"><b>Shinkansen to Osaka</b> — first class, luggage space reserved</div></div>
-        <div class="ev"><div class="t">10:30 AM</div><div class="w"><b>Osaka Food &amp; Highlights Tour</b> — until 4:30 PM<span class="nt">Met at the station; your guide, car and driver stay with you for the day.</span></div></div>
-        <div class="ev"><div class="t">5:30 PM</div><div class="w"><b>Drive to Kyoto</b> (about one hour); check in at The Shinmonzen<span class="nt">Dinner at leisure.</span></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">九</div><div class="date">Sun<br>Oct 4</div></div>
-      <div>
-        <h3><span class="yomi">Miyako · The Old Capital</span>Kyoto Highlights &amp; the Hotel's Art</h3>
-        <div class="ev"><div class="t">9:00 AM</div><div class="w"><b>Kyoto Highlights Half-Day Tour</b> — until 1:00 PM<span class="nt">Private guide from the lobby; minivan for the morning.</span></div></div>
-        <div class="ev"><div class="t">Afternoon</div><div class="w"><b>The Shinmonzen art tour</b><span class="nt">Arranged with the hotel's concierge.</span></div></div>
-        <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">十</div><div class="date">Mon<br>Oct 5</div></div>
-      <div>
-        <h3><span class="yomi">Zen to Cha · Zen &amp; Tea</span>Stillness at a Historic Temple</h3>
-        <div class="ev"><div class="t">Morning</div><div class="w">At leisure</div></div>
-        <div class="ev"><div class="t">2:00 PM</div><div class="w"><b>Private Zen temple tour &amp; seated meditation with tea ceremony</b> — until 5:00 PM<span class="nt">Pick-up and drop-off included.</span></div></div>
-        <div class="ev"><div class="t">7:00 PM</div><div class="w"><b>Dinner reservation</b></div></div>
-      </div>
-    </article>
-
-    <article class="day" style="--accent: var(--ai)">
-      <div class="daymark"><div class="maru">十一</div><div class="date">Tue<br>Oct 6</div></div>
-      <div>
-        <h3><span class="yomi">Naoshima · The Art Island</span>Naoshima, with Kurashiki En Route</h3>
-        <div class="ev"><div class="t">8:26 AM</div><div class="w"><b>Shinkansen Kyoto → Okayama</b> — arrive 9:25 AM<span class="nt">First class; car between hotel and station.</span></div></div>
-        <div class="ev"><div class="t">Morning</div><div class="w"><b>A short walk through Kurashiki</b><span class="nt">Canals, willows and white-walled storehouses of the Bikan quarter.</span></div></div>
-        <div class="ev"><div class="t">11:55 AM</div><div class="w"><b>Ferry, Uno Port → Naoshima</b> — twenty minutes across the Seto Inland Sea</div></div>
-        <div class="ev"><div class="t">Day</div><div class="w"><b>The island's icons, privately guided</b><span class="nt">The Chichu Art Museum — Monet, Turrell, De Maria in galleries sunk into the hill — the Benesse House Museum, and Kusama's pumpkins along the shore. Private car throughout.</span></div></div>
-        <div class="ev"><div class="t">5:35 PM</div><div class="w">Ferry back to Uno; drive to Okayama</div></div>
-        <div class="ev"><div class="t">6:58 PM</div><div class="w"><b>Shinkansen to Kyoto</b> — arrive 7:58 PM; at the hotel by about 8:30 PM<span class="nt">Dinner at leisure.</span></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">十二</div><div class="date">Wed<br>Oct 7</div></div>
-      <div>
-        <h3><span class="yomi">Hanamachi · The Flower District</span>A Free Day &amp; a Geisha Evening</h3>
-        <div class="ev"><div class="t">Day</div><div class="w">At leisure — one last unhurried day in Kyoto</div></div>
-        <div class="ev"><div class="t">6:00 PM</div><div class="w"><b>Night geisha house performance with dinner</b> — until 9:00 PM<span class="nt">A private evening of dance, music and conversation; dinner in the style you prefer — sushi, kaiseki or Italian.</span></div></div>
-      </div>
-    </article>
-
-    <article class="day">
-      <div class="daymark"><div class="maru">十三</div><div class="date">Thu<br>Oct 8</div></div>
-      <div>
-        <h3><span class="yomi">Shuppatsu · Departure</span>Homeward, via Seoul</h3>
-        <div class="ev"><div class="t">7:00 AM</div><div class="w"><b>Private transfer to Kansai International Airport</b> — about ninety minutes, porter service arranged</div></div>
-        <div class="ev"><div class="t">10:35 AM</div><div class="w"><b>Depart on flight KE035</b><span class="nt">行ってらっしゃい — until the next journey.</span></div></div>
-      </div>
-    </article>
-  </section>
-
-  <!-- ========== NOTES ========== -->
-  <aside class="kotoba">
-    <ul>
-      <li><b>Dining</b> — Terry's meat-free preference is noted on every reservation and experience.</li>
-      <li><b>Support</b> — Real-time remote travel support accompanies the whole journey; your team is one message away at any hour.</li>
-      <li><b>Guides &amp; cars</b> — Guides meet you in the hotel lobby unless noted; private vehicles wait for the hours listed.</li>
-      <li><b>Rail</b> — Every shinkansen segment is first class, with luggage space reserved.</li>
-      <li><b>Reservations</b> — Remaining dinner venues and timings follow in the final confirmation.</li>
-    </ul>
-  </aside>
-
-  <footer class="owari">
-    <div class="maru-shu">結</div>
-    <div class="msg">Prepared for Terry &amp; Fred — September 2026</div>
-  </footer>
-
+  </div>
+  <div class="deckle bottom" aria-hidden="true"><svg viewBox="0 0 800 22" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 L800 0 L800 14.7 L791.5 14.6 L776.3 10.3 L750.5 18.3 L739.5 18.6 L709.1 14.7 L698.7 15.1 L675.2 17.3 L662.4 15.0 L628.5 16.2 L608.1 17.6 L574.5 19.5 L555.4 15.6 L542.3 11.7 L509.1 11.0 L498.8 12.2 L478.7 17.8 L462.7 16.0 L449.0 12.2 L431.5 5.5 L405.7 15.8 L386.1 12.6 L356.9 15.7 L333.6 18.8 L319.3 17.9 L308.5 11.9 L293.8 19.4 L279.3 14.7 L261.8 18.9 L239.9 14.2 L206.0 18.2 L178.7 18.1 L159.2 17.6 L136.4 18.8 L108.3 8.6 L97.1 12.1 L86.7 12.5 L55.7 9.4 L46.7 13.0 L24.2 18.6 L0 12.3 Z"/></svg></div>
 </div>
 
 </body>
