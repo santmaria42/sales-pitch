@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Terry &amp; Fred — Japan Itinerary · Choose a Style</title>
+<style>
+  :root {
+    --bg: #F5F3EC;
+    --ink: #24281F;
+    --muted: #6B6F60;
+    --line: #DCD7C6;
+    --card: #FCFBF7;
+    --accent: #96763F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14181C; --ink: #E9E7DC; --muted: #A0A496; --line: #2C333A; --card: #1B2126; --accent: #C9A566; }
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Avenir Next", "Optima", -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh; display: grid; place-items: center; padding: 40px 20px; box-sizing: border-box;
+  }
+  main { max-width: 680px; width: 100%; text-align: center; }
+  .kicker { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-family: "Hoefler Text", Georgia, serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.4rem); margin: 10px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 40px; }
+  .grid { display: grid; gap: 14px; }
+  a.pick {
+    display: grid; gap: 4px; text-align: left; text-decoration: none;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 24px; color: var(--ink); transition: border-color 0.15s;
+  }
+  a.pick:hover, a.pick:focus-visible { border-color: var(--accent); outline: none; }
+  a.pick .name { font-family: "Hoefler Text", Georgia, serif; font-size: 1.2rem; }
+  a.pick .name .em { margin-right: 10px; }
+  a.pick .desc { color: var(--muted); font-size: 0.88rem; }
+  footer { margin-top: 44px; color: var(--muted); font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">A Private Journey Through Japan</div>
+  <h1>Terry &amp; Fred — Itinerary</h1>
+  <p class="sub">September 26 – October 8, 2026 · Tokyo · Hakone · Kyoto · Naoshima<br>One journey, three presentations — choose the one you like.</p>
+  <div class="grid">
+    <a class="pick" href="folio.html">
+      <span class="name"><span class="em">🗾</span>The Folio</span>
+      <span class="desc">A classic hotel-brochure treatment — serif elegance, ivory and bronze. A keepsake.</span>
+    </a>
+    <a class="pick" href="rail.html">
+      <span class="name"><span class="em">🚄</span>The Timeline</span>
+      <span class="desc">A modern concierge view — color-coded cities, time chips, quick navigation. For use on the go.</span>
+    </a>
+    <a class="pick" href="washi.html">
+      <span class="name"><span class="em">⛩️</span>The Washi</span>
+      <span class="desc">Washi paper, sumi ink and a vermilion seal — day markers in kanji. The most Japanese of the three.</span>
+    </a>
+  </div>
+  <footer>Prepared September 2026</footer>
+</main>
+</body>
+</html>
