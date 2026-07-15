@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理会社健全度診断｜あなたの管理費、払いすぎていませんか?</title>
+<style>
+  :root{
+    --navy:#122a4c; --navy2:#1d3f6e; --teal:#0e9f8a; --teal-dark:#0b7f6f;
+    --bg:#f4f7fb; --card:#ffffff; --ink:#1c2733; --sub:#5a6b7e; --line:#dde5ee;
+    --ok:#0e9f8a; --warn:#e8a20c; --bad:#e05252;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px 80px;}
+
+  /* hero */
+  .hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;padding:52px 20px 60px;text-align:center;}
+  .hero .badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 16px;font-size:12px;letter-spacing:.12em;margin-bottom:18px;}
+  .hero h1{font-size:clamp(22px,4.6vw,32px);font-weight:800;line-height:1.5;}
+  .hero h1 .em{color:#7fe3d3;}
+  .hero p{margin-top:14px;font-size:14px;opacity:.85;}
+  .hero .stats{display:flex;justify-content:center;gap:28px;margin-top:26px;flex-wrap:wrap;}
+  .hero .stat{text-align:center;}
+  .hero .stat b{display:block;font-size:24px;color:#7fe3d3;}
+  .hero .stat span{font-size:11px;opacity:.8;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 24px;margin-top:24px;box-shadow:0 2px 10px rgba(18,42,76,.05);}
+  .card h2{font-size:17px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .card h2 .num{background:var(--teal);color:#fff;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){.grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px;}
+  .field .unit-in{position:relative;}
+  .field input[type=number]{width:100%;padding:12px 52px 12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;background:#fbfcfe;}
+  .field input:focus{outline:none;border-color:var(--teal);}
+  .field .unit{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--sub);}
+
+  .checks{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+  .checks label{display:flex;gap:10px;align-items:flex-start;background:#fbfcfe;border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;font-size:13.5px;cursor:pointer;transition:.15s;}
+  .checks label:has(input:checked){border-color:var(--warn);background:#fff9ec;}
+  .checks input{margin-top:4px;accent-color:var(--warn);}
+
+  .btn{display:block;width:100%;margin-top:22px;padding:17px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%);color:#fff;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:.06em;box-shadow:0 6px 18px rgba(14,159,138,.35);transition:.15s;}
+  .btn:hover{transform:translateY(-1px);}
+  .demo-fill{display:block;margin:14px auto 0;background:none;border:none;color:var(--sub);font-size:12.5px;text-decoration:underline;cursor:pointer;}
+
+  /* result */
+  #result{display:none;}
+  .verdict{text-align:center;padding-top:34px;}
+  .gauge{position:relative;width:190px;height:190px;margin:0 auto;}
+  .gauge svg{transform:rotate(-90deg);}
+  .gauge .score{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge .score b{font-size:46px;line-height:1;font-variant-numeric:tabular-nums;}
+  .gauge .score span{font-size:12px;color:var(--sub);margin-top:4px;}
+  .verdict .label{display:inline-block;margin-top:16px;padding:7px 22px;border-radius:999px;font-size:16px;font-weight:800;color:#fff;}
+  .verdict .comment{margin-top:12px;font-size:14px;color:var(--sub);}
+
+  /* impact patterns */
+  .tabs{display:flex;gap:8px;margin-top:26px;}
+  .tabs button{flex:1;padding:11px 6px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:800;color:var(--sub);cursor:pointer;transition:.15s;}
+  .tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .pat{display:none;}
+  .pat.on{display:block;}
+
+  .loss{margin-top:14px;background:linear-gradient(135deg,#6e1414 0%,#a83232 100%);border-radius:16px;color:#fff;text-align:center;padding:30px 20px 32px;}
+  .loss .t{font-size:13.5px;opacity:.9;}
+  .loss .big{font-size:clamp(26px,6vw,38px);font-weight:800;line-height:1.35;margin-top:8px;}
+  .loss .big .yen{color:#ffd76a;font-size:1.35em;font-variant-numeric:tabular-nums;}
+  .loss .daily{display:inline-block;margin-top:14px;background:rgba(0,0,0,.25);border-radius:999px;padding:6px 18px;font-size:13.5px;}
+  .loss .daily b{color:#ffd76a;}
+
+  .chartbox{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;}
+  .chartbox .ct{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px;}
+  .chartbox svg{width:100%;height:auto;display:block;}
+
+  .convs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+  @media(max-width:560px){.convs{grid-template-columns:1fr;}}
+  .conv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center;}
+  .conv b{display:block;font-size:17px;color:var(--teal-dark);font-variant-numeric:tabular-nums;}
+  .conv span{font-size:11.5px;color:var(--sub);}
+
+  .vbars{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;}
+  .vbars .ct{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;}
+  .vrow{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .vrow .vl{width:64px;font-size:12.5px;font-weight:700;color:var(--sub);flex:none;}
+  .vrow .vtrack{flex:1;height:26px;background:#edf2f8;border-radius:8px;display:flex;overflow:hidden;}
+  .vrow .seg{height:100%;width:0;transition:width .9s ease;}
+  .seg.fair{background:var(--navy2);}
+  .seg.over{background:var(--bad);}
+  .seg.good{background:var(--teal);}
+  .vrow b{width:96px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums;flex:none;}
+  .vnote{font-size:11.5px;color:var(--sub);margin-top:10px;}
+  .vnote .sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--bad);vertical-align:-1px;}
+
+  table.cmp{width:100%;border-collapse:collapse;margin-top:14px;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--line);}
+  .cmp th,.cmp td{padding:12px 12px;font-size:13px;text-align:center;border-bottom:1px solid var(--line);}
+  .cmp thead th{background:var(--navy);color:#fff;font-size:12.5px;}
+  .cmp td:first-child{text-align:left;font-weight:700;color:var(--sub);font-size:12.5px;background:#fbfcfe;}
+  .cmp .now{color:var(--bad);font-weight:800;}
+  .cmp .fair{color:var(--teal-dark);font-weight:800;}
+  .cmp tfoot td{border-bottom:none;background:#fff6f6;font-weight:800;font-size:14px;}
+
+  .saving{margin-top:14px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);border-radius:16px;color:#fff;text-align:center;padding:30px 20px 34px;}
+  .saving .t{font-size:13.5px;opacity:.85;}
+  .saving .big{font-size:clamp(38px,9vw,56px);font-weight:800;color:#7fe3d3;line-height:1.2;font-variant-numeric:tabular-nums;}
+  .saving .big small{font-size:.45em;color:#fff;opacity:.9;font-weight:700;}
+  .saving .sub{font-size:12.5px;opacity:.75;margin-top:6px;}
+
+  .break{margin-top:20px;display:flex;flex-direction:column;gap:12px;}
+  .brow{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .brow .head{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .brow .head b{font-size:14.5px;}
+  .brow .tag{font-size:12px;font-weight:800;padding:3px 12px;border-radius:999px;color:#fff;flex:none;}
+  .brow .bar{height:8px;border-radius:99px;background:#e8eef5;margin:10px 0 8px;overflow:hidden;position:relative;}
+  .brow .bar i{display:block;height:100%;border-radius:99px;transition:width .8s ease;}
+  .brow .bar .mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--navy);opacity:.5;}
+  .brow p{font-size:12.5px;color:var(--sub);}
+  .flags{list-style:none;margin-top:8px;}
+  .flags li{font-size:12.5px;color:var(--bad);padding:2px 0 2px 1.4em;text-indent:-1.4em;}
+  .flags li::before{content:"⚠ ";}
+
+  .cta{margin-top:26px;text-align:center;background:var(--card);border:2px solid var(--teal);border-radius:16px;padding:30px 22px;}
+  .cta h3{font-size:17px;font-weight:800;color:var(--navy);}
+  .cta p{font-size:13px;color:var(--sub);margin-top:8px;}
+  .cta .btn{max-width:420px;margin:18px auto 0;}
+  .cta .trust{font-size:11.5px;color:var(--sub);margin-top:12px;}
+
+  .note{font-size:11px;color:#8b99a9;margin-top:26px;line-height:1.8;}
+  footer{text-align:center;font-size:11px;color:#8b99a9;padding:30px 0 10px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">賃貸オーナー様向け・無料診断</div>
+  <h1>その管理費、高いのか安いのか。<br><span class="em">誰にも聞けないまま</span>になっていませんか?</h1>
+  <p>大家さんどうしでも、お金の話はなかなかできないもの。<br>相場と契約条件から、いまの状態を60秒で整理します。責める診断ではなく、安心するための診断です。</p>
+  <div class="stats">
+    <div class="stat"><b>2〜3%</b><span>健全な管理手数料の目安</span></div>
+    <div class="stat"><b>5〜6%</b><span>見直し推奨ライン</span></div>
+    <div class="stat"><b>60秒</b><span>診断にかかる時間</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2><span class="num">1</span>物件について</h2>
+    <div class="grid">
+      <div class="field"><label>戸数</label><div class="unit-in"><input type="number" id="units" min="1" placeholder="8"><span class="unit">戸</span></div></div>
+      <div class="field"><label>平均家賃(1戸あたり)</label><div class="unit-in"><input type="number" id="rent" min="1" placeholder="70,000"><span class="unit">円/月</span></div></div>
+      <div class="field"><label>築年数</label><div class="unit-in"><input type="number" id="age" min="0" placeholder="18"><span class="unit">年</span></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span>いまのご契約内容</h2>
+    <div class="grid">
+      <div class="field"><label>管理手数料率</label><div class="unit-in"><input type="number" id="feeRate" min="0" step="0.5" placeholder="5"><span class="unit">%</span></div></div>
+      <div class="field"><label>昨年1年間の修繕費(原状回復含む)</label><div class="unit-in"><input type="number" id="repair" min="0" placeholder="1,200,000"><span class="unit">円/年</span></div></div>
+      <div class="field"><label>いまの管理会社に任せて何年?</label><div class="unit-in"><input type="number" id="years" min="0" placeholder="6"><span class="unit">年</span></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span>契約条件チェック(あてはまるものすべて)</h2>
+    <div class="checks">
+      <label><input type="checkbox" id="c1">解約すると違約金がかかる、または解約予告が6ヶ月以上</label>
+      <label><input type="checkbox" id="c2">売却するときは、この管理会社(系列)に仲介を頼む契約になっている</label>
+      <label><input type="checkbox" id="c3">修繕は管理会社の指定業者のみで、相見積りを取ったことがない</label>
+      <label><input type="checkbox" id="c4">入居募集のたびに広告料(AD)を家賃2ヶ月分以上払っている</label>
+      <label><input type="checkbox" id="c5">原状回復費の内訳明細を見たことがない</label>
+    </div>
+    <p style="font-size:12px;color:var(--sub);margin-top:10px;">わからない項目は、空欄・チェックなしのままで大丈夫です。</p>
+    <button class="btn" onclick="diagnose()">60秒診断をはじめる(無料)</button>
+    <button class="demo-fill" onclick="fillDemo()">▶ サンプル値で試す(8戸・家賃7万・築18年・手数料5%)</button>
+  </div>
+
+  <div id="result">
+    <div class="card verdict">
+      <div class="gauge">
+        <svg width="190" height="190" viewBox="0 0 190 190">
+          <circle cx="95" cy="95" r="82" fill="none" stroke="#e8eef5" stroke-width="14"/>
+          <circle id="arc" cx="95" cy="95" r="82" fill="none" stroke="var(--ok)" stroke-width="14" stroke-linecap="round" stroke-dasharray="515" stroke-dashoffset="515" style="transition:stroke-dashoffset 1.2s ease, stroke .6s;"/>
+        </svg>
+        <div class="score"><b id="scoreNum">0</b><span>健全度スコア / 100</span></div>
+      </div>
+      <div class="label" id="verdictLabel">—</div>
+      <div class="comment" id="verdictComment"></div>
+    </div>
+
+    <div id="impact">
+      <div class="tabs">
+        <button id="tabA" class="on" onclick="showPat('A')">いまの差額を見る</button>
+        <button id="tabB" onclick="showPat('B')">見直し効果を見る</button>
+        <button id="tabC" onclick="showPat('C')">条件を比べる</button>
+      </div>
+
+      <!-- パターンA: 損失強調 -->
+      <div class="pat on" id="patA">
+        <div class="loss">
+          <div class="t">もし相場水準の条件だったら…と比べてみると</div>
+          <div class="big">この<span id="lossYears">—</span>年間で 約<span class="yen" id="lossPast">0</span>万円<br>の差額が生まれている可能性</div>
+          <div class="daily">この差は、放っておくと1日あたり 約<b id="lossDaily">0</b>円ずつ広がります</div>
+          <div style="font-size:11.5px;opacity:.75;margin-top:12px;">オーナー様を責める数字ではありません。次の10年を変えるための数字です。</div>
+        </div>
+        <div class="chartbox">
+          <div class="ct">これから10年の累積支払額(管理費+修繕費)の試算</div>
+          <svg id="chart" viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+
+      <!-- パターンB: 削減強調 -->
+      <div class="pat" id="patB">
+        <div class="saving">
+          <div class="t">条件を相場水準に整えた場合、手元に残るお金(試算)</div>
+          <div class="big"><span id="save10">0</span><small> 万円 / 10年</small></div>
+          <div class="sub">年間 約<span id="save1">0</span>万円 × 10年保有した場合</div>
+        </div>
+        <div class="convs">
+          <div class="conv"><b id="convMonth">—</b><span>毎月の手取り改善</span></div>
+          <div class="conv"><b id="convRent">—</b><span>家賃収入に換算(年)</span></div>
+          <div class="conv"><b id="convUp">—</b><span>実質の家賃値上げ効果</span></div>
+        </div>
+        <div class="vbars">
+          <div class="ct">年間の管理コスト(管理費+修繕費)</div>
+          <div class="vrow"><span class="vl">今のまま</span><div class="vtrack"><i class="seg fair" id="barNowFair"></i><i class="seg over" id="barNowOver"></i></div><b id="barNowLabel">—</b></div>
+          <div class="vrow"><span class="vl">見直し後</span><div class="vtrack"><i class="seg good" id="barAfter"></i></div><b id="barAfterLabel">—</b></div>
+          <div class="vnote"><i class="sw"></i> = 相場との差額にあたる部分</div>
+        </div>
+      </div>
+
+      <!-- パターンC: 比較表 -->
+      <div class="pat" id="patC">
+        <table class="cmp">
+          <thead><tr><th>項目</th><th>いまの契約</th><th>健全な管理会社(例)</th></tr></thead>
+          <tbody>
+            <tr><td>管理手数料</td><td class="now" id="cFeeNow">—</td><td class="fair" id="cFeeFair">2〜3%</td></tr>
+            <tr><td>月額の管理費</td><td class="now" id="cFeeYenNow">—</td><td class="fair" id="cFeeYenFair">—</td></tr>
+            <tr><td>年間修繕費</td><td class="now" id="cRepNow">—</td><td class="fair" id="cRepFair">—</td></tr>
+            <tr><td>修繕の相見積り</td><td class="now" id="cAimNow">—</td><td class="fair">○ 必ず実施</td></tr>
+            <tr><td>解約違約金・縛り</td><td class="now" id="cPenNow">—</td><td class="fair">なし</td></tr>
+          </tbody>
+          <tfoot><tr><td>年間トータル差</td><td colspan="2" id="cTotal">—</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="impactOk" style="display:none">
+      <p style="font-size:14px;color:var(--teal-dark);font-weight:700;">✓ 管理費・修繕費に大きな差額は見当たりませんでした。良い条件で契約できています。</p>
+    </div>
+
+    <div class="card">
+      <h2>診断の内訳</h2>
+      <div class="break">
+        <div class="brow">
+          <div class="head"><b>① 管理手数料</b><span class="tag" id="feeTag">—</span></div>
+          <div class="bar"><i id="feeBar"></i><span class="mark" style="left:30%"></span></div>
+          <p id="feeText"></p>
+        </div>
+        <div class="brow">
+          <div class="head"><b>② 修繕費</b><span class="tag" id="repTag">—</span></div>
+          <div class="bar"><i id="repBar"></i><span class="mark" id="repMark"></span></div>
+          <p id="repText"></p>
+        </div>
+        <div class="brow">
+          <div class="head"><b>③ 契約の縛り・不透明さ</b><span class="tag" id="conTag">—</span></div>
+          <p id="conText"></p>
+          <ul class="flags" id="conFlags"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>気づけないのが、ふつうです</h2>
+      <p style="font-size:13.5px;color:var(--sub);">管理費や修繕費の相場は、オーナー様どうしでも話す機会がほとんどありません。「大手だから安心」と考えるのも自然なことです。実際、条件の見直しに気づくきっかけとして多いのは、税理士さんからの何気ない一言。この診断が、その一言の代わりになればと思っています。</p>
+    </div>
+
+    <div class="cta">
+      <h3 id="ctaHead">この差額は、来月から変えられます</h3>
+      <p>いますぐ乗り換える必要はありません。オーナー様の物件(エリア・戸数・築年数)に合う、<br>費用がガラス張りの管理会社の条件を、まずは「比較材料」としてお渡しします。</p>
+      <button class="btn" onclick="alert('※デモ:ここから相談フォームへ遷移します')">うちの場合はどうなる? を無料で聞いてみる</button>
+      <div class="trust">相談は無料 / いまの管理会社さんに連絡がいくことはありません / 乗り換えの強制もありません</div>
+    </div>
+
+    <p class="note">※本診断は入力値と一般的な相場観にもとづく簡易試算であり、削減額を保証するものではありません。管理手数料の健全目安(2〜3%)、修繕費の目安(築年数に応じ年間家賃収入の5〜10%程度)は物件の構造・エリアにより変動します。個別の契約見直しは契約書の確認が必要です。</p>
+  </div>
+
+  <footer>管理会社健全度診断(デモ版)</footer>
+</div>
+
+<script>
+const yen = n => Math.round(n).toLocaleString('ja-JP');
+
+function fillDemo(){
+  units.value=8; rent.value=70000; age.value=18;
+  feeRate.value=5; repair.value=1200000; years.value=6;
+  c1.checked=true; c2.checked=false; c3.checked=true; c4.checked=false; c5.checked=true;
+  diagnose();
+}
+
+function repairBenchRate(a){ // 年間家賃収入に対する修繕費の上限目安
+  if(a < 10) return 0.05;
+  if(a < 20) return 0.07;
+  return 0.10;
+}
+
+function diagnose(){
+  const u = +units.value, r = +rent.value, a = +age.value||0;
+  const fee = +feeRate.value, rep = +repair.value||0;
+  if(!u || !r || feeRate.value===''){ alert('戸数・平均家賃・管理手数料率を入力してください'); return; }
+
+  const annualRent = u * r * 12;
+  const benchRate = repairBenchRate(a);
+  const repRate = annualRent ? rep/annualRent : 0;
+  const flags = [c1,c2,c3,c4,c5].filter(c=>c.checked);
+  const flagTexts = {
+    c1:'違約金・長期予告の条項は、他社と比べる自由を狭めてしまいます',
+    c2:'売却時の仲介縛りは、出口(売却価格)に影響することがあります',
+    c3:'相見積りの取れない修繕は、費用が上乗せされやすい構造です',
+    c4:'広告料2ヶ月以上が続いている場合、募集条件を一度見直す余地があります',
+    c5:'原状回復の明細は、お願いすれば出てくるのが健全な状態です'
+  };
+
+  // --- スコア計算 ---
+  let score = 100;
+  // 管理手数料: 3%超は超過1%あたり-8(最大-30)。0%は不透明リスクで-15
+  let feePenalty = 0;
+  if(fee > 3) feePenalty = Math.min(30, (fee-3)*8);
+  if(fee === 0) feePenalty = 15;
+  score -= feePenalty;
+  // 修繕費: 目安超過に応じて最大-30
+  let repPenalty = 0;
+  if(repRate > benchRate) repPenalty = Math.min(30, Math.round((repRate-benchRate)/benchRate*20));
+  score -= repPenalty;
+  // 契約フラグ: 1つ-8
+  score -= flags.length*8;
+  score = Math.max(5, Math.round(score));
+
+  // --- 削減試算 ---
+  const feeSave = fee > 3 ? (fee-3)/100 * annualRent : 0;
+  const repExcess = Math.max(0, rep - annualRent*benchRate);
+  const repSave = repExcess * 0.5; // 保守的に超過分の半分
+  const totalSave = feeSave + repSave;
+
+  // --- 描画 ---
+  document.getElementById('result').style.display='block';
+  const band = score>=80 ? ['健全です','var(--ok)','いまの管理会社さんと、良い関係が築けています。安心して続けてください。']
+    : score>=60 ? ['おおむね健全・一部見直し余地','var(--warn)','大きな問題はありません。ただ、「聞いてみるだけで良くなる」項目がいくつかあります。']
+    : score>=40 ? ['相場より高めです','var(--warn)','オーナー様が悪いわけではありません。比べる機会がなかっただけです。数字を材料に、一度見直してみませんか。']
+    : ['かなり見直し余地があります','var(--bad)','複数の項目で相場との差が大きい状態です。逆にいえば、それだけ良くなる余地があるということです。'];
+  const arc = document.getElementById('arc');
+  arc.style.stroke = band[1];
+  setTimeout(()=>{ arc.style.strokeDashoffset = 515 - 515*score/100; }, 30);
+  const label = document.getElementById('verdictLabel');
+  label.textContent = band[0]; label.style.background = band[1];
+  document.getElementById('verdictComment').textContent = band[2];
+
+  // スコアカウントアップ
+  animateNum('scoreNum', score, 900);
+  // インパクト表示(3パターン)
+  const yrs = +document.getElementById('years').value || 5;
+  renderImpact({annualRent, fee, rep, totalSave, feeSave, repSave, yrs, u, r});
+
+  // ① 管理手数料
+  setRow('fee', fee<=3&&fee>0 ? 0 : fee===0 ? 1 : fee<=4.5 ? 1 : 2,
+    Math.min(100, fee/6*100),
+    fee===0
+      ? '手数料0%です。お得に感じるのが自然ですが、その分を違約金や修繕費など別の場所で補う契約も多くあります。まずは契約条項を一緒に確認するのがおすすめです。'
+      : `現在 ${fee}% (月額約${yen(annualRent*fee/100/12)}円)。健全な相場は2〜3%です。` +
+        (fee>3 ? `3%になれば、年間 約${yen(feeSave)}円 が手元に残ります。交渉だけで下がるケースもあります。` : 'この水準は健全です。'));
+
+  // ② 修繕費
+  document.getElementById('repMark').style.left = Math.min(95, benchRate/(benchRate*2)*100)+'%';
+  setRow('rep', repRate<=benchRate ? 0 : repRate<=benchRate*1.5 ? 1 : 2,
+    Math.min(100, repRate/(benchRate*2)*100),
+    `昨年実績は年間家賃収入の ${(repRate*100).toFixed(1)}%。築${a}年の目安は${(benchRate*100).toFixed(0)}%程度です。` +
+    (repExcess>0 ? `目安より約${yen(repExcess)}円多い状態です。相見積りを取るだけで収まるケースが多い項目なので、悲観する必要はありません。` : '目安の範囲内です。'));
+
+  // ③ 契約
+  const conTag = document.getElementById('conTag');
+  const lv = flags.length===0?0 : flags.length<=2?1 : 2;
+  conTag.textContent = ['問題なし','注意','危険'][lv];
+  conTag.style.background = ['var(--ok)','var(--warn)','var(--bad)'][lv];
+  document.getElementById('conText').textContent = flags.length===0
+    ? '気になる縛り条項は見当たりません。'
+    : `${flags.length}件、気にしておきたい条項があります。「そういうものだと思っていた」という方がほとんどなので、ご安心ください。`;
+  document.getElementById('conFlags').innerHTML = flags.map(c=>`<li>${flagTexts[c.id]}</li>`).join('');
+
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+
+function setRow(prefix, lv, barPct, text){
+  const tag = document.getElementById(prefix+'Tag');
+  tag.textContent = ['健全','やや高い','高い'][lv];
+  tag.style.background = ['var(--ok)','var(--warn)','var(--bad)'][lv];
+  const bar = document.getElementById(prefix+'Bar');
+  bar.style.background = ['var(--ok)','var(--warn)','var(--bad)'][lv];
+  setTimeout(()=>{ bar.style.width = barPct+'%'; }, 30);
+  document.getElementById(prefix+'Text').textContent = text;
+}
+
+function showPat(k){
+  ['A','B','C'].forEach(p=>{
+    document.getElementById('pat'+p).classList.toggle('on', p===k);
+    document.getElementById('tab'+p).classList.toggle('on', p===k);
+  });
+}
+
+function renderImpact(d){
+  const box = document.getElementById('impact');
+  const okBox = document.getElementById('impactOk');
+  if(d.totalSave <= 0){
+    box.style.display='none'; okBox.style.display='block';
+    document.getElementById('ctaHead').textContent = 'いまの良い状態を、これからも';
+    return;
+  }
+  box.style.display='block'; okBox.style.display='none';
+  document.getElementById('ctaHead').textContent =
+    `毎月 約${yen(d.totalSave/12)}円の差額は、来月から変えられます`;
+
+  // --- A: 損失強調 ---
+  document.getElementById('lossYears').textContent = d.yrs;
+  animateNum('lossPast', Math.round(d.totalSave*d.yrs/10000), 1400);
+  document.getElementById('lossDaily').textContent = yen(d.totalSave/365);
+  buildChart(d);
+
+  // --- B: 削減強調 ---
+  animateNum('save10', Math.round(d.totalSave*10/10000), 1400);
+  document.getElementById('save1').textContent = yen(d.totalSave/10000);
+  document.getElementById('convMonth').textContent = '+'+yen(d.totalSave/12)+'円';
+  document.getElementById('convRent').textContent = '約'+(d.totalSave/(d.u*d.r)).toFixed(1)+'ヶ月分';
+  document.getElementById('convUp').textContent = '+'+(d.totalSave/d.annualRent*100).toFixed(1)+'%';
+  const costNow = d.annualRent*d.fee/100 + d.rep;
+  const costAfter = costNow - d.totalSave;
+  document.getElementById('barNowLabel').textContent = yen(costNow)+'円';
+  document.getElementById('barAfterLabel').textContent = yen(costAfter)+'円';
+  setTimeout(()=>{
+    document.getElementById('barNowFair').style.width = (costAfter/costNow*100)+'%';
+    document.getElementById('barNowOver').style.width = (d.totalSave/costNow*100)+'%';
+    document.getElementById('barAfter').style.width = (costAfter/costNow*100)+'%';
+  },30);
+
+  // --- C: 比較表 ---
+  const fairFee = Math.min(d.fee, 3);
+  document.getElementById('cFeeNow').textContent = d.fee+'%';
+  document.getElementById('cFeeYenNow').textContent = yen(d.annualRent*d.fee/100/12)+'円';
+  document.getElementById('cFeeYenFair').textContent = yen(d.annualRent*fairFee/100/12)+'円';
+  document.getElementById('cRepNow').textContent = yen(d.rep)+'円';
+  document.getElementById('cRepFair').textContent = '約'+yen(d.rep-d.repSave)+'円(相見積りで圧縮)';
+  document.getElementById('cAimNow').textContent = c3.checked ? '✕ 指定業者のみ' : '○ 実施できる';
+  document.getElementById('cPenNow').textContent = (c1.checked||c2.checked) ? 'あり' : 'なし';
+  document.getElementById('cTotal').innerHTML = `年間 約 <span style="color:var(--bad)">${yen(d.totalSave)}円</span> の差`;
+
+  showPat('A');
+}
+
+function buildChart(d){
+  const nowY = d.annualRent*d.fee/100 + d.rep;
+  const fairY = nowY - d.totalSave;
+  const L=10, Rr=460, T=30, B=222;
+  const maxV = nowY*10;
+  const X=t=>L+(Rr-L)*t/10, Y=v=>B-(B-T)*(v/maxV);
+  const pn=[], pf=[];
+  for(let t=0;t<=10;t++){ pn.push(X(t)+','+Y(nowY*t)); pf.push(X(t)+','+Y(fairY*t)); }
+  const man=v=>Math.round(v/10000).toLocaleString('ja-JP');
+  const yN=Y(nowY*10), yF=Y(fairY*10), mid=(yN+yF)/2;
+  document.getElementById('chart').innerHTML = `
+    <line x1="${L}" y1="${B}" x2="${Rr}" y2="${B}" stroke="#c8d4e2"/>
+    <polygon points="${pn.join(' ')} ${pf.slice().reverse().join(' ')}" fill="rgba(224,82,82,.16)"/>
+    <polyline points="${pf.join(' ')}" fill="none" stroke="#0e9f8a" stroke-width="3"/>
+    <polyline points="${pn.join(' ')}" fill="none" stroke="#e05252" stroke-width="3"/>
+    <line x1="${Rr}" y1="${yN}" x2="${Rr}" y2="${yF}" stroke="#e05252" stroke-dasharray="4 3"/>
+    <text x="${Rr+8}" y="${yN+4}" font-size="12" fill="#e05252" font-weight="bold">今のまま ${man(nowY*10)}万円</text>
+    <text x="${Rr+8}" y="${mid+4}" font-size="13" fill="#e05252" font-weight="bold">差 ${man(d.totalSave*10)}万円</text>
+    <text x="${Rr+8}" y="${yF+4}" font-size="12" fill="#0b7f6f" font-weight="bold">見直し後 ${man(fairY*10)}万円</text>
+    <text x="${L}" y="${B+18}" font-size="11" fill="#8b99a9">現在</text>
+    <text x="${X(5)}" y="${B+18}" font-size="11" fill="#8b99a9" text-anchor="middle">5年後</text>
+    <text x="${Rr}" y="${B+18}" font-size="11" fill="#8b99a9" text-anchor="middle">10年後</text>`;
+}
+
+function animateNum(id, target, dur){
+  const el = document.getElementById(id);
+  const t0 = performance.now();
+  let done = false;
+  function tick(t){
+    if(done) return;
+    const p = Math.min(1,(t-t0)/dur);
+    el.textContent = Math.round(target*(1-Math.pow(1-p,3))).toLocaleString('ja-JP');
+    if(p<1) requestAnimationFrame(tick); else done = true;
+  }
+  requestAnimationFrame(tick);
+  // rAFが止まっている環境(非表示タブ等)でも最終値を保証
+  setTimeout(()=>{ if(!done){ done=true; el.textContent = target.toLocaleString('ja-JP'); } }, dur+100);
+}
+</script>
+</body>
+</html>
