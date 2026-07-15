@@ -3,85 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理会社健全度診断｜管理費と修繕費、いまが適正か60秒でわかる無料診断</title>
+<title>オーナードック｜管理会社健全度診断 — 管理費と修繕費、いまが適正か60秒でわかる</title>
+<meta name="description" content="賃貸オーナー様向けの無料診断。管理手数料と修繕費を入力するだけで、相場と契約条件から見直し余地を試算します。責める診断ではなく、安心するための診断です。">
+<meta property="og:title" content="オーナードック｜管理会社健全度診断">
+<meta property="og:description" content="管理費と修繕費、いまが適正か60秒でわかる無料診断。賃貸経営の健康診断です。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e9f8a'/%3E%3Cpath d='M6 17h5l2.5-6 4 10 2.5-4h6' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#122a4c; --navy2:#1d3f6e; --teal:#0e9f8a; --teal-dark:#0b7f6f;
-    --bg:#f4f7fb; --card:#ffffff; --ink:#1c2733; --sub:#5a6b7e; --line:#dde5ee;
+    --bg:#f5f8fb; --card:#ffffff; --ink:#1c2733; --sub:#5a6b7e; --line:#e2e9f1;
     --ok:#0e9f8a; --warn:#e8a20c; --bad:#e05252;
+    --shadow:0 1px 2px rgba(18,42,76,.05),0 14px 36px rgba(18,42,76,.07);
+    --num:"Manrope","Noto Sans JP",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;}
-  .wrap{max-width:760px;margin:0 auto;padding:0 20px 80px;}
+  html{scroll-behavior:smooth;}
+  body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;font-size:15px;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px;}
 
-  /* hero */
-  .hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;padding:52px 20px 60px;text-align:center;}
-  .hero .badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:4px 16px;font-size:12px;letter-spacing:.12em;margin-bottom:18px;}
-  .hero h1{font-size:clamp(22px,4.6vw,32px);font-weight:800;line-height:1.5;}
+  /* ===== header ===== */
+  .site-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .site-header .inner{max-width:1040px;margin:0 auto;padding:0 20px;height:62px;display:flex;align-items:center;gap:24px;}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);}
+  .brand .mark{width:34px;height:34px;flex:none;}
+  .brand .name{font-weight:900;font-size:17px;letter-spacing:.02em;line-height:1.2;}
+  .brand .tag{display:block;font-size:10px;font-weight:500;color:var(--sub);letter-spacing:.08em;}
+  .gnav{margin-left:auto;display:flex;align-items:center;gap:22px;}
+  .gnav a{font-size:13px;font-weight:700;color:var(--sub);text-decoration:none;}
+  .gnav a:hover{color:var(--teal-dark);}
+  .gnav .cta-mini{background:var(--teal);color:#fff;padding:9px 18px;border-radius:999px;font-size:13px;box-shadow:0 4px 12px rgba(14,159,138,.3);}
+  .gnav .cta-mini:hover{color:#fff;background:var(--teal-dark);}
+  @media(max-width:640px){.gnav a:not(.cta-mini){display:none;}}
+
+  /* ===== hero ===== */
+  .hero{background:linear-gradient(150deg,var(--navy) 0%,var(--navy2) 78%,#265087 100%);color:#fff;padding:64px 20px 72px;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1px);background-size:26px 26px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),transparent 75%);-webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),transparent 75%);}
+  .hero>*{position:relative;}
+  .hero .badge{display:inline-block;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:5px 18px;font-size:12px;font-weight:700;letter-spacing:.14em;margin-bottom:20px;}
+  .hero h1{font-size:clamp(23px,4.6vw,34px);font-weight:900;line-height:1.55;letter-spacing:.01em;}
   .hero h1 .em{color:#7fe3d3;}
-  .hero p{margin-top:14px;font-size:14px;opacity:.85;}
-  .hero .stats{display:flex;justify-content:center;gap:28px;margin-top:26px;flex-wrap:wrap;}
-  .hero .stat{text-align:center;}
-  .hero .stat b{display:block;font-size:24px;color:#7fe3d3;}
-  .hero .stat span{font-size:11px;opacity:.8;}
+  .hero p{margin:16px auto 0;font-size:14px;opacity:.88;max-width:620px;}
+  .hero .stats{display:flex;justify-content:center;gap:14px;margin-top:30px;flex-wrap:wrap;}
+  .hero .stat{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:12px 22px;min-width:140px;}
+  .hero .stat b{display:block;font-size:23px;color:#7fe3d3;font-family:var(--num);}
+  .hero .stat span{font-size:11px;opacity:.82;}
+  .hero .chips{display:flex;justify-content:center;gap:8px;margin-top:26px;flex-wrap:wrap;}
+  .hero .chip{font-size:11.5px;background:rgba(255,255,255,.1);border-radius:999px;padding:5px 14px;opacity:.92;}
+  .hero .chip::before{content:"✓ ";color:#7fe3d3;font-weight:900;}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 24px;margin-top:24px;box-shadow:0 2px 10px rgba(18,42,76,.05);}
-  .card h2{font-size:17px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
-  .card h2 .num{background:var(--teal);color:#fff;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none;}
+  /* ===== cards ===== */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px 28px;margin-top:26px;box-shadow:var(--shadow);}
+  @media(max-width:560px){.card{padding:24px 18px;}}
+  .card h2{font-size:17px;font-weight:900;color:var(--navy);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
 
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  /* ===== wizard ===== */
+  .wizard{margin-top:-34px;}
+  .steps{display:flex;gap:0;margin-bottom:6px;}
+  .steps .st{flex:1;text-align:center;font-size:12px;font-weight:700;color:#a9b7c6;padding-bottom:12px;position:relative;}
+  .steps .st::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:99px;background:#e8eef5;}
+  .steps .st.on{color:var(--teal-dark);}
+  .steps .st.on::after{background:var(--teal);}
+  .steps .st.done{color:var(--navy);}
+  .steps .st.done::after{background:var(--navy2);}
+  .steps .st .n{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#e8eef5;color:#a9b7c6;align-items:center;justify-content:center;font-size:11px;margin-right:6px;font-family:var(--num);}
+  .steps .st.on .n{background:var(--teal);color:#fff;}
+  .steps .st.done .n{background:var(--navy2);color:#fff;}
+  .step-panel{display:none;padding-top:16px;}
+  .step-panel.on{display:block;animation:fadein .3s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .step-panel .ptitle{font-size:16px;font-weight:900;color:var(--navy);margin-bottom:4px;}
+  .step-panel .pdesc{font-size:12.5px;color:var(--sub);margin-bottom:18px;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media(max-width:560px){.grid{grid-template-columns:1fr;}}
-  .field label{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-bottom:6px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:7px;}
   .field .unit-in{position:relative;}
-  .field input[type=number]{width:100%;padding:12px 52px 12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;background:#fbfcfe;}
-  .field input:focus{outline:none;border-color:var(--teal);}
-  .field .unit{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--sub);}
+  .field input[type=number]{width:100%;padding:13px 56px 13px 15px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;background:#fbfcfe;font-family:var(--num);font-weight:700;color:var(--ink);transition:.15s;}
+  .field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,159,138,.12);background:#fff;}
+  .field .unit{position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--sub);}
+  .live{margin-top:16px;background:#eef7f5;border:1px solid #cfe9e4;border-radius:12px;padding:11px 16px;font-size:13px;color:var(--teal-dark);font-weight:700;display:none;}
+  .live b{font-family:var(--num);font-size:16px;}
 
-  .checks{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
-  .checks label{display:flex;gap:10px;align-items:flex-start;background:#fbfcfe;border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;font-size:13.5px;cursor:pointer;transition:.15s;}
+  .checks{display:flex;flex-direction:column;gap:10px;}
+  .checks label{display:flex;gap:11px;align-items:flex-start;background:#fbfcfe;border:1.5px solid var(--line);border-radius:12px;padding:12px 15px;font-size:13.5px;cursor:pointer;transition:.15s;}
+  .checks label:hover{border-color:#c8d8e8;}
   .checks label:has(input:checked){border-color:var(--warn);background:#fff9ec;}
-  .checks input{margin-top:4px;accent-color:var(--warn);}
+  .checks input{margin-top:5px;accent-color:var(--warn);}
 
-  .btn{display:block;width:100%;margin-top:22px;padding:17px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%);color:#fff;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:.06em;box-shadow:0 6px 18px rgba(14,159,138,.35);transition:.15s;}
-  .btn:hover{transform:translateY(-1px);}
-  .demo-fill{display:block;margin:14px auto 0;background:none;border:none;color:var(--sub);font-size:12.5px;text-decoration:underline;cursor:pointer;}
+  .wiz-foot{display:flex;align-items:center;gap:12px;margin-top:24px;}
+  .btn{padding:15px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%);color:#fff;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.05em;box-shadow:0 6px 18px rgba(14,159,138,.32);transition:.15s;font-family:inherit;}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 9px 24px rgba(14,159,138,.4);}
+  .btn.big{flex:1;padding:16px;}
+  .btn-ghost{padding:15px 22px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--sub);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .btn-ghost:hover{border-color:#c8d8e8;}
+  .next{flex:1;}
+  .err{display:none;font-size:12.5px;color:var(--bad);font-weight:700;margin-top:12px;}
+  .demo-fill{display:block;margin:16px auto 0;background:none;border:none;color:#9fb0c1;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit;}
+  .demo-fill:hover{color:var(--sub);}
 
-  /* result */
+  /* ===== analyzing overlay ===== */
+  #overlay{display:none;position:fixed;inset:0;background:rgba(18,42,76,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  #overlay.on{display:flex;}
+  .analyzing{background:#fff;border-radius:20px;padding:36px 34px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+  .analyzing .sp{width:44px;height:44px;border-radius:50%;border:4px solid #e8eef5;border-top-color:var(--teal);margin:0 auto 18px;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .analyzing h3{text-align:center;font-size:15px;font-weight:900;color:var(--navy);margin-bottom:20px;}
+  .analyzing ol{list-style:none;display:flex;flex-direction:column;gap:11px;}
+  .analyzing li{font-size:13px;color:#a9b7c6;display:flex;gap:10px;align-items:center;transition:.3s;}
+  .analyzing li::before{content:"";width:18px;height:18px;flex:none;border-radius:50%;border:2px solid #dfe7ef;transition:.3s;}
+  .analyzing li.doing{color:var(--navy);font-weight:700;}
+  .analyzing li.doing::before{border-color:var(--teal);border-top-color:transparent;animation:spin .8s linear infinite;}
+  .analyzing li.done{color:var(--teal-dark);}
+  .analyzing li.done::before{content:"✓";border-color:var(--teal);background:var(--teal);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;animation:none;}
+
+  /* ===== report ===== */
   #result{display:none;}
-  .verdict{text-align:center;padding-top:34px;}
+  .report-bar{margin-top:34px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--navy);padding-bottom:12px;}
+  .report-bar .rt{font-size:19px;font-weight:900;color:var(--navy);}
+  .report-bar .rmeta{font-size:11.5px;color:var(--sub);font-family:var(--num);}
+  .report-bar .print{margin-left:auto;font-size:12px;font-weight:700;color:var(--sub);background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer;font-family:inherit;}
+  .report-bar .print:hover{border-color:#c8d8e8;}
+
+  .verdict{text-align:center;}
   .gauge{position:relative;width:190px;height:190px;margin:0 auto;}
   .gauge svg{transform:rotate(-90deg);}
   .gauge .score{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-  .gauge .score b{font-size:46px;line-height:1;font-variant-numeric:tabular-nums;}
-  .gauge .score span{font-size:12px;color:var(--sub);margin-top:4px;}
-  .verdict .label{display:inline-block;margin-top:16px;padding:7px 22px;border-radius:999px;font-size:16px;font-weight:800;color:#fff;}
-  .verdict .comment{margin-top:12px;font-size:14px;color:var(--sub);}
+  .gauge .score b{font-size:50px;line-height:1;font-family:var(--num);}
+  .gauge .score span{font-size:11.5px;color:var(--sub);margin-top:4px;}
+  .verdict .label{display:inline-block;margin-top:16px;padding:8px 24px;border-radius:999px;font-size:15.5px;font-weight:900;color:#fff;}
+  .verdict .comment{margin-top:12px;font-size:13.5px;color:var(--sub);max-width:520px;margin-left:auto;margin-right:auto;}
 
-  /* impact patterns */
   .tabs{display:flex;gap:8px;margin-top:26px;}
-  .tabs button{flex:1;padding:11px 6px;border-radius:11px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:800;color:var(--sub);cursor:pointer;transition:.15s;}
+  .tabs button{flex:1;padding:12px 6px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:800;color:var(--sub);cursor:pointer;transition:.15s;font-family:inherit;}
   .tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy);}
   .pat{display:none;}
-  .pat.on{display:block;}
+  .pat.on{display:block;animation:fadein .3s ease;}
 
-  .loss{margin-top:14px;background:linear-gradient(135deg,#6e1414 0%,#a83232 100%);border-radius:16px;color:#fff;text-align:center;padding:30px 20px 32px;}
+  .loss{margin-top:14px;background:linear-gradient(135deg,#6e1414 0%,#a83232 100%);border-radius:18px;color:#fff;text-align:center;padding:32px 22px 30px;box-shadow:var(--shadow);}
   .loss .t{font-size:13.5px;opacity:.9;}
-  .loss .big{font-size:clamp(26px,6vw,38px);font-weight:800;line-height:1.35;margin-top:8px;}
-  .loss .big .yen{color:#ffd76a;font-size:1.35em;font-variant-numeric:tabular-nums;}
-  .loss .daily{display:inline-block;margin-top:14px;background:rgba(0,0,0,.25);border-radius:999px;padding:6px 18px;font-size:13.5px;}
-  .loss .daily b{color:#ffd76a;}
+  .loss .big{font-size:clamp(25px,5.6vw,36px);font-weight:900;line-height:1.4;margin-top:8px;}
+  .loss .big .yen{color:#ffd76a;font-size:1.35em;font-family:var(--num);}
+  .loss .daily{display:inline-block;margin-top:14px;background:rgba(0,0,0,.25);border-radius:999px;padding:6px 18px;font-size:13px;}
+  .loss .daily b{color:#ffd76a;font-family:var(--num);}
+  .loss .soft{font-size:11.5px;opacity:.75;margin-top:12px;}
 
-  .chartbox{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;}
+  .chartbox{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 20px;box-shadow:var(--shadow);}
   .chartbox .ct{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:8px;}
-  .chartbox svg{width:100%;height:auto;display:block;}
+  .chartbox svg{width:100%;height:auto;display:block;font-family:var(--num);}
+
+  .saving{margin-top:14px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);border-radius:18px;color:#fff;text-align:center;padding:32px 20px 34px;box-shadow:var(--shadow);}
+  .saving .t{font-size:13.5px;opacity:.85;}
+  .saving .big{font-size:clamp(38px,9vw,56px);font-weight:800;color:#7fe3d3;line-height:1.2;font-family:var(--num);}
+  .saving .big small{font-size:.42em;color:#fff;opacity:.9;font-weight:700;font-family:"Noto Sans JP",sans-serif;}
+  .saving .sub{font-size:12.5px;opacity:.75;margin-top:6px;}
 
   .convs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
   @media(max-width:560px){.convs{grid-template-columns:1fr;}}
-  .conv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center;}
-  .conv b{display:block;font-size:17px;color:var(--teal-dark);font-variant-numeric:tabular-nums;}
+  .conv{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;box-shadow:var(--shadow);}
+  .conv b{display:block;font-size:18px;color:var(--teal-dark);font-family:var(--num);}
   .conv span{font-size:11.5px;color:var(--sub);}
 
-  .vbars{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;}
+  .vbars{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 20px;box-shadow:var(--shadow);}
   .vbars .ct{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;}
   .vrow{display:flex;align-items:center;gap:10px;margin-top:10px;}
   .vrow .vl{width:64px;font-size:12.5px;font-weight:700;color:var(--sub);flex:none;}
@@ -90,29 +177,23 @@
   .seg.fair{background:var(--navy2);}
   .seg.over{background:var(--bad);}
   .seg.good{background:var(--teal);}
-  .vrow b{width:96px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums;flex:none;}
+  .vrow b{width:100px;text-align:right;font-size:13px;font-family:var(--num);flex:none;}
   .vnote{font-size:11.5px;color:var(--sub);margin-top:10px;}
   .vnote .sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--bad);vertical-align:-1px;}
 
-  table.cmp{width:100%;border-collapse:collapse;margin-top:14px;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--line);}
-  .cmp th,.cmp td{padding:12px 12px;font-size:13px;text-align:center;border-bottom:1px solid var(--line);}
+  table.cmp{width:100%;border-collapse:collapse;margin-top:14px;background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);}
+  .cmp th,.cmp td{padding:13px 12px;font-size:13px;text-align:center;border-bottom:1px solid var(--line);}
   .cmp thead th{background:var(--navy);color:#fff;font-size:12.5px;}
   .cmp td:first-child{text-align:left;font-weight:700;color:var(--sub);font-size:12.5px;background:#fbfcfe;}
-  .cmp .now{color:var(--bad);font-weight:800;}
-  .cmp .fair{color:var(--teal-dark);font-weight:800;}
+  .cmp .now{color:var(--bad);font-weight:800;font-family:var(--num);}
+  .cmp .fair{color:var(--teal-dark);font-weight:800;font-family:var(--num);}
   .cmp tfoot td{border-bottom:none;background:#fff6f6;font-weight:800;font-size:14px;}
 
-  .saving{margin-top:14px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);border-radius:16px;color:#fff;text-align:center;padding:30px 20px 34px;}
-  .saving .t{font-size:13.5px;opacity:.85;}
-  .saving .big{font-size:clamp(38px,9vw,56px);font-weight:800;color:#7fe3d3;line-height:1.2;font-variant-numeric:tabular-nums;}
-  .saving .big small{font-size:.45em;color:#fff;opacity:.9;font-weight:700;}
-  .saving .sub{font-size:12.5px;opacity:.75;margin-top:6px;}
-
-  .break{margin-top:20px;display:flex;flex-direction:column;gap:12px;}
-  .brow{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .break{display:flex;flex-direction:column;gap:12px;}
+  .brow{background:#fbfcfe;border:1px solid var(--line);border-radius:14px;padding:17px 18px;}
   .brow .head{display:flex;justify-content:space-between;align-items:center;gap:10px;}
   .brow .head b{font-size:14.5px;}
-  .brow .tag{font-size:12px;font-weight:800;padding:3px 12px;border-radius:999px;color:#fff;flex:none;}
+  .brow .tag{font-size:12px;font-weight:800;padding:3px 13px;border-radius:999px;color:#fff;flex:none;}
   .brow .bar{height:8px;border-radius:99px;background:#e8eef5;margin:10px 0 8px;overflow:hidden;position:relative;}
   .brow .bar i{display:block;height:100%;border-radius:99px;transition:width .8s ease;}
   .brow .bar .mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--navy);opacity:.5;}
@@ -121,64 +202,158 @@
   .flags li{font-size:12.5px;color:var(--bad);padding:2px 0 2px 1.4em;text-indent:-1.4em;}
   .flags li::before{content:"⚠ ";}
 
-  .cta{margin-top:26px;text-align:center;background:var(--card);border:2px solid var(--teal);border-radius:16px;padding:30px 22px;}
-  .cta h3{font-size:17px;font-weight:800;color:var(--navy);}
-  .cta p{font-size:13px;color:var(--sub);margin-top:8px;}
-  .cta .btn{max-width:420px;margin:18px auto 0;}
-  .cta .trust{font-size:11.5px;color:var(--sub);margin-top:12px;}
+  .cta{margin-top:26px;text-align:center;background:var(--card);border:2px solid var(--teal);border-radius:18px;padding:34px 24px;box-shadow:var(--shadow);}
+  .cta h3{font-size:18px;font-weight:900;color:var(--navy);}
+  .cta p{font-size:13px;color:var(--sub);margin-top:10px;}
+  .cta .btn{max-width:440px;width:100%;margin:20px auto 0;display:block;}
+  .cta .trust{font-size:11.5px;color:var(--sub);margin-top:14px;}
 
-  .note{font-size:11px;color:#8b99a9;margin-top:26px;line-height:1.8;}
-  footer{text-align:center;font-size:11px;color:#8b99a9;padding:30px 0 10px;}
+  /* ===== how / faq ===== */
+  .sec-title{margin-top:64px;text-align:center;}
+  .sec-title h2{font-size:21px;font-weight:900;color:var(--navy);}
+  .sec-title p{font-size:12.5px;color:var(--sub);margin-top:6px;}
+  .hows{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;}
+  @media(max-width:640px){.hows{grid-template-columns:1fr;}}
+  .how{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 20px;text-align:center;box-shadow:var(--shadow);}
+  .how .ic{width:52px;height:52px;margin:0 auto 14px;border-radius:14px;background:#eef7f5;display:flex;align-items:center;justify-content:center;}
+  .how b{display:block;font-size:14.5px;color:var(--navy);font-weight:900;margin-bottom:6px;}
+  .how p{font-size:12.5px;color:var(--sub);}
+  .how .stepno{font-size:11px;color:var(--teal-dark);font-weight:800;letter-spacing:.14em;display:block;margin-bottom:8px;font-family:var(--num);}
+
+  .faq{margin-top:24px;display:flex;flex-direction:column;gap:10px;}
+  .faq details{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+  .faq summary{list-style:none;cursor:pointer;padding:17px 20px;font-size:14px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:12px;}
+  .faq summary::-webkit-details-marker{display:none;}
+  .faq summary::before{content:"Q";flex:none;width:24px;height:24px;border-radius:8px;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--num);}
+  .faq summary::after{content:"+";margin-left:auto;color:#a9b7c6;font-size:20px;font-weight:400;font-family:var(--num);}
+  .faq details[open] summary::after{content:"−";}
+  .faq .a{padding:0 20px 18px 56px;font-size:13px;color:var(--sub);}
+
+  .note{font-size:11px;color:#8b99a9;margin-top:28px;line-height:1.8;}
+
+  /* ===== modal ===== */
+  #modal{display:none;position:fixed;inset:0;background:rgba(18,42,76,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  #modal.on{display:flex;}
+  .mbox{background:#fff;border-radius:20px;padding:32px 30px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.25);position:relative;}
+  .mbox .x{position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;color:#a9b7c6;cursor:pointer;font-family:var(--num);}
+  .mbox h3{font-size:16px;font-weight:900;color:var(--navy);margin-bottom:6px;}
+  .mbox .md{font-size:12.5px;color:var(--sub);margin-bottom:18px;}
+  .mbox .field{margin-bottom:14px;}
+  .mbox input[type=text]{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;background:#fbfcfe;font-family:inherit;}
+  .mbox input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,159,138,.12);}
+  .mbox .btn{width:100%;}
+  .msent{display:none;text-align:center;padding:22px 0 8px;}
+  .msent .ic{width:56px;height:56px;border-radius:50%;background:#eef7f5;color:var(--teal);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+  .msent b{font-size:15px;color:var(--navy);}
+  .msent p{font-size:12.5px;color:var(--sub);margin-top:8px;}
+
+  /* ===== footer ===== */
+  .site-footer{margin-top:72px;background:var(--navy);color:#fff;padding:44px 20px 30px;}
+  .site-footer .inner{max-width:1040px;margin:0 auto;display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;}
+  .site-footer .fb .name{font-weight:900;font-size:16px;}
+  .site-footer .fb .tag{font-size:11px;opacity:.65;margin-top:2px;}
+  .site-footer nav{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap;}
+  .site-footer nav a{color:rgba(255,255,255,.75);font-size:12px;text-decoration:none;}
+  .site-footer nav a:hover{color:#fff;}
+  .site-footer .cp{max-width:1040px;margin:26px auto 0;border-top:1px solid rgba(255,255,255,.14);padding-top:18px;font-size:11px;opacity:.55;}
+
+  @media print{
+    .site-header,.hero,.wizard,.sec-title,.hows,.faq,.site-footer,.tabs,.cta,.report-bar .print,.demo-fill{display:none !important;}
+    body{background:#fff;}
+    .card,.chartbox,.vbars,.conv,.loss,.saving{box-shadow:none;}
+  }
 </style>
 </head>
 <body>
 
-<div class="hero">
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="#top">
+      <svg class="mark" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0e9f8a"/><path d="M6 17h5l2.5-6 4 10 2.5-4h6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="name">オーナードック<span class="tag">賃貸経営の、健康診断。</span></span>
+    </a>
+    <nav class="gnav">
+      <a href="#how">診断の仕組み</a>
+      <a href="#faq">よくあるご質問</a>
+      <a class="cta-mini" href="#shindan">無料で診断する</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
   <div class="badge">賃貸オーナー様向け・無料診断</div>
   <h1>その管理費、高いのか安いのか。<br><span class="em">誰にも聞けないまま</span>になっていませんか?</h1>
-  <p>大家さんどうしでも、お金の話はなかなかできないもの。<br>相場と契約条件から、いまの状態を60秒で整理します。責める診断ではなく、安心するための診断です。</p>
+  <p>大家さんどうしでも、お金の話はなかなかできないもの。相場と契約条件から、いまの状態を60秒で整理します。責める診断ではなく、安心するための診断です。</p>
   <div class="stats">
     <div class="stat"><b>2〜3%</b><span>健全な管理手数料の目安</span></div>
     <div class="stat"><b>5〜6%</b><span>見直し推奨ライン</span></div>
     <div class="stat"><b>60秒</b><span>診断にかかる時間</span></div>
   </div>
+  <div class="chips">
+    <span class="chip">登録不要・完全無料</span>
+    <span class="chip">いまの管理会社に知られません</span>
+    <span class="chip">乗り換えの強制なし</span>
+  </div>
 </div>
 
 <div class="wrap">
 
-  <div class="card">
-    <h2><span class="num">1</span>物件について</h2>
-    <div class="grid">
-      <div class="field"><label>戸数</label><div class="unit-in"><input type="number" id="units" min="1" placeholder="8"><span class="unit">戸</span></div></div>
-      <div class="field"><label>平均家賃(1戸あたり)</label><div class="unit-in"><input type="number" id="rent" min="1" placeholder="70,000"><span class="unit">円/月</span></div></div>
-      <div class="field"><label>築年数</label><div class="unit-in"><input type="number" id="age" min="0" placeholder="18"><span class="unit">年</span></div></div>
+  <!-- ===== wizard ===== -->
+  <div class="card wizard" id="shindan">
+    <div class="steps">
+      <div class="st on" id="stp1"><span class="n">1</span>物件情報</div>
+      <div class="st" id="stp2"><span class="n">2</span>ご契約内容</div>
+      <div class="st" id="stp3"><span class="n">3</span>契約条件</div>
     </div>
+
+    <div class="step-panel on" id="step1">
+      <div class="ptitle">物件について教えてください</div>
+      <div class="pdesc">おおよその数字で大丈夫です。</div>
+      <div class="grid">
+        <div class="field"><label>戸数</label><div class="unit-in"><input type="number" id="units" min="1" placeholder="8" oninput="liveCalc()"><span class="unit">戸</span></div></div>
+        <div class="field"><label>平均家賃(1戸あたり)</label><div class="unit-in"><input type="number" id="rent" min="1" placeholder="70000" oninput="liveCalc()"><span class="unit">円/月</span></div></div>
+        <div class="field"><label>築年数</label><div class="unit-in"><input type="number" id="age" min="0" placeholder="18"><span class="unit">年</span></div></div>
+      </div>
+      <div class="live" id="liveRent">年間の家賃収入: <b>—</b></div>
+      <div class="wiz-foot"><button class="btn next" onclick="goStep(2)">次へ</button></div>
+    </div>
+
+    <div class="step-panel" id="step2">
+      <div class="ptitle">いまのご契約内容について</div>
+      <div class="pdesc">直近1年の実績でかまいません。</div>
+      <div class="grid">
+        <div class="field"><label>管理手数料率</label><div class="unit-in"><input type="number" id="feeRate" min="0" step="0.5" placeholder="5"><span class="unit">%</span></div></div>
+        <div class="field"><label>昨年1年間の修繕費(原状回復含む)</label><div class="unit-in"><input type="number" id="repair" min="0" placeholder="1200000"><span class="unit">円/年</span></div></div>
+        <div class="field"><label>いまの管理会社に任せて何年?</label><div class="unit-in"><input type="number" id="years" min="0" placeholder="6"><span class="unit">年</span></div></div>
+      </div>
+      <div class="wiz-foot"><button class="btn-ghost" onclick="goStep(1)">戻る</button><button class="btn next" onclick="goStep(3)">次へ</button></div>
+    </div>
+
+    <div class="step-panel" id="step3">
+      <div class="ptitle">あてはまるものにチェックしてください</div>
+      <div class="pdesc">わからない項目は、チェックなしのままで大丈夫です。</div>
+      <div class="checks">
+        <label><input type="checkbox" id="c1">解約すると違約金がかかる、または解約予告が6ヶ月以上</label>
+        <label><input type="checkbox" id="c2">売却するときは、この管理会社(系列)に仲介を頼む契約になっている</label>
+        <label><input type="checkbox" id="c3">修繕は管理会社の指定業者のみで、相見積りを取ったことがない</label>
+        <label><input type="checkbox" id="c4">入居募集のたびに広告料(AD)を家賃2ヶ月分以上払っている</label>
+        <label><input type="checkbox" id="c5">原状回復費の内訳明細を見たことがない</label>
+      </div>
+      <div class="wiz-foot"><button class="btn-ghost" onclick="goStep(2)">戻る</button><button class="btn big" onclick="startDiagnose()">診断結果を見る</button></div>
+    </div>
+
+    <div class="err" id="wizErr"></div>
+    <button class="demo-fill" onclick="fillDemo()">デモ用のサンプル値で試す</button>
   </div>
 
-  <div class="card">
-    <h2><span class="num">2</span>いまのご契約内容</h2>
-    <div class="grid">
-      <div class="field"><label>管理手数料率</label><div class="unit-in"><input type="number" id="feeRate" min="0" step="0.5" placeholder="5"><span class="unit">%</span></div></div>
-      <div class="field"><label>昨年1年間の修繕費(原状回復含む)</label><div class="unit-in"><input type="number" id="repair" min="0" placeholder="1,200,000"><span class="unit">円/年</span></div></div>
-      <div class="field"><label>いまの管理会社に任せて何年?</label><div class="unit-in"><input type="number" id="years" min="0" placeholder="6"><span class="unit">年</span></div></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="num">3</span>契約条件チェック(あてはまるものすべて)</h2>
-    <div class="checks">
-      <label><input type="checkbox" id="c1">解約すると違約金がかかる、または解約予告が6ヶ月以上</label>
-      <label><input type="checkbox" id="c2">売却するときは、この管理会社(系列)に仲介を頼む契約になっている</label>
-      <label><input type="checkbox" id="c3">修繕は管理会社の指定業者のみで、相見積りを取ったことがない</label>
-      <label><input type="checkbox" id="c4">入居募集のたびに広告料(AD)を家賃2ヶ月分以上払っている</label>
-      <label><input type="checkbox" id="c5">原状回復費の内訳明細を見たことがない</label>
-    </div>
-    <p style="font-size:12px;color:var(--sub);margin-top:10px;">わからない項目は、空欄・チェックなしのままで大丈夫です。</p>
-    <button class="btn" onclick="diagnose()">60秒診断をはじめる(無料)</button>
-    <button class="demo-fill" onclick="fillDemo()">▶ サンプル値で試す(8戸・家賃7万・築18年・手数料5%)</button>
-  </div>
-
+  <!-- ===== result ===== -->
   <div id="result">
+    <div class="report-bar">
+      <span class="rt">診断レポート</span>
+      <span class="rmeta" id="reportMeta">—</span>
+      <button class="print" onclick="window.print()">印刷・保存</button>
+    </div>
+
     <div class="card verdict">
       <div class="gauge">
         <svg width="190" height="190" viewBox="0 0 190 190">
@@ -198,13 +373,12 @@
         <button id="tabC" onclick="showPat('C')">条件を比べる</button>
       </div>
 
-      <!-- パターンA: 損失強調 -->
       <div class="pat on" id="patA">
         <div class="loss">
           <div class="t">もし相場水準の条件だったら…と比べてみると</div>
           <div class="big">この<span id="lossYears">—</span>年間で 約<span class="yen" id="lossPast">0</span>万円<br>の差額が生まれている可能性</div>
           <div class="daily">この差は、放っておくと1日あたり 約<b id="lossDaily">0</b>円ずつ広がります</div>
-          <div style="font-size:11.5px;opacity:.75;margin-top:12px;">オーナー様を責める数字ではありません。次の10年を変えるための数字です。</div>
+          <div class="soft">オーナー様を責める数字ではありません。次の10年を変えるための数字です。</div>
         </div>
         <div class="chartbox">
           <div class="ct">これから10年の累積支払額(管理費+修繕費)の試算</div>
@@ -212,7 +386,6 @@
         </div>
       </div>
 
-      <!-- パターンB: 削減強調 -->
       <div class="pat" id="patB">
         <div class="saving">
           <div class="t">条件を相場水準に整えた場合、手元に残るお金(試算)</div>
@@ -232,7 +405,6 @@
         </div>
       </div>
 
-      <!-- パターンC: 比較表 -->
       <div class="pat" id="patC">
         <table class="cmp">
           <thead><tr><th>項目</th><th>いまの契約</th><th>健全な管理会社(例)</th></tr></thead>
@@ -281,27 +453,174 @@
     <div class="cta">
       <h3 id="ctaHead">この差額は、来月から変えられます</h3>
       <p>いますぐ乗り換える必要はありません。オーナー様の物件(エリア・戸数・築年数)に合う、<br>費用がガラス張りの管理会社の条件を、まずは「比較材料」としてお渡しします。</p>
-      <button class="btn" onclick="alert('※デモ:ここから相談フォームへ遷移します')">うちの場合はどうなる? を無料で聞いてみる</button>
+      <button class="btn" onclick="openModal()">うちの場合はどうなる? を無料で聞いてみる</button>
       <div class="trust">相談は無料 / いまの管理会社さんに連絡がいくことはありません / 乗り換えの強制もありません</div>
     </div>
 
     <p class="note">※本診断は入力値と一般的な相場観にもとづく簡易試算であり、削減額を保証するものではありません。管理手数料の健全目安(2〜3%)、修繕費の目安(築年数に応じ年間家賃収入の5〜10%程度)は物件の構造・エリアにより変動します。個別の契約見直しは契約書の確認が必要です。</p>
   </div>
 
-  <footer>管理会社健全度診断(デモ版)</footer>
+  <!-- ===== how ===== -->
+  <div class="sec-title" id="how">
+    <h2>診断の仕組み</h2>
+    <p>入力いただいた数字を、3つの視点で確認しています。</p>
+  </div>
+  <div class="hows">
+    <div class="how">
+      <span class="stepno">STEP 1</span>
+      <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0e9f8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+      <b>相場データと比較</b>
+      <p>管理手数料と修繕費を、同条件(築年数・規模)の相場目安と照らし合わせます。</p>
+    </div>
+    <div class="how">
+      <span class="stepno">STEP 2</span>
+      <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0e9f8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg></div>
+      <b>契約条件をチェック</b>
+      <p>違約金・売却縛り・相見積りの可否など、金額に表れにくい条項を確認します。</p>
+    </div>
+    <div class="how">
+      <span class="stepno">STEP 3</span>
+      <div class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0e9f8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <b>改善余地を試算</b>
+      <p>相場水準に整えた場合に手元へ残る金額を、年間・10年の両方で試算します。</p>
+    </div>
+  </div>
+
+  <!-- ===== faq ===== -->
+  <div class="sec-title" id="faq">
+    <h2>よくあるご質問</h2>
+    <p>不安な点は、診断の前に解消してください。</p>
+  </div>
+  <div class="faq">
+    <details>
+      <summary>いまの管理会社に知られることはありませんか?</summary>
+      <div class="a">ありません。診断はこのページの中だけで完結し、どこかに連絡がいくことは一切ありません。ご相談いただいた場合も、オーナー様の許可なく現在の管理会社へ連絡することはありません。</div>
+    </details>
+    <details>
+      <summary>本当に無料ですか? あとから費用がかかりませんか?</summary>
+      <div class="a">診断・ご相談・管理会社のご紹介まで、オーナー様の費用負担はありません。当サービスは、ご紹介先の管理会社から紹介料をいただく仕組みで運営しています(だからこそ、紹介先は条件で厳しく審査しています)。</div>
+    </details>
+    <details>
+      <summary>乗り換えを強くすすめられませんか?</summary>
+      <div class="a">すすめません。診断の結果「いまのままが良い」というケースも普通にあります。まずは比較材料としてお使いいただき、動くかどうかはオーナー様ご自身のペースでお決めください。</div>
+    </details>
+    <details>
+      <summary>手元に正確な数字がないのですが…</summary>
+      <div class="a">おおよその数字で大丈夫です。管理手数料率は毎月の送金明細に、修繕費は年間の収支報告に記載があることが多いです。わからない項目は空欄のままでも診断できます。</div>
+    </details>
+  </div>
+
 </div>
+
+<!-- ===== analyzing overlay ===== -->
+<div id="overlay">
+  <div class="analyzing">
+    <div class="sp"></div>
+    <h3>診断しています…</h3>
+    <ol id="anList">
+      <li>入力内容を確認しています</li>
+      <li>同条件の相場データと照合しています</li>
+      <li>契約条件のリスクを確認しています</li>
+      <li>レポートを作成しています</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ===== contact modal ===== -->
+<div id="modal">
+  <div class="mbox">
+    <button class="x" onclick="closeModal()">×</button>
+    <div id="mform">
+      <h3>無料相談のお申し込み</h3>
+      <div class="md">診断結果をもとに、担当者からご連絡します。しつこい営業は一切ありません。</div>
+      <div class="field"><label style="display:block;font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:7px;">お名前</label><input type="text" id="mName" placeholder="山田 太郎"></div>
+      <div class="field"><label style="display:block;font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:7px;">ご連絡先(メールまたは電話)</label><input type="text" id="mContact" placeholder="taro@example.com"></div>
+      <button class="btn" onclick="sendModal()">この内容で相談する(無料)</button>
+    </div>
+    <div class="msent" id="msent">
+      <div class="ic">✓</div>
+      <b>お申し込みを受け付けました</b>
+      <p>担当者より1営業日以内にご連絡いたします。<br>(※デモ版のため、実際の送信は行われていません)</p>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div class="fb">
+      <div class="name">オーナードック</div>
+      <div class="tag">賃貸経営の、健康診断。</div>
+    </div>
+    <nav>
+      <a href="#" onclick="return false;">利用規約</a>
+      <a href="#" onclick="return false;">プライバシーポリシー</a>
+      <a href="#" onclick="return false;">運営会社</a>
+      <a href="#" onclick="return false;">お問い合わせ</a>
+    </nav>
+  </div>
+  <div class="cp">© 2026 オーナードック(デモ版)</div>
+</footer>
 
 <script>
 const yen = n => Math.round(n).toLocaleString('ja-JP');
+
+/* ===== wizard ===== */
+let curStep = 1;
+function goStep(n){
+  const err = document.getElementById('wizErr');
+  err.style.display = 'none';
+  if(n > 1 && (!+units.value || !+rent.value)){
+    err.textContent = '戸数と平均家賃を入力してください'; err.style.display='block'; return;
+  }
+  if(n > 2 && feeRate.value === ''){
+    err.textContent = '管理手数料率を入力してください'; err.style.display='block'; return;
+  }
+  curStep = n;
+  [1,2,3].forEach(i=>{
+    document.getElementById('step'+i).classList.toggle('on', i===n);
+    const st = document.getElementById('stp'+i);
+    st.classList.toggle('on', i===n);
+    st.classList.toggle('done', i<n);
+  });
+}
+function liveCalc(){
+  const u=+units.value, r=+rent.value;
+  const box=document.getElementById('liveRent');
+  if(u&&r){ box.style.display='block'; box.innerHTML='年間の家賃収入: <b>'+yen(u*r*12)+'円</b>'; }
+  else box.style.display='none';
+}
 
 function fillDemo(){
   units.value=8; rent.value=70000; age.value=18;
   feeRate.value=5; repair.value=1200000; years.value=6;
   c1.checked=true; c2.checked=false; c3.checked=true; c4.checked=false; c5.checked=true;
-  diagnose();
+  liveCalc(); goStep(3);
+  startDiagnose();
 }
 
-function repairBenchRate(a){ // 年間家賃収入に対する修繕費の上限目安
+/* ===== analyzing ===== */
+function startDiagnose(){
+  const err = document.getElementById('wizErr');
+  err.style.display='none';
+  if(!+units.value || !+rent.value || feeRate.value===''){
+    err.textContent='戸数・平均家賃・管理手数料率を入力してください'; err.style.display='block'; return;
+  }
+  const ov = document.getElementById('overlay');
+  const items = document.querySelectorAll('#anList li');
+  items.forEach(li=>li.className='');
+  ov.classList.add('on');
+  const stepMs = 520;
+  items.forEach((li,i)=>{
+    setTimeout(()=>{ li.className='doing'; }, i*stepMs);
+    setTimeout(()=>{ li.className='done'; }, (i+1)*stepMs-120);
+  });
+  setTimeout(()=>{
+    ov.classList.remove('on');
+    diagnose();
+  }, items.length*stepMs+260);
+}
+
+function repairBenchRate(a){
   if(a < 10) return 0.05;
   if(a < 20) return 0.07;
   return 0.10;
@@ -310,7 +629,6 @@ function repairBenchRate(a){ // 年間家賃収入に対する修繕費の上限
 function diagnose(){
   const u = +units.value, r = +rent.value, a = +age.value||0;
   const fee = +feeRate.value, rep = +repair.value||0;
-  if(!u || !r || feeRate.value===''){ alert('戸数・平均家賃・管理手数料率を入力してください'); return; }
 
   const annualRent = u * r * 12;
   const benchRate = repairBenchRate(a);
@@ -326,27 +644,29 @@ function diagnose(){
 
   // --- スコア計算 ---
   let score = 100;
-  // 管理手数料: 3%超は超過1%あたり-8(最大-30)。0%は不透明リスクで-15
   let feePenalty = 0;
   if(fee > 3) feePenalty = Math.min(30, (fee-3)*8);
   if(fee === 0) feePenalty = 15;
   score -= feePenalty;
-  // 修繕費: 目安超過に応じて最大-30
   let repPenalty = 0;
   if(repRate > benchRate) repPenalty = Math.min(30, Math.round((repRate-benchRate)/benchRate*20));
   score -= repPenalty;
-  // 契約フラグ: 1つ-8
   score -= flags.length*8;
   score = Math.max(5, Math.round(score));
 
   // --- 削減試算 ---
   const feeSave = fee > 3 ? (fee-3)/100 * annualRent : 0;
   const repExcess = Math.max(0, rep - annualRent*benchRate);
-  const repSave = repExcess * 0.5; // 保守的に超過分の半分
+  const repSave = repExcess * 0.5;
   const totalSave = feeSave + repSave;
 
   // --- 描画 ---
   document.getElementById('result').style.display='block';
+  const d = new Date();
+  document.getElementById('reportMeta').textContent =
+    'No. OD-'+String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100)
+    +'　診断日: '+d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();
+
   const band = score>=80 ? ['健全です','var(--ok)','いまの管理会社さんと、良い関係が築けています。安心して続けてください。']
     : score>=60 ? ['おおむね健全・一部見直し余地','var(--warn)','大きな問題はありません。ただ、「聞いてみるだけで良くなる」項目がいくつかあります。']
     : score>=40 ? ['相場より高めです','var(--warn)','オーナー様が悪いわけではありません。比べる機会がなかっただけです。数字を材料に、一度見直してみませんか。']
@@ -358,13 +678,10 @@ function diagnose(){
   label.textContent = band[0]; label.style.background = band[1];
   document.getElementById('verdictComment').textContent = band[2];
 
-  // スコアカウントアップ
   animateNum('scoreNum', score, 900);
-  // インパクト表示(3パターン)
   const yrs = +document.getElementById('years').value || 5;
   renderImpact({annualRent, fee, rep, totalSave, feeSave, repSave, yrs, u, r});
 
-  // ① 管理手数料
   setRow('fee', fee<=3&&fee>0 ? 0 : fee===0 ? 1 : fee<=4.5 ? 1 : 2,
     Math.min(100, fee/6*100),
     fee===0
@@ -372,14 +689,12 @@ function diagnose(){
       : `現在 ${fee}% (月額約${yen(annualRent*fee/100/12)}円)。健全な相場は2〜3%です。` +
         (fee>3 ? `3%になれば、年間 約${yen(feeSave)}円 が手元に残ります。交渉だけで下がるケースもあります。` : 'この水準は健全です。'));
 
-  // ② 修繕費
   document.getElementById('repMark').style.left = Math.min(95, benchRate/(benchRate*2)*100)+'%';
   setRow('rep', repRate<=benchRate ? 0 : repRate<=benchRate*1.5 ? 1 : 2,
     Math.min(100, repRate/(benchRate*2)*100),
     `昨年実績は年間家賃収入の ${(repRate*100).toFixed(1)}%。築${a}年の目安は${(benchRate*100).toFixed(0)}%程度です。` +
     (repExcess>0 ? `目安より約${yen(repExcess)}円多い状態です。相見積りを取るだけで収まるケースが多い項目なので、悲観する必要はありません。` : '目安の範囲内です。'));
 
-  // ③ 契約
   const conTag = document.getElementById('conTag');
   const lv = flags.length===0?0 : flags.length<=2?1 : 2;
   conTag.textContent = ['問題なし','注意','危険'][lv];
@@ -402,6 +717,7 @@ function setRow(prefix, lv, barPct, text){
   document.getElementById(prefix+'Text').textContent = text;
 }
 
+/* ===== impact patterns ===== */
 function showPat(k){
   ['A','B','C'].forEach(p=>{
     document.getElementById('pat'+p).classList.toggle('on', p===k);
@@ -421,13 +737,11 @@ function renderImpact(d){
   document.getElementById('ctaHead').textContent =
     `毎月 約${yen(d.totalSave/12)}円の差額は、来月から変えられます`;
 
-  // --- A: 損失強調 ---
   document.getElementById('lossYears').textContent = d.yrs;
   animateNum('lossPast', Math.round(d.totalSave*d.yrs/10000), 1400);
   document.getElementById('lossDaily').textContent = yen(d.totalSave/365);
   buildChart(d);
 
-  // --- B: 削減強調 ---
   animateNum('save10', Math.round(d.totalSave*10/10000), 1400);
   document.getElementById('save1').textContent = yen(d.totalSave/10000);
   document.getElementById('convMonth').textContent = '+'+yen(d.totalSave/12)+'円';
@@ -443,7 +757,6 @@ function renderImpact(d){
     document.getElementById('barAfter').style.width = (costAfter/costNow*100)+'%';
   },30);
 
-  // --- C: 比較表 ---
   const fairFee = Math.min(d.fee, 3);
   document.getElementById('cFeeNow').textContent = d.fee+'%';
   document.getElementById('cFeeYenNow').textContent = yen(d.annualRent*d.fee/100/12)+'円';
@@ -492,9 +805,22 @@ function animateNum(id, target, dur){
     if(p<1) requestAnimationFrame(tick); else done = true;
   }
   requestAnimationFrame(tick);
-  // rAFが止まっている環境(非表示タブ等)でも最終値を保証
   setTimeout(()=>{ if(!done){ done=true; el.textContent = target.toLocaleString('ja-JP'); } }, dur+100);
 }
+
+/* ===== modal ===== */
+function openModal(){
+  document.getElementById('mform').style.display='block';
+  document.getElementById('msent').style.display='none';
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+function sendModal(){
+  document.getElementById('mform').style.display='none';
+  document.getElementById('msent').style.display='block';
+}
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+document.getElementById('overlay').addEventListener('click', e=>{});
 </script>
 </body>
 </html>
