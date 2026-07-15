@@ -63,16 +63,20 @@
 
   /* ===== wizard ===== */
   .wizard{margin-top:-34px;}
-  .steps{display:flex;gap:0;margin-bottom:6px;}
-  .steps .st{flex:1;text-align:center;font-size:12px;font-weight:700;color:#a9b7c6;padding-bottom:12px;position:relative;}
-  .steps .st::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:99px;background:#e8eef5;}
-  .steps .st.on{color:var(--teal-dark);}
-  .steps .st.on::after{background:var(--teal);}
-  .steps .st.done{color:var(--navy);}
-  .steps .st.done::after{background:var(--navy2);}
-  .steps .st .n{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#e8eef5;color:#a9b7c6;align-items:center;justify-content:center;font-size:11px;margin-right:6px;font-family:var(--num);}
-  .steps .st.on .n{background:var(--teal);color:#fff;}
-  .steps .st.done .n{background:var(--navy2);color:#fff;}
+  .wiz-title{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .wiz-title b{font-size:18px;font-weight:900;color:var(--navy);}
+  .wiz-title span{font-size:12px;color:var(--sub);}
+  .steps{display:flex;gap:8px;margin-bottom:8px;}
+  .steps .st{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 6px;border-radius:12px;background:#eef2f7;border:1.5px solid var(--line);color:#8b99a9;font-size:13px;font-weight:800;transition:.2s;}
+  .steps .st .n{display:inline-flex;width:22px;height:22px;flex:none;border-radius:50%;background:#fff;color:#8b99a9;border:1.5px solid #d5dfe9;align-items:center;justify-content:center;font-size:12px;font-family:var(--num);}
+  .steps .st.on{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 5px 14px rgba(14,159,138,.32);}
+  .steps .st.on .n{background:#fff;border-color:#fff;color:var(--teal-dark);}
+  .steps .st.done{background:var(--navy2);border-color:var(--navy2);color:#fff;}
+  .steps .st.done .n{background:rgba(255,255,255,.18);border-color:transparent;color:#fff;font-size:0;}
+  .steps .st.done .n::before{content:"✓";font-size:12px;font-weight:900;}
+  @media(max-width:560px){.steps .st{flex-direction:column;gap:5px;font-size:11px;padding:10px 4px;}}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .step-panel{display:none;padding-top:16px;}
   .step-panel.on{display:block;animation:fadein .3s ease;}
   @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
@@ -300,6 +304,7 @@
 
   <!-- ===== wizard ===== -->
   <div class="card wizard" id="shindan">
+    <div class="wiz-title"><b>無料60秒診断</b><span>入力は、この3ステップだけです。</span></div>
     <div class="steps">
       <div class="st on" id="stp1"><span class="n">1</span>物件情報</div>
       <div class="st" id="stp2"><span class="n">2</span>ご契約内容</div>
@@ -820,6 +825,7 @@ function sendModal(){
   document.getElementById('msent').style.display='block';
 }
 document.getElementById('modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+document.querySelectorAll('.wizard input').forEach(el=>el.addEventListener('input',()=>{ document.getElementById('wizErr').style.display='none'; }));
 document.getElementById('overlay').addEventListener('click', e=>{});
 </script>
 </body>
