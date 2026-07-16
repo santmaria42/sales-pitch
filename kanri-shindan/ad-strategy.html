@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オーナードック 広告戦略のご提案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Manrope:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#122a4c; --navy2:#1d3f6e; --teal:#0e9f8a; --teal-dark:#0b7f6f;
+    --ink:#1c2733; --sub:#5a6b7e; --line:#e2e9f1; --bad:#e05252; --gold:#ffd76a;
+    --num:"Manrope","Noto Sans JP",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Noto Sans JP",sans-serif;background:#e9edf3;color:var(--ink);line-height:1.75;font-size:13.5px;}
+  .page{width:794px;min-height:1123px;background:#fff;margin:24px auto;padding:56px 58px;position:relative;box-shadow:0 8px 30px rgba(18,42,76,.12);}
+  @media print{
+    body{background:#fff;}
+    .page{margin:0;box-shadow:none;page-break-after:always;width:auto;min-height:auto;}
+    @page{size:A4 portrait;margin:0;}
+  }
+  .pageno{position:absolute;bottom:22px;right:30px;font-size:10px;color:#a9b7c6;font-family:var(--num);}
+  .foot-brand{position:absolute;bottom:22px;left:30px;font-size:10px;color:#a9b7c6;}
+
+  h1{font-size:30px;font-weight:900;color:var(--navy);line-height:1.5;}
+  h2{font-size:20px;font-weight:900;color:var(--navy);margin-bottom:6px;}
+  .lead{font-size:13px;color:var(--sub);}
+  .kicker{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--teal-dark);border:1.5px solid var(--teal);border-radius:999px;padding:3px 14px;margin-bottom:14px;}
+
+  /* cover */
+  .cover{background:linear-gradient(150deg,var(--navy) 0%,var(--navy2) 80%,#265087 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;}
+  .cover .kicker{color:#7fe3d3;border-color:#7fe3d3;}
+  .cover h1{color:#fff;font-size:36px;}
+  .cover .em{color:#7fe3d3;}
+  .cover .sub{margin-top:18px;font-size:14px;opacity:.85;}
+  .cover .meta{margin-top:60px;font-size:12px;opacity:.7;}
+  .cover .logo{display:flex;align-items:center;gap:10px;margin-bottom:34px;}
+  .cover .logo .name{font-weight:900;font-size:18px;}
+  .cover .logo .tag{font-size:10px;opacity:.7;display:block;}
+
+  .sec{margin-top:22px;}
+  .box{border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:12px;background:#fbfcfe;}
+  .box b.t{display:block;font-size:14px;color:var(--navy);margin-bottom:4px;}
+  .num-badge{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-right:8px;font-family:var(--num);flex:none;}
+  ul.cl{list-style:none;}
+  ul.cl li{padding-left:1.5em;text-indent:-1.5em;margin-top:6px;}
+  ul.cl li::before{content:"✓ ";color:var(--teal);font-weight:900;}
+
+  table.t{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px;}
+  .t th,.t td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;}
+  .t thead th{background:var(--navy);color:#fff;font-size:12px;text-align:center;}
+  .t td:first-child{background:#fbfcfe;font-weight:700;color:var(--sub);width:120px;}
+
+  /* ad mockup (IG frame) */
+  .adwrap{display:flex;gap:26px;margin-top:18px;}
+  .igframe{width:330px;flex:none;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 6px 20px rgba(18,42,76,.1);}
+  .ighead{display:flex;align-items:center;gap:9px;padding:10px 12px;}
+  .ighead .av{width:30px;height:30px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;}
+  .ighead .an{font-size:11.5px;font-weight:700;line-height:1.3;}
+  .ighead .sp{display:block;font-size:10px;color:var(--sub);font-weight:400;}
+  .ighead .dots{margin-left:auto;color:var(--sub);letter-spacing:2px;}
+  .igfoot{padding:10px 12px 12px;}
+  .igfoot .icons{font-size:14px;letter-spacing:8px;color:var(--ink);}
+  .igfoot .cap{font-size:11px;color:var(--ink);margin-top:6px;}
+  .igfoot .cap b{font-weight:700;}
+  .igcta{display:flex;justify-content:space-between;align-items:center;background:#f4f7fb;padding:9px 12px;font-size:12px;font-weight:800;color:var(--navy2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .cr{width:100%;aspect-ratio:1/1;position:relative;overflow:hidden;}
+
+  /* creative A: inherit */
+  .crA{background:linear-gradient(160deg,#f7f1e6 0%,#efe5d2 100%);padding:26px 24px;display:flex;flex-direction:column;}
+  .crA .tagline{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#8a7a5c;}
+  .crA h3{font-size:21px;font-weight:900;color:#4a3f2c;line-height:1.6;margin-top:10px;}
+  .crA h3 .u{background:linear-gradient(transparent 62%,#ffd76a 62%);}
+  .crA .house{margin:auto 0 8px;}
+  .crA .msg{font-size:11.5px;color:#6b5d43;}
+  .crA .bar{margin-top:12px;background:var(--teal);color:#fff;border-radius:9px;text-align:center;font-size:12.5px;font-weight:900;padding:9px;}
+
+  /* creative B: numbers */
+  .crB{background:linear-gradient(150deg,var(--navy) 0%,var(--navy2) 100%);padding:26px 24px;display:flex;flex-direction:column;color:#fff;}
+  .crB .tagline{font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#7fe3d3;}
+  .crB h3{font-size:20px;font-weight:900;line-height:1.55;margin-top:10px;}
+  .crB .fee{display:flex;align-items:center;gap:12px;margin:16px 0 4px;}
+  .crB .fee .now{font-family:var(--num);font-size:44px;font-weight:800;color:var(--gold);line-height:1;}
+  .crB .fee .now small{font-size:.45em;}
+  .crB .fee .arrow{font-size:20px;color:#7fe3d3;}
+  .crB .fee .fair{font-family:var(--num);font-size:26px;font-weight:800;color:#7fe3d3;}
+  .crB .fee .fair small{font-size:.55em;}
+  .crB .fl{font-size:10px;color:rgba(255,255,255,.65);}
+  .crB .msg{margin-top:auto;font-size:12px;color:rgba(255,255,255,.85);}
+  .crB .bar{margin-top:10px;background:#fff;color:var(--navy);border-radius:9px;text-align:center;font-size:12.5px;font-weight:900;padding:9px;}
+
+  /* creative C: tax accountant */
+  .crC{background:#fff;padding:26px 24px;display:flex;flex-direction:column;border-top:8px solid var(--teal);}
+  .crC .tagline{display:inline-block;font-size:10.5px;font-weight:800;color:var(--teal-dark);background:#eef7f5;border-radius:999px;padding:3px 12px;align-self:flex-start;}
+  .crC h3{font-size:20px;font-weight:900;color:var(--navy);line-height:1.6;margin-top:12px;}
+  .crC .q{margin-top:14px;background:#fbfcfe;border-left:3px solid var(--teal);padding:10px 14px;font-size:11.5px;color:var(--sub);}
+  .crC .msg{margin-top:auto;font-size:11.5px;color:var(--sub);}
+  .crC .bar{margin-top:10px;background:var(--navy);color:#fff;border-radius:9px;text-align:center;font-size:12.5px;font-weight:900;padding:9px;}
+
+  .spec{flex:1;}
+  .spec .srow{margin-bottom:12px;}
+  .spec .sl{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--teal-dark);}
+  .spec .sv{font-size:12.5px;margin-top:2px;}
+  .persona{background:#fbfcfe;border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:12px;}
+  .persona b{color:var(--navy);font-size:12.5px;}
+  .persona p{font-size:11.5px;color:var(--sub);}
+
+  .aid{display:inline-block;background:var(--navy);color:#fff;font-family:var(--num);font-weight:800;font-size:15px;border-radius:9px;padding:4px 14px;margin-right:10px;vertical-align:middle;}
+  .note{font-size:10.5px;color:#8b99a9;margin-top:14px;line-height:1.7;}
+  .hl{background:linear-gradient(transparent 62%,rgba(255,215,106,.55) 62%);}
+</style>
+</head>
+<body>
+
+<!-- ===== P1 cover ===== -->
+<div class="page cover">
+  <div class="logo">
+    <svg width="36" height="36" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0e9f8a"/><path d="M6 17h5l2.5-6 4 10 2.5-4h6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><span class="name">オーナードック</span><span class="tag">賃貸経営の、健康診断。</span></div>
+  </div>
+  <div class="kicker">AD STRATEGY PROPOSAL</div>
+  <h1>広告戦略のご提案<br><span class="em">「誰に、どの顔で会いに行くか」</span></h1>
+  <div class="sub">Meta広告(Facebook / Instagram)3案コンペ形式<br>クリエイティブ案 × ターゲット定義 × 検証プラン</div>
+  <div class="meta">2026年7月16日 ｜ オーナードック(デモ・検討用資料)</div>
+</div>
+
+<!-- ===== P2 strategy ===== -->
+<div class="page">
+  <div class="kicker">STRATEGY</div>
+  <h2>結論: 主戦場はMeta(Facebook / Instagram)</h2>
+  <p class="lead">「賃貸オーナー」という少数派に、広告で会いに行けるほぼ唯一の場所です。</p>
+
+  <div class="sec">
+    <div class="box"><b class="t"><span class="num-badge">1</span>層が合っている</b>
+      賃貸オーナーのボリュームゾーンは50〜70代。日本でこの年代が日常的に触れるSNSはFacebookです。一方Instagramは40〜50代——「親の物件をこれから相続する層」に届きます。つまり<b>FB=いまのオーナー、IG=次のオーナー</b>と使い分けられます。</div>
+    <div class="box"><b class="t"><span class="num-badge">2</span>興味関心ターゲティングが使える</b>
+      「不動産投資」「アパート・マンション経営」「相続」「資産運用」といった興味関心での絞り込みと、診断完了者データからの類似拡張(そっくりさん配信)が使えるのはMetaの強みです。検索広告は「管理会社 変更」など顕在キーワードの検索数自体が少なく、主戦場にはなりません(小額の刈り取り併用が適切)。</div>
+    <div class="box"><b class="t"><span class="num-badge">3</span>コピー自体でターゲットを選別できる</b>
+      オーナーは人口の数%しかいないため、絞り込みすぎると配信が細ります。そこで<b>「大家さんへ」「親から継いだアパート」と広告文で名指しする</b>ことで、対象外の人は素通りし、無駄クリックが自然に減ります。ターゲティングは中くらい、選別はクリエイティブで——が本案の基本設計です。</div>
+  </div>
+
+  <div class="sec">
+    <h2 style="font-size:16px;">共通のゴール設計</h2>
+    <table class="t">
+      <thead><tr><th>段階</th><th>行動</th><th>広告上の扱い</th></tr></thead>
+      <tbody>
+        <tr><td>CV1(主指標)</td><td>60秒診断の完了</td><td>ハードルが低く数が取れる。類似拡張の種データになる</td></tr>
+        <tr><td>CV2(本命)</td><td>無料相談の申込</td><td>売上に直結。CV1からの引き上げ率をLP側で改善</td></tr>
+      </tbody>
+    </table>
+    <p class="note">※本資料のKPI・費用感はすべて一般的な相場観にもとづく仮説値です。少額の実配信2週間で実測に置き換えることを前提としています。</p>
+  </div>
+  <div class="foot-brand">オーナードック 広告戦略のご提案</div><div class="pageno">2</div>
+</div>
+
+<!-- ===== P3 案A ===== -->
+<div class="page">
+  <div class="kicker">PLAN A</div>
+  <h2><span class="aid">A案</span>「二代目の、置きっぱなし」— 相続オーナー</h2>
+  <p class="lead">管理会社を"自分で選んでいない"人たち。義理はないのに、変える基準も持っていない。</p>
+
+  <div class="adwrap">
+    <div class="igframe">
+      <div class="ighead">
+        <div class="av"><svg width="16" height="16" viewBox="0 0 32 32"><path d="M6 17h5l2.5-6 4 10 2.5-4h6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="an">ownerdock_official<span class="sp">広告</span></div>
+        <div class="dots">・・・</div>
+      </div>
+      <div class="cr crA">
+        <div class="tagline">親の代からの管理会社、そのままの方へ</div>
+        <h3>親から継いだアパート。<br><span class="u">管理会社まで</span>、<br>そのままにしていませんか?</h3>
+        <div class="house">
+          <svg width="84" height="60" viewBox="0 0 84 60" fill="none" stroke="#8a7a5c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 28L30 10l22 18"/><path d="M14 26v24h32V26"/><rect x="22" y="34" width="7" height="7"/><rect x="33" y="34" width="7" height="7"/><path d="M52 50h24V30l-10-8-8 6.4"/><rect x="60" y="36" width="6" height="6"/><path d="M4 50h76" stroke-width="2.4"/></svg>
+        </div>
+        <div class="msg">その契約を選んだのは、あなたではありません。<br>いまの条件が適正か、60秒で確認できます。</div>
+        <div class="bar">無料で健全度をチェックする</div>
+      </div>
+      <div class="igcta">詳しくはこちら<span>›</span></div>
+      <div class="igfoot">
+        <div class="icons">♡ 💬 ↗</div>
+        <div class="cap"><b>ownerdock_official</b> 責める診断ではなく、安心するための診断です。管理会社に連絡はいきません。</div>
+      </div>
+    </div>
+    <div class="spec">
+      <div class="persona"><b>ペルソナ: 佐藤さん(48)会社員</b>
+        <p>3年前に父の遺したアパート8戸を相続。会社員の傍ら、父の代からの管理会社に任せきり。明細は見ているが「これが普通なのか」を判断する物差しがない。付き合いを切ることへの罪悪感もある。</p></div>
+      <div class="srow"><div class="sl">配信面</div><div class="sv">Instagramフィード・リール中心+Facebook併用(4:5/1:1)</div></div>
+      <div class="srow"><div class="sl">ターゲティング</div><div class="sv">40〜55歳/興味:「相続」「固定資産税」「不動産」「実家じまい」関連/まず首都圏+政令市</div></div>
+      <div class="srow"><div class="sl">訴求ロジック</div><div class="sv">「選んだのはあなたじゃない」で<b>罪悪感を外す</b>のが鍵。見直し=親への裏切りではなく、資産を守る行為だと再定義する。寄り添いトーンのLPと完全に地続き。</div></div>
+      <div class="srow"><div class="sl">KPI仮説</div><div class="sv">CTR 0.8〜1.2%/診断完了率 高(不安が顕在)/CV1単価 ¥1,500〜3,000</div></div>
+    </div>
+  </div>
+  <div class="foot-brand">オーナードック 広告戦略のご提案</div><div class="pageno">3</div>
+</div>
+
+<!-- ===== P4 案B ===== -->
+<div class="page">
+  <div class="kicker">PLAN B</div>
+  <h2><span class="aid">B案</span>「数字で気づく」— ベテラン複数戸オーナー</h2>
+  <p class="lead">「大手だから安心」で長年放置してきた合理派。感情ではなく、相場の数字で動く。</p>
+
+  <div class="adwrap">
+    <div class="igframe">
+      <div class="ighead">
+        <div class="av"><svg width="16" height="16" viewBox="0 0 32 32"><path d="M6 17h5l2.5-6 4 10 2.5-4h6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="an">ownerdock_official<span class="sp">広告</span></div>
+        <div class="dots">・・・</div>
+      </div>
+      <div class="cr crB">
+        <div class="tagline">大家さん、ご存知でしたか</div>
+        <h3>その管理手数料、<br>相場と比べたことは<br>ありますか?</h3>
+        <div class="fee">
+          <div class="now">5<small>%</small></div>
+          <div class="arrow">▶</div>
+          <div class="fair">2〜3<small>%</small></div>
+        </div>
+        <div class="fl">左:よくある手数料 ／ 右:健全な相場の目安</div>
+        <div class="msg">この差は、10年で数百万円になることも。<br>戸数と家賃を入れるだけで、60秒で試算できます。</div>
+        <div class="bar">60秒で無料診断する</div>
+      </div>
+      <div class="igcta">詳しくはこちら<span>›</span></div>
+      <div class="igfoot">
+        <div class="icons">♡ 💬 ↗</div>
+        <div class="cap"><b>ownerdock_official</b> 登録不要・無料。いまの管理会社に連絡がいくことはありません。</div>
+      </div>
+    </div>
+    <div class="spec">
+      <div class="persona"><b>ペルソナ: 田中さん(63)専業大家</b>
+        <p>アパート2棟+駐車場を保有して15年。大手管理会社に任せて大きな不満はないが、収支は年々細っている。プライドが高く「騙されている」と言われると反発するが、相場データには素直。Facebookを毎日見る。</p></div>
+      <div class="srow"><div class="sl">配信面</div><div class="sv">Facebookフィード中心(1:1)。IGは補助</div></div>
+      <div class="srow"><div class="sl">ターゲティング</div><div class="sv">55〜70歳・男性比重/興味:「不動産投資」「アパート・マンション経営」「資産運用」/診断完了者の類似拡張を早期に投入</div></div>
+      <div class="srow"><div class="sl">訴求ロジック</div><div class="sv">「ぼったくり」と言わない。<b>「相場と比べる」という中立な誘い</b>で入り、差額はLPの診断結果に言わせる。広告は問い、答えはLP——の役割分担。</div></div>
+      <div class="srow"><div class="sl">KPI仮説</div><div class="sv">CTR 0.6〜1.0%/クリック単価やや高め/ただし相談CVまでの到達率は3案中最有力</div></div>
+    </div>
+  </div>
+  <div class="foot-brand">オーナードック 広告戦略のご提案</div><div class="pageno">4</div>
+</div>
+
+<!-- ===== P5 案C ===== -->
+<div class="page">
+  <div class="kicker">PLAN C</div>
+  <h2><span class="aid">C案</span>「1人で数十人に届く」— 税理士ルート(変化球)</h2>
+  <p class="lead">オーナーを1人ずつ買わず、オーナーを何十人も顧問に持つ税理士に届ける。</p>
+
+  <div class="adwrap">
+    <div class="igframe">
+      <div class="ighead">
+        <div class="av"><svg width="16" height="16" viewBox="0 0 32 32"><path d="M6 17h5l2.5-6 4 10 2.5-4h6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="an">ownerdock_official<span class="sp">広告</span></div>
+        <div class="dots">・・・</div>
+      </div>
+      <div class="cr crC">
+        <div class="tagline">税理士・会計事務所さま向け</div>
+        <h3>顧問先の大家さんに、<br>管理費の話……<br>していますか?</h3>
+        <div class="q">「高い気はするけど、根拠を示すのは手間」<br>——その一言の根拠づくりを、無料の診断レポートが代行します。</div>
+        <div class="msg">顧問先に配れる60秒診断ツール。<br>貴事務所の付加価値サービスとしてご提供いただけます。</div>
+        <div class="bar">提携のご案内資料を見る</div>
+      </div>
+      <div class="igcta">資料を見る<span>›</span></div>
+      <div class="igfoot">
+        <div class="icons">♡ 💬 ↗</div>
+        <div class="cap"><b>ownerdock_official</b> 不動産オーナーの顧問先が多い事務所さまに。</div>
+      </div>
+    </div>
+    <div class="spec">
+      <div class="persona"><b>ペルソナ: 鈴木先生(45)税理士</b>
+        <p>顧問先100件のうち3割が不動産オーナー。確定申告のたびに「この管理費、高いな」と思うが、根拠データを揃えてまで指摘する時間はない。顧問先への提供サービスを増やして差別化したい。</p></div>
+      <div class="srow"><div class="sl">配信面</div><div class="sv">Facebookフィード(業務系の情報収集はFB)。少額でOK</div></div>
+      <div class="srow"><div class="sl">ターゲティング</div><div class="sv">30〜60歳/興味・職歴:「税理士」「会計事務所」「確定申告」業務関連/リスト獲得(資料DL)をCVに設定</div></div>
+      <div class="srow"><div class="sl">訴求ロジック</div><div class="sv">ヒアリングの核心「<b>見直しのきっかけは税理士の一言</b>」をそのまま事業化する案。1件の提携=顧問先数十人への継続導線。広告というより営業リスト獲得に近い。</div></div>
+      <div class="srow"><div class="sl">KPI仮説</div><div class="sv">獲得単価は高くてよい(1提携のLTVが大きい)/月数万円の少額運用で十分</div></div>
+    </div>
+  </div>
+  <div class="foot-brand">オーナードック 広告戦略のご提案</div><div class="pageno">5</div>
+</div>
+
+<!-- ===== P6 plan ===== -->
+<div class="page">
+  <div class="kicker">TEST PLAN</div>
+  <h2>3案の比較と、はじめ方</h2>
+  <p class="lead">最初から勝ち筋を当てにいかず、小さく並走させて数字で決めます。</p>
+
+  <table class="t" style="margin-top:18px;">
+    <thead><tr><th></th><th>A案 相続オーナー</th><th>B案 ベテラン大家</th><th>C案 税理士</th></tr></thead>
+    <tbody>
+      <tr><td>狙う層</td><td>40〜55歳・次のオーナー</td><td>55〜70歳・いまのオーナー</td><td>税理士・会計事務所</td></tr>
+      <tr><td>主戦場</td><td>Instagram</td><td>Facebook</td><td>Facebook</td></tr>
+      <tr><td>リーチ規模</td><td>◎ 広い</td><td>○ 中</td><td>△ 狭い(それでよい)</td></tr>
+      <tr><td>相談CVへの近さ</td><td>○ 不安が顕在</td><td>◎ 物件規模が大きい</td><td>◎ 1件で数十人分</td></tr>
+      <tr><td>立ち上がり</td><td>速い</td><td>中</td><td>遅い(営業併走)</td></tr>
+      <tr><td>戦略的な位置づけ</td><td>数を集める主砲</td><td>売上をつくる本命</td><td>堀をつくる布石</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sec">
+    <div class="box"><b class="t">推奨のはじめ方(例)</b>
+      <ul class="cl">
+        <li><b>第1週〜2週:</b> A案+B案を同予算で並走(例: 各10万円/2週間)。クリエイティブは各案2バリエーションでAB</li>
+        <li><b>第3週〜:</b> CV1単価の良い案に予算の7割を寄せ、診断完了者データで類似拡張を開始</li>
+        <li><b>C案:</b> 提携資料が整い次第、月数万円の定常運用。広告と並行して、知り合いの税理士への直接営業が最短</li>
+      </ul>
+    </div>
+    <div class="box"><b class="t">クリエイティブの共通ルール</b>
+      <ul class="cl">
+        <li>「ぼったくり」「損してる」等の攻撃語は使わない(LPの寄り添いトーンと統一)</li>
+        <li>安心3点(無料・管理会社に連絡なし・乗り換え強制なし)を必ずどこかに入れる</li>
+        <li>広告は「問い」まで。答え(差額の金額)はLPの診断に言わせる</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">※KPI・費用はすべて検討用の仮説値です。媒体審査(不動産・金融関連の広告ポリシー)上、断定的な利益訴求は避けた表現にしています。実配信時はLPに運営者情報の明記が必要になります。</p>
+  <div class="foot-brand">オーナードック 広告戦略のご提案</div><div class="pageno">6</div>
+</div>
+
+</body>
+</html>
