@@ -93,6 +93,7 @@
   .field .unit-in{position:relative;}
   .field input[type=number]{width:100%;padding:13px 56px 13px 15px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;background:#fbfcfe;font-family:var(--num);font-weight:700;color:var(--ink);transition:.15s;}
   .field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,159,138,.12);background:#fff;}
+  .field input::placeholder{color:#c3cedb;font-weight:400;opacity:1;}
   .field .unit{position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--sub);}
   .live{margin-top:16px;background:#eef7f5;border:1px solid #cfe9e4;border-radius:12px;padding:11px 16px;font-size:13px;color:var(--teal-dark);font-weight:700;display:none;}
   .live b{font-family:var(--num);font-size:16px;}
@@ -324,9 +325,9 @@
       <div class="ptitle">物件について教えてください</div>
       <div class="pdesc">おおよその数字で大丈夫です。</div>
       <div class="grid">
-        <div class="field"><label>戸数</label><div class="unit-in"><input type="number" id="units" min="1" placeholder="8" oninput="liveCalc()"><span class="unit">戸</span></div></div>
-        <div class="field"><label>平均家賃(1戸あたり)</label><div class="unit-in"><input type="number" id="rent" min="1" placeholder="70000" oninput="liveCalc()"><span class="unit">円/月</span></div></div>
-        <div class="field"><label>築年数</label><div class="unit-in"><input type="number" id="age" min="0" placeholder="18"><span class="unit">年</span></div></div>
+        <div class="field"><label>戸数</label><div class="unit-in"><input type="number" id="units" min="1" placeholder="例) 8" oninput="liveCalc()"><span class="unit">戸</span></div></div>
+        <div class="field"><label>平均家賃(1戸あたり)</label><div class="unit-in"><input type="number" id="rent" min="1" placeholder="例) 70000" oninput="liveCalc()"><span class="unit">円/月</span></div></div>
+        <div class="field"><label>築年数</label><div class="unit-in"><input type="number" id="age" min="0" placeholder="例) 18"><span class="unit">年</span></div></div>
       </div>
       <div class="live" id="liveRent">年間の家賃収入: <b>—</b></div>
       <div class="wiz-foot"><button class="btn next" onclick="goStep(2)">次へ</button></div>
@@ -336,9 +337,9 @@
       <div class="ptitle">いまのご契約内容について</div>
       <div class="pdesc">直近1年の実績でかまいません。</div>
       <div class="grid">
-        <div class="field"><label>管理手数料率</label><div class="unit-in"><input type="number" id="feeRate" min="0" step="0.5" placeholder="5"><span class="unit">%</span></div></div>
-        <div class="field"><label>昨年1年間の修繕費(原状回復含む)</label><div class="unit-in"><input type="number" id="repair" min="0" placeholder="1200000"><span class="unit">円/年</span></div></div>
-        <div class="field"><label>いまの管理会社に任せて何年?</label><div class="unit-in"><input type="number" id="years" min="0" placeholder="6"><span class="unit">年</span></div></div>
+        <div class="field"><label>管理手数料率</label><div class="unit-in"><input type="number" id="feeRate" min="0" step="0.5" placeholder="例) 5"><span class="unit">%</span></div></div>
+        <div class="field"><label>昨年1年間の修繕費(原状回復含む)</label><div class="unit-in"><input type="number" id="repair" min="0" placeholder="例) 1200000"><span class="unit">円/年</span></div></div>
+        <div class="field"><label>いまの管理会社に任せて何年?</label><div class="unit-in"><input type="number" id="years" min="0" placeholder="例) 6"><span class="unit">年</span></div></div>
       </div>
       <div class="wiz-foot"><button class="btn-ghost" onclick="goStep(1)">戻る</button><button class="btn next" onclick="goStep(3)">次へ</button></div>
     </div>
