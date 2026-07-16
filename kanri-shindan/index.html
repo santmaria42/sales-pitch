@@ -62,10 +62,14 @@
   .card h2{font-size:17px;font-weight:900;color:var(--navy);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
 
   /* ===== wizard ===== */
-  .wizard{margin-top:-34px;}
-  .wiz-title{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-  .wiz-title b{font-size:18px;font-weight:900;color:var(--navy);}
-  .wiz-title span{font-size:12px;color:var(--sub);}
+  .wizard{margin-top:40px;padding:0;overflow:hidden;position:relative;z-index:1;}
+  .wiz-head{background:linear-gradient(135deg,var(--teal) 0%,var(--teal-dark) 100%);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:14px;}
+  .wiz-head .whic{width:42px;height:42px;flex:none;border-radius:12px;background:rgba(255,255,255,.17);display:flex;align-items:center;justify-content:center;}
+  .wiz-head b{display:block;font-size:17px;font-weight:900;line-height:1.35;}
+  .wiz-head .ws{display:block;font-size:11.5px;opacity:.88;}
+  .wiz-head .wchip{margin-left:auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:5px 15px;font-size:11.5px;font-weight:700;flex:none;}
+  .wiz-body{padding:26px 28px 28px;}
+  @media(max-width:560px){.wiz-head{padding:15px 18px;}.wiz-body{padding:20px 18px 24px;}.wiz-head .wchip{display:none;}}
   .steps{display:flex;gap:8px;margin-bottom:8px;}
   .steps .st{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 6px;border-radius:12px;background:#eef2f7;border:1.5px solid var(--line);color:#8b99a9;font-size:13px;font-weight:800;transition:.2s;}
   .steps .st .n{display:inline-flex;width:22px;height:22px;flex:none;border-radius:50%;background:#fff;color:#8b99a9;border:1.5px solid #d5dfe9;align-items:center;justify-content:center;font-size:12px;font-family:var(--num);}
@@ -304,7 +308,12 @@
 
   <!-- ===== wizard ===== -->
   <div class="card wizard" id="shindan">
-    <div class="wiz-title"><b>無料60秒診断</b><span>入力は、この3ステップだけです。</span></div>
+    <div class="wiz-head">
+      <div class="whic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div>
+      <div><b>無料60秒診断</b><span class="ws">入力は、この3ステップだけです。</span></div>
+      <div class="wchip">登録不要・無料</div>
+    </div>
+    <div class="wiz-body">
     <div class="steps">
       <div class="st on" id="stp1"><span class="n">1</span>物件情報</div>
       <div class="st" id="stp2"><span class="n">2</span>ご契約内容</div>
@@ -349,6 +358,7 @@
 
     <div class="err" id="wizErr"></div>
     <button class="demo-fill" onclick="fillDemo()">デモ用のサンプル値で試す</button>
+    </div><!-- /.wiz-body -->
   </div>
 
   <!-- ===== result ===== -->
